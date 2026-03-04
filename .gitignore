@@ -1,0 +1,15 @@
+AGENTS.md
+GOALS.md
+# Python
+*.pyc
+__pycache__/
+kb-server/.venv/
+
+kb-server/.env
+kb-server/.pytest_cache/
+
+# Postgres data if ever stored locally
+postgres-data/
+
+# OS junk
+.DS_Store

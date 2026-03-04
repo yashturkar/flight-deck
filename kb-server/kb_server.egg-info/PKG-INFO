@@ -1,0 +1,17 @@
+Metadata-Version: 2.4
+Name: kb-server
+Version: 0.1.0
+Summary: File-first knowledge base server with autosave, Git automation, and Quartz publishing
+Requires-Python: >=3.11
+Requires-Dist: fastapi>=0.115
+Requires-Dist: uvicorn[standard]>=0.34
+Requires-Dist: pydantic-settings>=2.7
+Requires-Dist: sqlalchemy>=2.0
+Requires-Dist: psycopg2-binary>=2.9
+Requires-Dist: alembic>=1.14
+Requires-Dist: watchfiles>=1.0
+Requires-Dist: httpx>=0.28
+Provides-Extra: dev
+Requires-Dist: pytest>=8.0; extra == "dev"
+Requires-Dist: pytest-asyncio>=0.25; extra == "dev"
+Requires-Dist: httpx>=0.28; extra == "dev"

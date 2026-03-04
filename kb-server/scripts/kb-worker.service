@@ -1,0 +1,15 @@
+[Unit]
+Description=KB Server Autosave Worker
+After=network.target postgresql.service
+
+[Service]
+Type=simple
+User=kb
+WorkingDirectory=/opt/kb-server
+EnvironmentFile=/opt/kb-server/.env
+ExecStart=/opt/kb-server/.venv/bin/python -m app.workers.autosave
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
