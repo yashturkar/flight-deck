@@ -49,7 +49,7 @@ git remote add origin git@github.com:you/your-vault.git
 
 Create the directory structure you want (these are conventions, not enforced):
 
-```
+```text
 vault/
   notes/
   projects/
@@ -62,7 +62,7 @@ vault/
 ## Environment variables
 
 | Variable | Default | Description |
-|---|---|---|
+| --- | --- | --- |
 | `VAULT_PATH` | `/srv/flightdeck/vault` | Absolute path to the vault Git repo |
 | `DATABASE_URL` | `postgresql://kb:kb@localhost:5432/kb` | Postgres connection string |
 | `GIT_REMOTE` | `origin` | Git remote name |
@@ -86,13 +86,97 @@ Both share the vault filesystem and the Postgres database.
 ## API endpoints
 
 | Method | Path | Description |
-|---|---|---|
+| --- | --- | --- |
 | `GET` | `/health` | Always 200 |
 | `GET` | `/ready` | 200 when DB and vault are reachable |
 | `GET` | `/notes/{path}` | Read a note |
 | `PUT` | `/notes/{path}` | Write a note |
 | `GET` | `/notes/?prefix=...` | List notes under a prefix |
 | `POST` | `/publish` | Trigger a Quartz build manually |
+
+## Using the API
+
+Base URL (default): `http://localhost:8000`
+
+FastAPI also exposes interactive docs:
+
+- Swagger UI: `GET /docs`
+- OpenAPI JSON: `GET /openapi.json`
+
+### Health and readiness
+
+```bash
+curl http://localhost:8000/health
+curl http://localhost:8000/ready
+```
+
+`/ready` reports errors until:
+
+- Postgres is reachable via `DATABASE_URL`
+- the vault directory exists at `VAULT_PATH`
+- the vault is a Git repo (contains `VAULT_PATH/.git/`)
+
+### Read a note
+
+```bash
+curl http://localhost:8000/notes/notes/hello.md
+```
+
+Response shape:
+
+```json
+{
+  "path": "notes/hello.md",
+  "content": "# Hello\n...",
+  "modified_at": "2026-03-04T00:00:00Z"
+}
+```
+
+### Write a note
+
+```bash
+curl -X PUT http://localhost:8000/notes/notes/hello.md \
+  -H "Content-Type: application/json" \
+  -d '{"content":"# Hello\nCreated via API.\n"}'
+```
+
+Notes:
+
+- Writes are limited to file extensions: `.md`, `.markdown`, `.txt`
+- Paths must be relative to the vault (no absolute paths, no `..` traversal)
+
+### List notes
+
+List everything under a directory prefix:
+
+```bash
+curl "http://localhost:8000/notes/?prefix=notes"
+```
+
+### Publish (Quartz trigger)
+
+Manual publish trigger:
+
+```bash
+curl -X POST http://localhost:8000/publish
+```
+
+If neither `QUARTZ_BUILD_COMMAND` nor `QUARTZ_WEBHOOK_URL` is set, `/publish` returns `501`.
+
+### Common errors
+
+- **400**: path not allowed (bad extension, absolute path, traversal attempt)
+- **404**: note not found
+- **500**: Git failure (e.g., repo misconfigured) or DB issues
+
+### Path encoding gotcha
+
+If you have spaces or special characters in filenames, URL-encode them.
+Example:
+
+```bash
+curl "http://localhost:8000/notes/notes/My%20Note.md"
+```
 
 ## Production deployment (systemd)
 
@@ -152,7 +236,7 @@ The database is metadata only. If lost, you lose job history and event logs, but
 ## Troubleshooting
 
 | Symptom | Check |
-|---|---|
+| --- | --- |
 | `/ready` reports `db` error | Verify `DATABASE_URL` and that Postgres is running |
 | `/ready` reports vault missing | Verify `VAULT_PATH` points to a git-initialized directory |
 | Autosave not triggering | Check worker logs; verify `AUTOSAVE_DEBOUNCE_SECONDS` isn't too high |
