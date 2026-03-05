@@ -10,8 +10,24 @@ from app.models.db import ensure_tables
 
 @asynccontextmanager
 async def lifespan(_app: FastAPI):
+    import logging
+    
     setup_logging()
     ensure_tables()
+    
+    # Recover any uncommitted changes from previous crash/restart
+    from app.services.git_batcher import batcher
+    try:
+        recovered = batcher.recover_uncommitted()
+        if recovered:
+            logging.getLogger(__name__).info(
+                "Recovered %d uncommitted files from previous session", recovered
+            )
+    except Exception as exc:
+        logging.getLogger(__name__).warning(
+            "Failed to recover uncommitted changes: %s", exc
+        )
+    
     yield
 
 

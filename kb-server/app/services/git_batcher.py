@@ -41,6 +41,7 @@ class GitBatcher:
             else settings.git_batch_debounce_seconds
         )
         self._pending: set[str] = set()
+        self._api_owned: set[str] = set()  # Files written by API, not yet committed
         self._lock = threading.Lock()
         self._timer: threading.Timer | None = None
 
@@ -48,7 +49,13 @@ class GitBatcher:
         """Add *path* to the current batch and reset the debounce timer."""
         with self._lock:
             self._pending.add(path)
+            self._api_owned.add(path)
             self._reset_timer()
+
+    def is_api_owned(self, path: str) -> bool:
+        """Check if a path is owned by the API (pending commit via PR workflow)."""
+        with self._lock:
+            return path in self._api_owned
 
     def _reset_timer(self) -> None:
         if self._timer is not None:
@@ -62,15 +69,31 @@ class GitBatcher:
             if not self._pending:
                 return
             files = sorted(self._pending)
-            self._pending.clear()
+            # Don't clear yet - only clear after successful commit
+            self._timer = None
 
-        self._do_commit_and_pr(files)
+        success = self._do_commit_and_pr(files)
+        
+        if success:
+            with self._lock:
+                # Only remove files that were successfully committed
+                files_set = set(files)
+                self._pending -= files_set
+                self._api_owned -= files_set
+        else:
+            # Re-schedule retry after a delay
+            log.warning("git batch failed, will retry %d files", len(files))
+            with self._lock:
+                if self._pending:  # If there are still pending files
+                    self._reset_timer()
 
-    def _do_commit_and_pr(self, files: list[str]) -> None:
+    def _do_commit_and_pr(self, files: list[str]) -> bool:
+        """Attempt to commit and create PR. Returns True on success."""
         session = SessionLocal()
         branch_name = _daily_branch_name()
         original_branch = None
         was_stashed = False
+        success = False
 
         try:
             job = Job(
@@ -93,7 +116,7 @@ class GitBatcher:
                 job.completed_at = datetime.now(timezone.utc)
                 session.commit()
                 log.info("git batch skipped - nothing to commit")
-                return
+                return True  # Nothing to commit is still "success"
 
             session.add(
                 VaultEvent(
@@ -119,7 +142,7 @@ class GitBatcher:
                 job.error = str(exc)[:2000]
                 job.completed_at = datetime.now(timezone.utc)
                 session.commit()
-                return
+                return False
 
             session.add(
                 VaultEvent(
@@ -179,6 +202,7 @@ class GitBatcher:
                 sha[:10],
                 len(files),
             )
+            success = True
 
         except Exception:
             import traceback
@@ -195,6 +219,54 @@ class GitBatcher:
                 except Exception:
                     log.warning("Failed to return to original branch %s", original_branch)
             session.close()
+        
+        return success
+
+
+    def recover_uncommitted(self) -> int:
+        """Scan vault for uncommitted changes and enqueue them.
+        
+        Call this on startup to recover from crashes/restarts.
+        Returns the number of files enqueued.
+        """
+        if not git_service.has_changes():
+            log.debug("recovery: no uncommitted changes found")
+            return 0
+        
+        # Get list of changed/untracked files
+        result = git_service._run("status", "--porcelain", check=False)
+        if not result.stdout.strip():
+            return 0
+        
+        files_to_recover = []
+        for line in result.stdout.strip().split("\n"):
+            if not line:
+                continue
+            # Format: "XY filename" or "XY filename -> newname" for renames
+            # X = index status, Y = worktree status
+            # We care about: ??, M, A, D, R
+            parts = line.split(maxsplit=1)
+            if len(parts) < 2:
+                continue
+            status, filepath = parts[0], parts[1]
+            
+            # Handle renames (format: "R  old -> new")
+            if " -> " in filepath:
+                filepath = filepath.split(" -> ")[1]
+            
+            # Only recover files that look like vault notes
+            if filepath.endswith((".md", ".markdown", ".txt")):
+                files_to_recover.append(filepath)
+        
+        if not files_to_recover:
+            log.debug("recovery: no note files to recover")
+            return 0
+        
+        log.info("recovery: found %d uncommitted files, enqueueing", len(files_to_recover))
+        for f in files_to_recover:
+            self.enqueue(f)
+        
+        return len(files_to_recover)
 
 
 batcher = GitBatcher()

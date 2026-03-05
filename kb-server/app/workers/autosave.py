@@ -20,6 +20,7 @@ from app.core.config import settings
 from app.core.logging import setup_logging
 from app.models.db import Job, SessionLocal, VaultEvent
 from app.services import git_service, publish_service
+from app.services.git_batcher import batcher as api_batcher
 
 log = logging.getLogger(__name__)
 
@@ -64,9 +65,16 @@ class AutosaveWatcher:
         ):
             for _change_type, path_str in changes:
                 rel = str(Path(path_str).relative_to(self.vault_path))
+                
+                # Skip files owned by the API - they go through PR workflow
+                if api_batcher.is_api_owned(rel):
+                    log.debug("skipping API-owned file: %s", rel)
+                    continue
+                    
                 self._pending.add(rel)
 
-            self._reset_timer()
+            if self._pending:
+                self._reset_timer()
 
     async def _periodic_pull(self) -> None:
         """Periodically pull from remote to sync merged PRs."""
@@ -107,6 +115,13 @@ class AutosaveWatcher:
     def _do_autosave(self, files: set[str]) -> None:
         session = SessionLocal()
         try:
+            # Filter out any API-owned files one more time (in case they were
+            # added between watch event and flush)
+            files = {f for f in files if not api_batcher.is_api_owned(f)}
+            if not files:
+                log.debug("autosave: all files are API-owned, skipping")
+                return
+            
             job = Job(job_type="autosave", status="running", meta={"files": sorted(files)})
             session.add(job)
             session.commit()
@@ -114,7 +129,8 @@ class AutosaveWatcher:
             now = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M")
             message = f"autosave: {now}"
 
-            sha = git_service.commit(message)
+            # Only commit the specific files, not everything in the working tree
+            sha = git_service.commit_files(sorted(files), message)
             if sha is None:
                 job.status = "skipped"
                 job.completed_at = datetime.now(timezone.utc)

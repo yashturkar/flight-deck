@@ -56,6 +56,13 @@ def stage_all() -> None:
     _run("add", "--all")
 
 
+def stage_files(files: list[str]) -> None:
+    """Stage specific files (supports additions, modifications, and deletions)."""
+    if not files:
+        return
+    _run("add", "--", *files)
+
+
 def commit(message: str) -> str | None:
     """Create a commit and return the SHA, or ``None`` if nothing to commit."""
     if not has_changes():
@@ -69,6 +76,28 @@ def commit(message: str) -> str | None:
         log.info("staging produced no committable changes")
         return None
 
+    _run("commit", "-m", message)
+    sha = _run("rev-parse", "HEAD").stdout.strip()
+    log.info("committed %s: %s", sha[:10], message)
+    return sha
+
+
+def commit_files(files: list[str], message: str) -> str | None:
+    """Stage and commit only the specified files.
+    
+    Returns the SHA, or None if nothing to commit.
+    """
+    if not files:
+        log.info("no files to commit")
+        return None
+    
+    stage_files(files)
+    
+    status = _run("status", "--porcelain", check=False)
+    if not status.stdout.strip():
+        log.info("staging produced no committable changes")
+        return None
+    
     _run("commit", "-m", message)
     sha = _run("rev-parse", "HEAD").stdout.strip()
     log.info("committed %s: %s", sha[:10], message)
@@ -161,20 +190,124 @@ def remote_branch_exists(branch: str, remote: str | None = None) -> bool:
 
 
 def stash_changes() -> bool:
-    """Stash any uncommitted changes. Returns True if something was stashed."""
+    """Stash any uncommitted changes including untracked files.
+    
+    Returns True if something was stashed.
+    """
     if not has_changes():
         return False
-    _run("stash", "push", "-m", "kb-server-auto-stash")
-    log.debug("stashed local changes")
+    _run("stash", "push", "--include-untracked", "-m", "kb-server-auto-stash")
+    log.debug("stashed local changes (including untracked)")
     return True
 
 
-def stash_pop() -> None:
-    """Pop the most recent stash if it exists."""
+def stash_pop() -> bool:
+    """Pop the most recent stash if it exists.
+    
+    Returns True if stash was popped successfully, False if no stash or conflict.
+    Handles the case where untracked files in the stash already exist on disk.
+    """
     result = _run("stash", "list", check=False)
-    if "kb-server-auto-stash" in result.stdout:
-        _run("stash", "pop", check=False)
-        log.debug("restored stashed changes")
+    if "kb-server-auto-stash" not in result.stdout:
+        log.debug("no stash to pop")
+        return False
+    
+    # Show what's in the stash before popping
+    stash_show = _run("stash", "show", "--stat", "--include-untracked", check=False)
+    log.debug("stash contents: %s", stash_show.stdout.strip())
+    
+    pop_result = _run("stash", "pop", check=False)
+    if pop_result.returncode != 0:
+        stderr = pop_result.stderr.strip()
+        
+        if "already exists" in stderr or "could not restore untracked files" in stderr:
+            # Untracked files in stash conflict with existing files
+            # Parse the error to find which files are blocking
+            log.info("stash pop blocked by existing files, extracting manually")
+            log.debug("stash pop stderr: %s", stderr)
+            
+            # Extract blocking file names from error message
+            # Format: "path/to/file.md already exists, no checkout"
+            blocking_files = []
+            for line in stderr.split("\n"):
+                if "already exists" in line:
+                    # Extract the file path (everything before " already exists")
+                    file_path = line.split(" already exists")[0].strip()
+                    if file_path:
+                        blocking_files.append(file_path)
+            
+            log.debug("blocking files parsed: %s", blocking_files)
+            
+            # Remove existing files that block the stash
+            cwd = settings.vault_path
+            for f in blocking_files:
+                file_path = cwd / f
+                log.debug("checking file %s exists: %s", file_path, file_path.exists())
+                if file_path.exists():
+                    file_path.unlink()
+                    log.info("removed blocking file: %s", f)
+            
+            # Try pop again
+            retry_result = _run("stash", "pop", check=False)
+            log.debug("retry pop result: rc=%d stdout=%s stderr=%s", 
+                     retry_result.returncode, retry_result.stdout.strip(), retry_result.stderr.strip())
+            if retry_result.returncode != 0:
+                # Last resort: apply stash without index, then drop
+                log.warning("retry pop failed (%s), trying to extract from stash tree", retry_result.stderr.strip())
+                # Use git show to extract the stashed file content directly
+                # stash@{0}^3 is the untracked files tree in a stash
+                tree_result = _run("ls-tree", "-r", "--name-only", "stash@{0}^3", check=False)
+                log.debug("stash^3 tree: rc=%d files=%s", tree_result.returncode, tree_result.stdout.strip())
+                if tree_result.returncode == 0 and tree_result.stdout.strip():
+                    for f in tree_result.stdout.strip().split("\n"):
+                        f = f.strip()
+                        if not f:
+                            continue
+                        # Remove if exists, then checkout from stash
+                        file_path = cwd / f
+                        if file_path.exists():
+                            file_path.unlink()
+                        checkout_result = _run("checkout", "stash@{0}^3", "--", f, check=False)
+                        log.info("extracted from stash: %s (rc=%d)", f, checkout_result.returncode)
+                else:
+                    log.warning("no untracked files in stash^3, stash may have been dropped")
+                _run("stash", "drop", check=False)
+            
+            # Verify we have changes now
+            if has_changes():
+                log.info("restored stashed changes successfully")
+            else:
+                # Check if the file exists but content is identical
+                status = _run("status", "--porcelain", check=False)
+                diff = _run("diff", "HEAD", check=False)
+                log.warning(
+                    "stash extraction completed but no changes detected! "
+                    "status=%s diff_len=%d (content may be identical to committed version)",
+                    status.stdout.strip() or "(clean)",
+                    len(diff.stdout)
+                )
+            return True
+            
+        elif "CONFLICT" in stderr or "conflict" in stderr.lower():
+            log.warning("stash pop conflict, attempting to resolve by keeping stashed version")
+            # Accept "theirs" (the stashed version) for conflicts
+            _run("checkout", "--theirs", ".", check=False)
+            _run("add", "--all", check=False)
+            # Drop the stash since we've manually applied it
+            _run("stash", "drop", check=False)
+            log.debug("resolved stash conflict")
+            return True
+        else:
+            log.warning("stash pop failed: %s", stderr)
+            return False
+    
+    # Check if we actually have changes after pop
+    if has_changes():
+        log.debug("restored stashed changes (has uncommitted changes)")
+    else:
+        log.debug("stash popped but no changes detected (content may be identical)")
+    
+    return True
 
 
 def checkout(branch: str, create: bool = False) -> None:
@@ -191,6 +324,9 @@ def checkout_or_create_from_main(branch: str, stash: bool = True) -> bool:
     
     If stash=True, stashes uncommitted changes before checkout and returns True
     if changes were stashed (caller should call stash_pop after committing).
+    
+    When checking out an existing branch, rebases it on main to pick up any
+    merged changes.
     """
     main_branch = settings.git_branch
     remote = settings.git_remote
@@ -202,11 +338,29 @@ def checkout_or_create_from_main(branch: str, stash: bool = True) -> bool:
     try:
         if branch_exists(branch):
             checkout(branch)
+            # Rebase on main to pick up any merged changes (like deletions)
+            _run("fetch", remote, main_branch, check=False)
+            log.debug("rebasing %s onto %s/%s", branch, remote, main_branch)
+            rebase_result = _run("rebase", f"{remote}/{main_branch}", check=False)
+            if rebase_result.returncode != 0:
+                if "CONFLICT" in rebase_result.stderr:
+                    log.warning("rebase conflict on %s, aborting rebase", branch)
+                    _run("rebase", "--abort", check=False)
+                else:
+                    log.debug("rebase result: %s %s", rebase_result.stdout.strip(), rebase_result.stderr.strip())
+            else:
+                log.info("rebased %s onto %s/%s", branch, remote, main_branch)
             return stashed
 
         if remote_branch_exists(branch, remote):
             _run("checkout", "-b", branch, f"{remote}/{branch}")
             log.info("checked out remote branch %s", branch)
+            # Also rebase on main
+            _run("fetch", remote, main_branch, check=False)
+            rebase_result = _run("rebase", f"{remote}/{main_branch}", check=False)
+            if rebase_result.returncode != 0 and "CONFLICT" in rebase_result.stderr:
+                log.warning("rebase conflict on %s, aborting rebase", branch)
+                _run("rebase", "--abort", check=False)
             return stashed
 
         checkout(main_branch)
@@ -221,7 +375,11 @@ def checkout_or_create_from_main(branch: str, stash: bool = True) -> bool:
 
 
 def push_branch(branch: str, remote: str | None = None, retries: int = 2) -> None:
-    """Push a specific branch to remote with retry."""
+    """Push a specific branch to remote with retry.
+    
+    If push fails due to non-fast-forward (remote has diverged), attempts
+    to pull --rebase before retrying.
+    """
     remote = remote or settings.git_remote
 
     last_err: Exception | None = None
@@ -233,6 +391,19 @@ def push_branch(branch: str, remote: str | None = None, retries: int = 2) -> Non
         except GitError as exc:
             last_err = exc
             log.warning("push branch attempt %d failed: %s", attempt, exc)
+            
+            if "non-fast-forward" in str(exc) or "rejected" in str(exc):
+                log.info("attempting pull --rebase to resolve diverged branch")
+                rebase_result = _run(
+                    "pull", "--rebase", remote, branch, check=False
+                )
+                if rebase_result.returncode != 0:
+                    stderr = rebase_result.stderr.strip()
+                    if "CONFLICT" in stderr or "could not apply" in stderr.lower():
+                        log.warning("rebase conflict, aborting")
+                        _run("rebase", "--abort", check=False)
+                    else:
+                        log.warning("pull --rebase failed: %s", stderr)
 
     raise GitError(f"push branch failed after {retries} attempts") from last_err
 
@@ -252,10 +423,15 @@ def commit_for_batch(files: list[str]) -> str | None:
     stage_all()
 
     status = _run("status", "--porcelain", check=False)
-    if not status.stdout.strip():
+    status_output = status.stdout.strip()
+    if not status_output:
         log.info("batch commit: nothing to commit")
+        # Log what files we expected to commit for debugging
+        log.debug("batch commit: expected files were: %s", files)
         return None
 
+    log.debug("batch commit: staging status:\n%s", status_output)
+    
     summary = f"kb-api: update {', '.join(files[:5])}"
     if len(files) > 5:
         summary += f" (+{len(files) - 5} more)"
