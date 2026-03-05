@@ -97,6 +97,46 @@ def push(
     raise GitError(f"push failed after {retries} attempts") from last_err
 
 
+def pull(
+    remote: str | None = None,
+    branch: str | None = None,
+) -> bool:
+    """Pull from remote. Returns True if new commits were fetched.
+    
+    Uses rebase strategy to handle diverged branches cleanly.
+    Skips if there are uncommitted local changes.
+    """
+    remote = remote or settings.git_remote
+    branch = branch or settings.git_branch
+
+    if has_changes():
+        log.debug("pull skipped: uncommitted local changes")
+        return False
+
+    old_sha = current_sha()
+
+    _run("fetch", remote, branch, check=False)
+
+    result = _run("pull", "--rebase", remote, branch, check=False)
+    if result.returncode != 0:
+        stderr = result.stderr.strip()
+        if "Already up to date" in result.stdout or "Already up to date" in stderr:
+            return False
+        if "CONFLICT" in stderr or "could not apply" in stderr.lower():
+            log.warning("pull rebase conflict, aborting rebase")
+            _run("rebase", "--abort", check=False)
+            return False
+        log.warning("pull failed: %s", stderr)
+        return False
+
+    new_sha = current_sha()
+    if new_sha != old_sha:
+        log.info("pulled new commits: %s -> %s", old_sha[:10], new_sha[:10])
+        return True
+
+    return False
+
+
 def current_sha() -> str:
     return _run("rev-parse", "HEAD").stdout.strip()
 

@@ -70,6 +70,7 @@ vault/
 | `GIT_BRANCH` | `main` | Base branch for PRs and autosave pushes |
 | `GIT_PUSH_ENABLED` | `true` | Set `false` to commit without pushing |
 | `AUTOSAVE_DEBOUNCE_SECONDS` | `30` | Seconds of quiet before autosave triggers |
+| `GIT_PULL_INTERVAL_SECONDS` | `60` | How often to pull from remote (syncs merged PRs) |
 | `GIT_BATCH_DEBOUNCE_SECONDS` | `10` | Seconds to debounce API-write batching |
 | `GIT_BATCH_BRANCH_PREFIX` | `kb-api` | Prefix for daily feature branches (e.g., `kb-api/2026-03-05`) |
 | `GITHUB_TOKEN` | (empty) | GitHub personal access token with `repo` scope for PR creation |

@@ -1,5 +1,7 @@
 """File-watcher process that debounces vault changes and auto-commits.
 
+Also periodically pulls from remote to sync merged PRs.
+
 Run as a standalone process::
 
     python -m app.workers.autosave
@@ -23,12 +25,13 @@ log = logging.getLogger(__name__)
 
 
 class AutosaveWatcher:
-    """Watch the vault directory, debounce, then commit+push."""
+    """Watch the vault directory, debounce, then commit+push. Also periodic pull."""
 
     def __init__(
         self,
         vault_path: Path | None = None,
         debounce_seconds: int | None = None,
+        pull_interval_seconds: int | None = None,
     ):
         self.vault_path = (vault_path or settings.vault_path).resolve()
         self.debounce_seconds = (
@@ -36,15 +39,25 @@ class AutosaveWatcher:
             if debounce_seconds is not None
             else settings.autosave_debounce_seconds
         )
+        self.pull_interval_seconds = (
+            pull_interval_seconds
+            if pull_interval_seconds is not None
+            else settings.git_pull_interval_seconds
+        )
         self._pending: set[str] = set()
         self._flush_task: asyncio.Task | None = None
+        self._pull_task: asyncio.Task | None = None
 
     async def run(self) -> None:
         log.info(
-            "watching %s (debounce=%ds)",
+            "watching %s (debounce=%ds, pull_interval=%ds)",
             self.vault_path,
             self.debounce_seconds,
+            self.pull_interval_seconds,
         )
+
+        self._pull_task = asyncio.create_task(self._periodic_pull())
+
         async for changes in awatch(
             self.vault_path,
             watch_filter=self._filter,
@@ -54,6 +67,17 @@ class AutosaveWatcher:
                 self._pending.add(rel)
 
             self._reset_timer()
+
+    async def _periodic_pull(self) -> None:
+        """Periodically pull from remote to sync merged PRs."""
+        while True:
+            await asyncio.sleep(self.pull_interval_seconds)
+            try:
+                pulled = await asyncio.to_thread(git_service.pull)
+                if pulled:
+                    log.info("periodic pull: synced new commits from remote")
+            except Exception:
+                log.exception("periodic pull failed")
 
     def _filter(self, change: Change, path: str) -> bool:
         """Ignore .git and other non-content paths."""

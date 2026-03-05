@@ -29,6 +29,7 @@ class Settings(BaseSettings):
 
     # Autosave (file watcher) settings
     autosave_debounce_seconds: int = 30
+    git_pull_interval_seconds: int = 60
 
     quartz_build_command: str = ""
     quartz_webhook_url: str = ""
