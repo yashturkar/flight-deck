@@ -28,7 +28,6 @@ VENV_DIR="$PROJECT_DIR/.venv"
 VENV_PYTHON="$VENV_DIR/bin/python"
 VENV_PIP="$VENV_DIR/bin/pip"
 VENV_ALEMBIC="$VENV_DIR/bin/alembic"
-VENV_REVUP="$VENV_DIR/bin/revup"
 VENV_UVICORN="$VENV_DIR/bin/uvicorn"
 
 # -----------------------------
@@ -297,8 +296,6 @@ setup_python_env() {
     fi
   fi
 
-  # Revup is required for stacked-diff workflow.
-  "$VENV_PIP" install revup || return 1
 }
 
 upsert_env_file() {
@@ -377,15 +374,13 @@ print_next_steps() {
   cat <<EOF
 
 Next steps:
-  1) Authenticate revup once:
-       "$VENV_REVUP" config github_oauth
-  2) Start API:
+  1) Start API:
        cd "$PROJECT_DIR"
        "$VENV_PYTHON" -m uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
-  3) Start worker (new terminal):
+  2) Start worker (new terminal):
        cd "$PROJECT_DIR"
        "$VENV_PYTHON" -m app.workers.autosave
-  4) Validate:
+  3) Validate:
        curl http://localhost:8000/health
        curl http://localhost:8000/ready
 EOF

@@ -4,8 +4,8 @@ from sqlalchemy.orm import Session
 from app.api.deps import require_api_key
 from app.models.db import VaultEvent, get_session
 from app.schemas.notes import NoteContent, NoteListItem, NoteWrite
+from app.services.git_batcher import batcher
 from app.services import vault_service
-from app.services.revup_batcher import batcher
 
 router = APIRouter(
     prefix="/notes",

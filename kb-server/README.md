@@ -5,10 +5,8 @@ File-first knowledge base server. Watches a Markdown vault, auto-commits to Git,
 ## Prerequisites
 
 - Python 3.10+
-- Git 2.43+
+- Git 2.34+
 - PostgreSQL 15+
-- [Revup](https://github.com/Skydio/revup) (`pip install revup`) — required for stacked-diff PR workflow.
-  After installing, authenticate once: `revup config github_oauth`
 
 ## Quick start (development)
 
@@ -69,12 +67,13 @@ vault/
 | `DATABASE_URL` | `postgresql://kb:kb@localhost:5432/kb` | Postgres connection string |
 | `KB_API_KEY` | (empty) | API key required in every request (`X-API-Key` header). Leave blank to disable auth (dev only) |
 | `GIT_REMOTE` | `origin` | Git remote name |
-| `GIT_BRANCH` | `main` | Branch to commit/push to |
+| `GIT_BRANCH` | `main` | Base branch for PRs and autosave pushes |
 | `GIT_PUSH_ENABLED` | `true` | Set `false` to commit without pushing |
 | `AUTOSAVE_DEBOUNCE_SECONDS` | `30` | Seconds of quiet before autosave triggers |
-| `REVUP_BASE_BRANCH` | `main` | Base branch for Revup stacked-diff PRs |
-| `REVUP_TOPIC_PREFIX` | (empty) | Topic prefix for Revup PRs |
-| `REVUP_BATCH_DEBOUNCE_SECONDS` | `0` | Seconds to debounce Revup batch operations |
+| `GIT_BATCH_DEBOUNCE_SECONDS` | `10` | Seconds to debounce API-write batching |
+| `GIT_BATCH_BRANCH_PREFIX` | `kb-api` | Prefix for daily feature branches (e.g., `kb-api/2026-03-05`) |
+| `GITHUB_TOKEN` | (empty) | GitHub personal access token with `repo` scope for PR creation |
+| `GITHUB_REPO` | (empty) | GitHub repository in `owner/repo` format |
 | `QUARTZ_BUILD_COMMAND` | (empty) | Shell command to build Quartz site |
 | `QUARTZ_WEBHOOK_URL` | (empty) | URL to POST after push to trigger rebuild |
 | `API_HOST` | `0.0.0.0` | API bind address |
@@ -172,9 +171,14 @@ curl -X PUT http://localhost:8000/notes/notes/hello.md \
 ```
 
 API writes are batched in the background (configurable via
-`REVUP_BATCH_DEBOUNCE_SECONDS`). After the debounce window, the server
-commits the changes with Revup topic metadata and runs `revup upload` to
-create a stacked-diff pull request targeting `REVUP_BASE_BRANCH`.
+`GIT_BATCH_DEBOUNCE_SECONDS`). After the debounce window, the server:
+
+1. Creates/checks out a daily feature branch (e.g., `kb-api/2026-03-05`)
+2. Commits all batched changes (including deletions)
+3. Pushes the branch to the remote
+4. Creates or updates a PR targeting `GIT_BRANCH`
+
+This ensures API writes never push directly to main — they always go through a PR.
 
 Notes:
 

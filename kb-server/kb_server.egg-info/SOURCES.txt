@@ -16,9 +16,9 @@ app/models/db.py
 app/schemas/__init__.py
 app/schemas/notes.py
 app/services/__init__.py
+app/services/git_batcher.py
 app/services/git_service.py
 app/services/publish_service.py
-app/services/revup_batcher.py
 app/services/vault_service.py
 app/workers/__init__.py
 app/workers/autosave.py
@@ -28,7 +28,7 @@ kb_server.egg-info/dependency_links.txt
 kb_server.egg-info/requires.txt
 kb_server.egg-info/top_level.txt
 tests/test_autosave.py
+tests/test_git_batcher.py
 tests/test_git_service.py
 tests/test_notes_api.py
-tests/test_revup_batcher.py
 tests/test_vault_service.py

@@ -11,31 +11,27 @@ class Settings(BaseSettings):
     )
 
     vault_path: Path = Path("/srv/flightdeck/vault")
-
     database_url: str = "postgresql://kb:kb@localhost:5432/kb"
-
     kb_api_key: str = ""
 
+    # Git settings
     git_remote: str = "origin"
     git_branch: str = "main"
     git_push_enabled: bool = True
 
-    autosave_debounce_seconds: int = 30
+    # API write batching - commits go to a daily branch and create/update a PR
+    git_batch_debounce_seconds: int = 10
+    git_batch_branch_prefix: str = "kb-api"
 
-    # Revup stacked-diff settings
-    revup_base_branch: str = "main"
-    revup_topic_prefix: str = "kb-api"
-    revup_batch_debounce_seconds: int = 10
+    # GitHub API for PR creation (required for API write workflow)
+    github_token: str = ""
+    github_repo: str = ""  # e.g., "owner/repo"
+
+    # Autosave (file watcher) settings
+    autosave_debounce_seconds: int = 30
 
     quartz_build_command: str = ""
     quartz_webhook_url: str = ""
-
-    kb_api_key: str = ""
-
-    revup_base_branch: str = "main"
-    revup_topic_prefix: str = ""
-    revup_batch_debounce_seconds: int = 0
-
     api_host: str = "0.0.0.0"
     api_port: int = 8000
 
