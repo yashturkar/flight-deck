@@ -70,6 +70,7 @@ class GitBatcher:
         session = SessionLocal()
         branch_name = _daily_branch_name()
         original_branch = None
+        was_stashed = False
 
         try:
             job = Job(
@@ -81,7 +82,10 @@ class GitBatcher:
             session.commit()
 
             original_branch = git_service.current_branch()
-            git_service.checkout_or_create_from_main(branch_name)
+            was_stashed = git_service.checkout_or_create_from_main(branch_name)
+
+            if was_stashed:
+                git_service.stash_pop()
 
             sha = git_service.commit_for_batch(files)
             if sha is None:

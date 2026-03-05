@@ -160,6 +160,23 @@ def remote_branch_exists(branch: str, remote: str | None = None) -> bool:
     return result.returncode == 0
 
 
+def stash_changes() -> bool:
+    """Stash any uncommitted changes. Returns True if something was stashed."""
+    if not has_changes():
+        return False
+    _run("stash", "push", "-m", "kb-server-auto-stash")
+    log.debug("stashed local changes")
+    return True
+
+
+def stash_pop() -> None:
+    """Pop the most recent stash if it exists."""
+    result = _run("stash", "list", check=False)
+    if "kb-server-auto-stash" in result.stdout:
+        _run("stash", "pop", check=False)
+        log.debug("restored stashed changes")
+
+
 def checkout(branch: str, create: bool = False) -> None:
     """Checkout a branch, optionally creating it."""
     if create:
@@ -169,24 +186,38 @@ def checkout(branch: str, create: bool = False) -> None:
     log.info("checked out branch %s", branch)
 
 
-def checkout_or_create_from_main(branch: str) -> None:
-    """Checkout branch if it exists, otherwise create from main."""
+def checkout_or_create_from_main(branch: str, stash: bool = True) -> bool:
+    """Checkout branch if it exists, otherwise create from main.
+    
+    If stash=True, stashes uncommitted changes before checkout and returns True
+    if changes were stashed (caller should call stash_pop after committing).
+    """
     main_branch = settings.git_branch
     remote = settings.git_remote
 
-    if branch_exists(branch):
-        checkout(branch)
-        return
+    stashed = False
+    if stash and has_changes():
+        stashed = stash_changes()
 
-    if remote_branch_exists(branch, remote):
-        _run("checkout", "-b", branch, f"{remote}/{branch}")
-        log.info("checked out remote branch %s", branch)
-        return
+    try:
+        if branch_exists(branch):
+            checkout(branch)
+            return stashed
 
-    checkout(main_branch)
-    _run("pull", remote, main_branch, check=False)
-    checkout(branch, create=True)
-    log.info("created branch %s from %s", branch, main_branch)
+        if remote_branch_exists(branch, remote):
+            _run("checkout", "-b", branch, f"{remote}/{branch}")
+            log.info("checked out remote branch %s", branch)
+            return stashed
+
+        checkout(main_branch)
+        _run("pull", remote, main_branch, check=False)
+        checkout(branch, create=True)
+        log.info("created branch %s from %s", branch, main_branch)
+        return stashed
+    except GitError:
+        if stashed:
+            stash_pop()
+        raise
 
 
 def push_branch(branch: str, remote: str | None = None, retries: int = 2) -> None:
