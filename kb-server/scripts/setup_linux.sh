@@ -24,6 +24,12 @@ RUN_MIGRATIONS="${RUN_MIGRATIONS:-true}"
 CREATE_ENV_FILE="${CREATE_ENV_FILE:-true}"
 
 DATABASE_URL="postgresql://${DB_USER}:${DB_PASS}@${DB_HOST}:${DB_PORT}/${DB_NAME}"
+VENV_DIR="$PROJECT_DIR/.venv"
+VENV_PYTHON="$VENV_DIR/bin/python"
+VENV_PIP="$VENV_DIR/bin/pip"
+VENV_ALEMBIC="$VENV_DIR/bin/alembic"
+VENV_REVUP="$VENV_DIR/bin/revup"
+VENV_UVICORN="$VENV_DIR/bin/uvicorn"
 
 # -----------------------------
 # Step tracking and reporting
@@ -133,11 +139,11 @@ install_packages() {
     apt)
       $SUDO apt-get update
       $SUDO DEBIAN_FRONTEND=noninteractive apt-get install -y \
-        git curl ca-certificates build-essential pkg-config \
-        "$PYTHON_BIN" python3-venv python3-pip \
-        "postgresql${POSTGRES_VERSION_SUFFIX:+-$POSTGRES_VERSION_SUFFIX}" \
-        "postgresql-client${POSTGRES_VERSION_SUFFIX:+-$POSTGRES_VERSION_SUFFIX}" \
-        libpq-dev
+        git curl ca-certificates build-essential pkg-config software-properties-common \
+        postgresql postgresql-client libpq-dev
+
+      $SUDO DEBIAN_FRONTEND=noninteractive apt-get install -y \
+        python3 python3-venv python3-dev python3-pip
       ;;
     dnf)
       $SUDO dnf install -y \
@@ -172,17 +178,42 @@ install_packages() {
 
 ensure_python_version() {
   needs_cmd "$PYTHON_BIN" || {
-    echo "Python binary not found: $PYTHON_BIN"
+    echo "Configured PYTHON_BIN not found: $PYTHON_BIN"
     return 1
   }
 
   "$PYTHON_BIN" - <<'PY'
 import sys
 major, minor = sys.version_info[:2]
-ok = (major, minor) >= (3, 11)
 print(f"Detected Python: {major}.{minor}")
-raise SystemExit(0 if ok else 1)
+if (major, minor) < (3, 10):
+    print("Python 3.10+ is required.")
+    raise SystemExit(1)
 PY
+}
+
+ensure_postgres_user_exists() {
+  if id postgres >/dev/null 2>&1; then
+    return 0
+  fi
+  echo "System user 'postgres' not found. PostgreSQL may not be installed correctly."
+  return 1
+}
+
+ensure_venv_exists() {
+  if [ -x "$VENV_PYTHON" ] && [ -x "$VENV_PIP" ]; then
+    return 0
+  fi
+  echo "Virtualenv not found at $VENV_DIR. Setup step likely failed."
+  return 1
+}
+
+ensure_cmd_or_fail() {
+  local cmd="$1"
+  needs_cmd "$cmd" || {
+    echo "Required command not found: $cmd"
+    return 1
+  }
 }
 
 init_postgres_if_needed() {
@@ -210,6 +241,8 @@ init_postgres_if_needed() {
 }
 
 start_postgres() {
+  ensure_cmd_or_fail psql || return 1
+  ensure_postgres_user_exists || return 1
   init_postgres_if_needed || return 1
 
   if needs_cmd systemctl; then
@@ -228,6 +261,9 @@ start_postgres() {
 }
 
 setup_postgres_user_and_db() {
+  ensure_cmd_or_fail psql || return 1
+  ensure_postgres_user_exists || return 1
+
   local psql_cmd
   psql_cmd="psql -v ON_ERROR_STOP=1"
 
@@ -251,19 +287,26 @@ SQL"
 setup_python_env() {
   cd "$PROJECT_DIR" || return 1
 
-  "$PYTHON_BIN" -m venv .venv
-  # shellcheck disable=SC1091
-  source .venv/bin/activate
-  python -m pip install --upgrade pip wheel setuptools
+  "$PYTHON_BIN" -m venv "$VENV_DIR" || return 1
+  ensure_venv_exists || return 1
+  "$VENV_PYTHON" -m pip install --upgrade pip wheel setuptools || return 1
 
   if is_true "$INSTALL_DEV_DEPS"; then
-    pip install -e ".[dev]"
+    if ! "$VENV_PIP" install -e ".[dev]"; then
+      echo "Dependency installation failed. If error mentions Python version,"
+      echo "check pyproject.toml requires-python and align it with your runtime."
+      return 1
+    fi
   else
-    pip install -e .
+    if ! "$VENV_PIP" install -e .; then
+      echo "Dependency installation failed. If error mentions Python version,"
+      echo "check pyproject.toml requires-python and align it with your runtime."
+      return 1
+    fi
   fi
 
   # Revup is required for stacked-diff workflow.
-  pip install revup
+  "$VENV_PIP" install revup || return 1
 }
 
 upsert_env_file() {
@@ -304,19 +347,25 @@ setup_vault_repo() {
 
 run_migrations() {
   cd "$PROJECT_DIR" || return 1
-  # shellcheck disable=SC1091
-  source .venv/bin/activate
+  ensure_venv_exists || return 1
   export DATABASE_URL
-  alembic upgrade head
+  [ -x "$VENV_ALEMBIC" ] || {
+    echo "alembic not found in venv: $VENV_ALEMBIC"
+    return 1
+  }
+  "$VENV_ALEMBIC" upgrade head
 }
 
 run_checks() {
   cd "$PROJECT_DIR" || return 1
-  # shellcheck disable=SC1091
-  source .venv/bin/activate
+  ensure_venv_exists || return 1
 
-  python -m uvicorn --version >/dev/null
-  python - <<PY
+  [ -x "$VENV_UVICORN" ] || {
+    echo "uvicorn not found in venv: $VENV_UVICORN"
+    return 1
+  }
+  "$VENV_UVICORN" --version >/dev/null
+  "$VENV_PYTHON" - <<PY
 import os
 from pathlib import Path
 db = os.environ.get("DATABASE_URL", "${DATABASE_URL}")
@@ -328,6 +377,7 @@ if not vault.exists() or not (vault / ".git").exists():
     raise SystemExit(1)
 PY
 
+  ensure_cmd_or_fail psql || return 1
   PGPASSWORD="$DB_PASS" psql -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$DB_NAME" -c 'SELECT 1;' >/dev/null
 }
 
@@ -336,16 +386,13 @@ print_next_steps() {
 
 Next steps:
   1) Authenticate revup once:
-       source "$PROJECT_DIR/.venv/bin/activate"
-       revup config github_oauth
+       "$VENV_REVUP" config github_oauth
   2) Start API:
        cd "$PROJECT_DIR"
-       source .venv/bin/activate
-       python -m uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+       "$VENV_PYTHON" -m uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
   3) Start worker (new terminal):
        cd "$PROJECT_DIR"
-       source .venv/bin/activate
-       python -m app.workers.autosave
+       "$VENV_PYTHON" -m app.workers.autosave
   4) Validate:
        curl http://localhost:8000/health
        curl http://localhost:8000/ready
