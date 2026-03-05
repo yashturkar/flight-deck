@@ -65,14 +65,20 @@ vault/
 | --- | --- | --- |
 | `VAULT_PATH` | `/srv/flightdeck/vault` | Absolute path to the vault Git repo |
 | `DATABASE_URL` | `postgresql://kb:kb@localhost:5432/kb` | Postgres connection string |
+| `KB_API_KEY` | (empty) | **Required.** All `/notes` endpoints require this via `X-API-Key` header. Returns `401` when blank or missing. |
 | `GIT_REMOTE` | `origin` | Git remote name |
 | `GIT_BRANCH` | `main` | Branch to commit/push to |
 | `GIT_PUSH_ENABLED` | `true` | Set `false` to commit without pushing |
 | `AUTOSAVE_DEBOUNCE_SECONDS` | `30` | Seconds of quiet before autosave triggers |
+| `REVUP_BASE_BRANCH` | `main` | Base branch for Revup stacked-diff PRs |
+| `REVUP_TOPIC_PREFIX` | (empty) | Topic prefix for Revup PRs |
+| `REVUP_BATCH_DEBOUNCE_SECONDS` | `0` | Seconds to debounce Revup batch operations |
 | `QUARTZ_BUILD_COMMAND` | (empty) | Shell command to build Quartz site |
 | `QUARTZ_WEBHOOK_URL` | (empty) | URL to POST after push to trigger rebuild |
 | `API_HOST` | `0.0.0.0` | API bind address |
 | `API_PORT` | `8000` | API bind port |
+
+> **Note:** Unknown env keys in `.env` are silently ignored, so extra variables won't break startup.
 
 ## Process model
 
@@ -116,10 +122,18 @@ curl http://localhost:8000/ready
 - the vault directory exists at `VAULT_PATH`
 - the vault is a Git repo (contains `VAULT_PATH/.git/`)
 
+### Authentication
+
+All `/notes` endpoints require the `X-API-Key` header set to the value of `KB_API_KEY`.
+Requests without a valid key receive `401 Unauthorized`.
+
+`/health` and `/ready` remain unauthenticated.
+
 ### Read a note
 
 ```bash
-curl http://localhost:8000/notes/notes/hello.md
+curl -H "X-API-Key: $KB_API_KEY" \
+  http://localhost:8000/notes/notes/hello.md
 ```
 
 Response shape:
@@ -136,6 +150,7 @@ Response shape:
 
 ```bash
 curl -X PUT http://localhost:8000/notes/notes/hello.md \
+  -H "X-API-Key: $KB_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{"content":"# Hello\nCreated via API.\n"}'
 ```
@@ -150,7 +165,8 @@ Notes:
 List everything under a directory prefix:
 
 ```bash
-curl "http://localhost:8000/notes/?prefix=notes"
+curl -H "X-API-Key: $KB_API_KEY" \
+  "http://localhost:8000/notes/?prefix=notes"
 ```
 
 ### Publish (Quartz trigger)
@@ -165,6 +181,7 @@ If neither `QUARTZ_BUILD_COMMAND` nor `QUARTZ_WEBHOOK_URL` is set, `/publish` re
 
 ### Common errors
 
+- **401**: missing or invalid `X-API-Key` header (or `KB_API_KEY` not configured on server)
 - **400**: path not allowed (bad extension, absolute path, traversal attempt)
 - **404**: note not found
 - **500**: Git failure (e.g., repo misconfigured) or DB issues

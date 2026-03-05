@@ -1,11 +1,16 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
+from app.api.deps import require_api_key
 from app.models.db import VaultEvent, get_session
 from app.schemas.notes import NoteContent, NoteListItem, NoteWrite
 from app.services import vault_service
 
-router = APIRouter(prefix="/notes", tags=["notes"])
+router = APIRouter(
+    prefix="/notes",
+    tags=["notes"],
+    dependencies=[Depends(require_api_key)],
+)
 
 
 @router.get("/", response_model=list[NoteListItem])
