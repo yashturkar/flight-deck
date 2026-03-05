@@ -4,7 +4,7 @@ File-first knowledge base server. Watches a Markdown vault, auto-commits to Git,
 
 ## Prerequisites
 
-- Python 3.11+
+- Python 3.10+
 - Git 2.43+
 - PostgreSQL 15+
 - [Revup](https://github.com/Skydio/revup) (`pip install revup`) — required for stacked-diff PR workflow.

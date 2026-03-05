@@ -264,23 +264,15 @@ setup_postgres_user_and_db() {
   ensure_cmd_or_fail psql || return 1
   ensure_postgres_user_exists || return 1
 
-  local psql_cmd
-  psql_cmd="psql -v ON_ERROR_STOP=1"
+  # Use sudo -H and run in /tmp to avoid permission issues with restrictive home dirs.
+  if ! $SUDO -u postgres -H bash -lc "cd /tmp && psql -tAc \"SELECT 1 FROM pg_roles WHERE rolname='${DB_USER}'\"" | grep -q 1; then
+    $SUDO -u postgres -H bash -lc "cd /tmp && psql -v ON_ERROR_STOP=1 -c \"CREATE ROLE \\\"${DB_USER}\\\" LOGIN PASSWORD '${DB_PASS}';\""
+  else
+    $SUDO -u postgres -H bash -lc "cd /tmp && psql -v ON_ERROR_STOP=1 -c \"ALTER ROLE \\\"${DB_USER}\\\" WITH LOGIN PASSWORD '${DB_PASS}';\""
+  fi
 
-  $SUDO -u postgres bash -lc "$psql_cmd <<SQL
-DO \$\$
-BEGIN
-  IF NOT EXISTS (SELECT FROM pg_catalog.pg_roles WHERE rolname = '${DB_USER}') THEN
-    CREATE ROLE ${DB_USER} LOGIN PASSWORD '${DB_PASS}';
-  ELSE
-    ALTER ROLE ${DB_USER} WITH LOGIN PASSWORD '${DB_PASS}';
-  END IF;
-END
-\$\$;
-SQL"
-
-  if ! $SUDO -u postgres psql -tAc "SELECT 1 FROM pg_database WHERE datname='${DB_NAME}'" | grep -q 1; then
-    $SUDO -u postgres createdb -O "${DB_USER}" "${DB_NAME}"
+  if ! $SUDO -u postgres -H bash -lc "cd /tmp && psql -tAc \"SELECT 1 FROM pg_database WHERE datname='${DB_NAME}'\"" | grep -q 1; then
+    $SUDO -u postgres -H bash -lc "cd /tmp && createdb -O \"${DB_USER}\" \"${DB_NAME}\""
   fi
 }
 
@@ -409,7 +401,7 @@ main() {
   run_step "Check sudo/root privileges" setup_sudo
   run_step "Detect package manager" detect_package_manager
   run_step "Install system packages" install_packages
-  run_step "Validate Python >= 3.11" ensure_python_version
+  run_step "Validate Python >= 3.10" ensure_python_version
   run_step "Enable/start PostgreSQL service" start_postgres
   run_step "Create/update DB user and database" setup_postgres_user_and_db
   run_step "Create Python virtualenv and install deps" setup_python_env
