@@ -2,6 +2,7 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 
+from app.core.auth import APIKeyMiddleware
 from app.core.config import settings
 from app.core.logging import setup_logging
 from app.models.db import ensure_tables
@@ -20,6 +21,8 @@ def create_app() -> FastAPI:
         version="0.1.0",
         lifespan=lifespan,
     )
+
+    app.add_middleware(APIKeyMiddleware)
 
     from app.api.routes.health import router as health_router
     from app.api.routes.notes import router as notes_router

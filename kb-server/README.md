@@ -4,9 +4,11 @@ File-first knowledge base server. Watches a Markdown vault, auto-commits to Git,
 
 ## Prerequisites
 
-- Python 3.11+
-- Git
+- Python 3.10+
+- Git 2.43+
 - PostgreSQL 15+
+- [Revup](https://github.com/Skydio/revup) (`pip install revup`) — required for stacked-diff PR workflow.
+  After installing, authenticate once: `revup config github_oauth`
 
 ## Quick start (development)
 
@@ -65,7 +67,7 @@ vault/
 | --- | --- | --- |
 | `VAULT_PATH` | `/srv/flightdeck/vault` | Absolute path to the vault Git repo |
 | `DATABASE_URL` | `postgresql://kb:kb@localhost:5432/kb` | Postgres connection string |
-| `KB_API_KEY` | (empty) | **Required.** All `/notes` endpoints require this via `X-API-Key` header. Returns `401` when blank or missing. |
+| `KB_API_KEY` | (empty) | API key required in every request (`X-API-Key` header). Leave blank to disable auth (dev only) |
 | `GIT_REMOTE` | `origin` | Git remote name |
 | `GIT_BRANCH` | `main` | Branch to commit/push to |
 | `GIT_PUSH_ENABLED` | `true` | Set `false` to commit without pushing |
@@ -109,11 +111,25 @@ FastAPI also exposes interactive docs:
 - Swagger UI: `GET /docs`
 - OpenAPI JSON: `GET /openapi.json`
 
+### Authentication
+
+When `KB_API_KEY` is set, **every** request (including `/health`, `/ready`,
+`/docs`, and `/openapi.json`) must include the key:
+
+```bash
+curl -H "X-API-Key: YOUR_KEY" http://localhost:8000/health
+```
+
+Requests without a valid key receive a `401` response.
+
+When `KB_API_KEY` is left blank (development mode), no authentication is
+required.
+
 ### Health and readiness
 
 ```bash
-curl http://localhost:8000/health
-curl http://localhost:8000/ready
+curl -H "X-API-Key: $KB_API_KEY" http://localhost:8000/health
+curl -H "X-API-Key: $KB_API_KEY" http://localhost:8000/ready
 ```
 
 `/ready` reports errors until:
@@ -155,6 +171,11 @@ curl -X PUT http://localhost:8000/notes/notes/hello.md \
   -d '{"content":"# Hello\nCreated via API.\n"}'
 ```
 
+API writes are batched in the background (configurable via
+`REVUP_BATCH_DEBOUNCE_SECONDS`). After the debounce window, the server
+commits the changes with Revup topic metadata and runs `revup upload` to
+create a stacked-diff pull request targeting `REVUP_BASE_BRANCH`.
+
 Notes:
 
 - Writes are limited to file extensions: `.md`, `.markdown`, `.txt`
@@ -174,7 +195,7 @@ curl -H "X-API-Key: $KB_API_KEY" \
 Manual publish trigger:
 
 ```bash
-curl -X POST http://localhost:8000/publish
+curl -X POST -H "X-API-Key: $KB_API_KEY" http://localhost:8000/publish
 ```
 
 If neither `QUARTZ_BUILD_COMMAND` nor `QUARTZ_WEBHOOK_URL` is set, `/publish` returns `501`.

@@ -8,6 +8,7 @@ app/api/routes/health.py
 app/api/routes/notes.py
 app/api/routes/publish.py
 app/core/__init__.py
+app/core/auth.py
 app/core/config.py
 app/core/logging.py
 app/models/__init__.py
@@ -17,6 +18,7 @@ app/schemas/notes.py
 app/services/__init__.py
 app/services/git_service.py
 app/services/publish_service.py
+app/services/revup_batcher.py
 app/services/vault_service.py
 app/workers/__init__.py
 app/workers/autosave.py
@@ -28,4 +30,5 @@ kb_server.egg-info/top_level.txt
 tests/test_autosave.py
 tests/test_git_service.py
 tests/test_notes_api.py
+tests/test_revup_batcher.py
 tests/test_vault_service.py

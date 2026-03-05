@@ -5,6 +5,7 @@ from app.api.deps import require_api_key
 from app.models.db import VaultEvent, get_session
 from app.schemas.notes import NoteContent, NoteListItem, NoteWrite
 from app.services import vault_service
+from app.services.revup_batcher import batcher
 
 router = APIRouter(
     prefix="/notes",
@@ -53,5 +54,7 @@ def write_note(
         )
     )
     session.commit()
+
+    batcher.enqueue(path)
 
     return NoteContent(path=path, content=body.content, modified_at=modified_at)

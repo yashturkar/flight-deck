@@ -42,12 +42,77 @@ def _make_client(tmp_vault: Path, *, api_key: str = TEST_API_KEY):
         gs.git_branch = "main"
         auth_s.kb_api_key = api_key
 
-        from app.main import create_app
+    vs.vault_path = tmp_vault
+    gs.vault_path = tmp_vault
+    gs.git_remote = "origin"
+    gs.git_branch = "main"
+    auth_s.kb_api_key = api_key
 
-        app = create_app()
-        app.dependency_overrides[get_session] = _override_session
-        yield TestClient(app)
-        app.dependency_overrides.clear()
+    from app.main import create_app
+
+    app = create_app()
+    app.dependency_overrides[get_session] = _override_session
+
+    client = TestClient(app)
+    return client, app, patches
+
+
+@pytest.fixture()
+def client(tmp_vault: Path):
+    """Client with auth disabled (no API key configured)."""
+    c, app, patches = _make_client(tmp_vault, api_key="")
+    yield c
+    app.dependency_overrides.clear()
+    for p in patches:
+        p.stop()
+
+
+@pytest.fixture()
+def authed_client(tmp_vault: Path):
+    """Client with auth enabled — must send X-API-Key."""
+    c, app, patches = _make_client(tmp_vault, api_key=TEST_API_KEY)
+    yield c
+    app.dependency_overrides.clear()
+    for p in patches:
+        p.stop()
+
+
+class TestAPIKeyAuth:
+    """Verify that the API-key middleware gates every endpoint."""
+
+    def test_no_key_returns_401(self, authed_client: TestClient):
+        resp = authed_client.get("/health")
+        assert resp.status_code == 401
+        assert "API key" in resp.json()["detail"]
+
+    def test_wrong_key_returns_401(self, authed_client: TestClient):
+        resp = authed_client.get(
+            "/health", headers={"X-API-Key": "wrong-key"}
+        )
+        assert resp.status_code == 401
+
+    def test_correct_key_passes(self, authed_client: TestClient):
+        resp = authed_client.get(
+            "/health", headers={"X-API-Key": TEST_API_KEY}
+        )
+        assert resp.status_code == 200
+        assert resp.json()["status"] == "ok"
+
+    def test_notes_requires_key(self, authed_client: TestClient):
+        resp = authed_client.get("/notes/notes/any.md")
+        assert resp.status_code == 401
+
+    def test_notes_with_key(self, authed_client: TestClient, tmp_vault: Path):
+        (tmp_vault / "notes").mkdir(exist_ok=True)
+        (tmp_vault / "notes" / "k.md").write_text("key ok")
+        resp = authed_client.get(
+            "/notes/notes/k.md", headers={"X-API-Key": TEST_API_KEY}
+        )
+        assert resp.status_code == 200
+
+    def test_empty_key_config_disables_auth(self, client: TestClient):
+        resp = client.get("/health")
+        assert resp.status_code == 200
 
 
 @pytest.fixture()

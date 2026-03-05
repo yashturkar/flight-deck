@@ -14,11 +14,18 @@ class Settings(BaseSettings):
 
     database_url: str = "postgresql://kb:kb@localhost:5432/kb"
 
+    kb_api_key: str = ""
+
     git_remote: str = "origin"
     git_branch: str = "main"
     git_push_enabled: bool = True
 
     autosave_debounce_seconds: int = 30
+
+    # Revup stacked-diff settings
+    revup_base_branch: str = "main"
+    revup_topic_prefix: str = "kb-api"
+    revup_batch_debounce_seconds: int = 10
 
     quartz_build_command: str = ""
     quartz_webhook_url: str = ""
