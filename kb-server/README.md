@@ -5,8 +5,10 @@ File-first knowledge base server. Watches a Markdown vault, auto-commits to Git,
 ## Prerequisites
 
 - Python 3.11+
-- Git
+- Git 2.43+
 - PostgreSQL 15+
+- [Revup](https://github.com/Skydio/revup) (`pip install revup`) — required for stacked-diff PR workflow.
+  After installing, authenticate once: `revup config github_oauth`
 
 ## Quick start (development)
 
@@ -65,10 +67,14 @@ vault/
 | --- | --- | --- |
 | `VAULT_PATH` | `/srv/flightdeck/vault` | Absolute path to the vault Git repo |
 | `DATABASE_URL` | `postgresql://kb:kb@localhost:5432/kb` | Postgres connection string |
+| `KB_API_KEY` | (empty) | API key required in every request (`X-API-Key` header). Leave blank to disable auth (dev only) |
 | `GIT_REMOTE` | `origin` | Git remote name |
 | `GIT_BRANCH` | `main` | Branch to commit/push to |
 | `GIT_PUSH_ENABLED` | `true` | Set `false` to commit without pushing |
 | `AUTOSAVE_DEBOUNCE_SECONDS` | `30` | Seconds of quiet before autosave triggers |
+| `REVUP_BASE_BRANCH` | `main` | Target base branch for Revup stacked-diff PRs |
+| `REVUP_TOPIC_PREFIX` | `kb-api` | Prefix for Revup topic names |
+| `REVUP_BATCH_DEBOUNCE_SECONDS` | `10` | Seconds to batch API writes before committing and uploading via Revup |
 | `QUARTZ_BUILD_COMMAND` | (empty) | Shell command to build Quartz site |
 | `QUARTZ_WEBHOOK_URL` | (empty) | URL to POST after push to trigger rebuild |
 | `API_HOST` | `0.0.0.0` | API bind address |
@@ -103,11 +109,25 @@ FastAPI also exposes interactive docs:
 - Swagger UI: `GET /docs`
 - OpenAPI JSON: `GET /openapi.json`
 
+### Authentication
+
+When `KB_API_KEY` is set, **every** request (including `/health`, `/ready`,
+`/docs`, and `/openapi.json`) must include the key:
+
+```bash
+curl -H "X-API-Key: YOUR_KEY" http://localhost:8000/health
+```
+
+Requests without a valid key receive a `401` response.
+
+When `KB_API_KEY` is left blank (development mode), no authentication is
+required.
+
 ### Health and readiness
 
 ```bash
-curl http://localhost:8000/health
-curl http://localhost:8000/ready
+curl -H "X-API-Key: $KB_API_KEY" http://localhost:8000/health
+curl -H "X-API-Key: $KB_API_KEY" http://localhost:8000/ready
 ```
 
 `/ready` reports errors until:
@@ -119,7 +139,7 @@ curl http://localhost:8000/ready
 ### Read a note
 
 ```bash
-curl http://localhost:8000/notes/notes/hello.md
+curl -H "X-API-Key: $KB_API_KEY" http://localhost:8000/notes/notes/hello.md
 ```
 
 Response shape:
@@ -136,9 +156,15 @@ Response shape:
 
 ```bash
 curl -X PUT http://localhost:8000/notes/notes/hello.md \
+  -H "X-API-Key: $KB_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{"content":"# Hello\nCreated via API.\n"}'
 ```
+
+API writes are batched in the background (configurable via
+`REVUP_BATCH_DEBOUNCE_SECONDS`). After the debounce window, the server
+commits the changes with Revup topic metadata and runs `revup upload` to
+create a stacked-diff pull request targeting `REVUP_BASE_BRANCH`.
 
 Notes:
 
@@ -150,7 +176,7 @@ Notes:
 List everything under a directory prefix:
 
 ```bash
-curl "http://localhost:8000/notes/?prefix=notes"
+curl -H "X-API-Key: $KB_API_KEY" "http://localhost:8000/notes/?prefix=notes"
 ```
 
 ### Publish (Quartz trigger)
@@ -158,7 +184,7 @@ curl "http://localhost:8000/notes/?prefix=notes"
 Manual publish trigger:
 
 ```bash
-curl -X POST http://localhost:8000/publish
+curl -X POST -H "X-API-Key: $KB_API_KEY" http://localhost:8000/publish
 ```
 
 If neither `QUARTZ_BUILD_COMMAND` nor `QUARTZ_WEBHOOK_URL` is set, `/publish` returns `501`.
