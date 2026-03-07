@@ -3,7 +3,7 @@ owner: platform
 status: draft
 last_verified: 2026-03-07
 source_of_truth:
-  - exec-plans/active/context-system-rollout.md
+  - exec-plans/completed/context-system-rollout.md
 related_code:
   - ../scripts/docs_lint.py
   - ../scripts/generate_context_artifacts.py
@@ -25,6 +25,11 @@ review_cycle_days: 14
 - Active: `exec-plans/active/`
 - Completed: `exec-plans/completed/`
 - Debt register: `exec-plans/tech-debt-tracker.md`
+
+## Current Focus
+
+- Context system rollout is complete: `exec-plans/completed/context-system-rollout.md`.
+- Current work should be tracked as reliability hardening and docs-automation debt in `exec-plans/tech-debt-tracker.md`.
 
 ## Regeneration Commands
 

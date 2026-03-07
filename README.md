@@ -32,3 +32,12 @@ A file-first knowledge base with Git-backed approval workflows. Edit notes local
 - [AGENTS.md](AGENTS.md) — Entry point for AI agents
 - [docs/](docs/) — Design docs, runbooks, security, reliability
 
+## Docs Checks Before PR
+
+Run these from repo root before opening a PR:
+
+```bash
+python3 scripts/docs_lint.py
+python3 scripts/generate_context_artifacts.py
+python3 scripts/docs_garden.py --output docs/generated/stale-docs-report.md
+```

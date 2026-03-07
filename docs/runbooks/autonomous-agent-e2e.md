@@ -89,6 +89,10 @@ Agent should execute and validate all of the following:
    - edit from local sync side, verify server update
 5. **Conflict/edge behavior**
    - rapid edits, delete/recreate, unusual filenames, and debounce timing
+6. **Outage recovery behavior**
+   - stop DB temporarily and verify `/ready` fails, then recovers after DB restore
+   - simulate temporary API outage during sync and verify retry + convergence
+   - simulate remote push/PR failure and verify pending changes recover on retry
 
 ## Acceptance criteria
 
@@ -96,6 +100,7 @@ Agent should execute and validate all of the following:
 - E2E matrix above is completed with evidence.
 - Any discovered bug is fixed and retested in the same run.
 - Docs for changed behavior are updated in the same branch.
+- Failure-mode runs include observed signals/log lines and explicit recovery proof.
 
 ## Agent execution loop
 
@@ -115,3 +120,8 @@ Agent should execute and validate all of the following:
 - files changed
 - remaining risks and follow-up tasks
 
+## Expected Reliability Signals During E2E
+
+- DB outage: `/health` remains 200; `/ready` reports DB failure until restore.
+- API outage for sync: sync loop logs request failures, then recovers on next interval.
+- Git/PR outage: autosave or batch logs push/PR failures without dropping local changes.

@@ -34,9 +34,28 @@ review_cycle_days: 21
 - Job/event tables for write and publish operations.
 - Sync logs for pull/push loop success and retries.
 
+## Operator Checks by Failure Class
+
+### DB outage (`kb-server`)
+
+- Signal: `GET /health` stays 200 while `GET /ready` returns non-200 with DB failure detail.
+- Signal: API logs show database connection failures from readiness and write paths.
+- Recovery check: when DB is restored, `GET /ready` returns 200 without process restart.
+
+### Git remote / GitHub outage (`kb-server`)
+
+- Signal: autosave or batcher logs show push/PR failures while local commits continue.
+- Signal: pending API changes remain on `kb-api/*` branch until push/PR succeeds.
+- Recovery check: retry loop or next batch cycle pushes and re-establishes PR state.
+
+### API outage (`vault-sync`)
+
+- Signal: sync loop logs pull/push request failures and keeps retrying on interval.
+- Signal: local filesystem remains intact; no destructive cleanup on transient failures.
+- Recovery check: after API is reachable, next pull repopulates `view=current` and pending local changes push successfully.
+
 ## Runbook Links
 
 - `runbooks/deployment.md`
 - `runbooks/incident-response.md`
 - `runbooks/backup-restore.md`
-

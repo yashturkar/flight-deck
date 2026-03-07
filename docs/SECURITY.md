@@ -17,7 +17,9 @@ review_cycle_days: 21
 
 ## Auth Boundary
 
-- API key auth is enforced by server middleware/dependencies when configured.
+- API key auth is enforced by server middleware when configured (`KB_API_KEY` non-empty).
+- With auth enabled, all HTTP routes require `X-API-Key`, including `/health`, `/ready`, `/docs`, and `/openapi.json`.
+- With auth disabled (`KB_API_KEY` empty), requests are accepted without API-key checks.
 - `KB_API_KEY` must never be committed in docs examples with live values.
 
 ## Secret Handling
@@ -40,4 +42,3 @@ Update this document when changing:
 - request validation and path sanitization
 - external webhook/publish execution semantics
 - GitHub token scope or PR automation behavior
-

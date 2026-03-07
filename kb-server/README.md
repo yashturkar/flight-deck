@@ -164,13 +164,6 @@ curl -H "X-API-Key: $KB_API_KEY" http://localhost:8000/ready
 - the vault directory exists at `VAULT_PATH`
 - the vault is a Git repo (contains `VAULT_PATH/.git/`)
 
-### Authentication
-
-All `/notes` endpoints require the `X-API-Key` header set to the value of `KB_API_KEY`.
-Requests without a valid key receive `401 Unauthorized`.
-
-`/health` and `/ready` remain unauthenticated.
-
 ### Read a note
 
 ```bash

@@ -31,9 +31,14 @@ Each domain is scored 0-5 across:
 | vault-sync | 3 | 3 | 3 | 2 | Add deeper failure-mode runbook details. |
 | cross-cutting | 2 | 3 | 3 | 2 | CI checks added; gardening loop to improve over time. |
 
+## Automation Ownership
+
+- `docs-context` CI (`.github/workflows/docs-context.yml`) is owned by platform and must stay required on PRs.
+- `docs-garden` scheduled maintenance (`.github/workflows/docs-garden.yml`) is owned by platform and runs weekly on Mondays at 06:17 UTC.
+- Weekly review must confirm latest `docs/generated/stale-docs-report.md` results are triaged.
+
 ## Cadence
 
 - Weekly: review active plans and changed invariants.
 - Monthly: update scorecard and stale-doc burndown.
 - Quarterly: reassess rubric thresholds and ownership fit.
-

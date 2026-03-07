@@ -37,5 +37,4 @@ Each design document must define:
 
 - Topology: `../../ARCHITECTURE.md`
 - Product specs: `../product-specs/index.md`
-- Active plans: `../exec-plans/active/context-system-rollout.md`
-
+- Completed rollout: `../exec-plans/completed/context-system-rollout.md`
