@@ -17,13 +17,25 @@ def _content_hash(text: str) -> str:
     return hashlib.sha256(text.encode("utf-8")).hexdigest()
 
 
-def pull_current(sync_dir: Path, client: KBClient) -> set[str]:
+def pull_current(
+    sync_dir: Path,
+    client: KBClient,
+    pending_local: set[str] | None = None,
+) -> set[str]:
     """Refresh *sync_dir* from the server's ``current`` view.
 
     Returns the set of relative paths that were written or deleted locally.
     The caller can use this to suppress watcher echo.
+
+    Args:
+        sync_dir: Local directory to sync.
+        client: API client for the kb-server.
+        pending_local: Paths with pending local changes that should not be
+            deleted even if missing from the server. This prevents pull from
+            removing newly created files before they are pushed.
     """
     sync_dir.mkdir(parents=True, exist_ok=True)
+    pending_local = pending_local or set()
 
     remote_notes = client.list_notes(view="current")
     remote_paths: set[str] = set()
@@ -54,6 +66,9 @@ def pull_current(sync_dir: Path, client: KBClient) -> set[str]:
             continue
         rel = str(local_file.relative_to(sync_dir))
         if rel not in remote_paths:
+            if rel in pending_local:
+                log.debug("skipping local-only %s (pending push)", rel)
+                continue
             local_file.unlink()
             touched.add(rel)
             log.debug("removed local-only %s", rel)

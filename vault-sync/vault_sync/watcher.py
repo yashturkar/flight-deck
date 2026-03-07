@@ -115,6 +115,11 @@ class _Handler(FileSystemEventHandler):
             self._deleted.clear()
         return changed, deleted
 
+    def peek_changed(self) -> set[str]:
+        """Return a copy of pending changed paths without clearing them."""
+        with self._lock:
+            return set(self._changed)
+
 
 class SyncWatcher:
     """Watch *sync_dir* and accumulate file-system events.
@@ -141,3 +146,7 @@ class SyncWatcher:
     def drain(self) -> tuple[set[str], set[str]]:
         """Return ``(changed, deleted)`` and reset."""
         return self._handler.drain()
+
+    def peek_changed(self) -> set[str]:
+        """Return a copy of pending changed paths without clearing them."""
+        return self._handler.peek_changed()

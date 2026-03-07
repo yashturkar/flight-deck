@@ -81,6 +81,18 @@ class TestPullCurrent:
         pull_current(sync_dir, client)
         assert (sync_dir / "deep" / "nested" / "dir" / "note.md").read_text() == "deep\n"
 
+    def test_preserves_pending_local_files(self, sync_dir: Path):
+        """Files in pending_local should not be deleted even if missing from server."""
+        (sync_dir / "notes").mkdir(parents=True)
+        (sync_dir / "notes" / "new_local.md").write_text("new file\n")
+
+        client = _mock_client({})
+        touched = pull_current(sync_dir, client, pending_local={"notes/new_local.md"})
+
+        assert (sync_dir / "notes" / "new_local.md").exists()
+        assert (sync_dir / "notes" / "new_local.md").read_text() == "new file\n"
+        assert "notes/new_local.md" not in touched
+
 
 class TestPushChanges:
     def test_writes_changed_files(self, sync_dir: Path):
