@@ -1,0 +1,19 @@
+Harness engineering notes (project-local summary)
+===============================================
+
+Core idea:
+- keep AGENTS.md short and map-like
+- move deep guidance into structured docs/ with ownership and freshness metadata
+- rely on progressive disclosure and mechanical checks
+
+Adaptation for flight-deck:
+- monorepo context split across kb-server and vault-sync domains
+- approval model is branch-aware (main approved, kb-api pending)
+- current view is a composed read surface and should remain explicit in docs
+
+Operational implications:
+- add docs lint and changed-code doc-impact checks in CI
+- keep execution plans versioned in docs/exec-plans
+- generate key references from code/config where possible
+- run periodic stale-doc scan and route findings to owners
+
