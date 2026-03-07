@@ -5,6 +5,8 @@ from unittest.mock import patch
 import pytest
 
 from app.services.git_service import (
+    GitError,
+    _run,
     commit,
     commit_for_batch,
     current_sha,
@@ -64,6 +66,32 @@ class TestPush:
 
         with pytest.raises(GitError, match="push failed"):
             push(retries=1)
+
+
+class TestRunAuthBehavior:
+    def test_sets_non_interactive_git_env(self):
+        with patch("app.services.git_service.subprocess.run") as run_mock:
+            run_mock.return_value = subprocess.CompletedProcess(
+                args=["git", "status"],
+                returncode=0,
+                stdout="",
+                stderr="",
+            )
+            _run("status")
+            _, kwargs = run_mock.call_args
+            assert kwargs["env"]["GIT_TERMINAL_PROMPT"] == "0"
+            assert kwargs["env"]["GCM_INTERACTIVE"] == "never"
+
+    def test_auth_failure_adds_remediation_hint(self):
+        with patch("app.services.git_service.subprocess.run") as run_mock:
+            run_mock.return_value = subprocess.CompletedProcess(
+                args=["git", "push", "origin", "main"],
+                returncode=1,
+                stdout="",
+                stderr="remote: Invalid username or token.",
+            )
+            with pytest.raises(GitError, match="Configure non-interactive credentials"):
+                _run("push", "origin", "main")
 
 
 class TestCurrentSha:

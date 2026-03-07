@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+import os
 import subprocess
 from pathlib import Path
 
@@ -13,6 +14,26 @@ log = logging.getLogger(__name__)
 
 class GitError(Exception):
     pass
+
+
+def _auth_failure_hint(stderr: str, stdout: str) -> str | None:
+    """Return a remediation hint when git output indicates auth failure."""
+    text = f"{stderr}\n{stdout}".lower()
+    auth_markers = (
+        "authentication failed",
+        "invalid username or token",
+        "password authentication is not supported",
+        "could not read username",
+        "could not read password",
+        "terminal prompts disabled",
+    )
+    if any(marker in text for marker in auth_markers):
+        return (
+            "Git authentication failed. Configure non-interactive credentials "
+            "for the remote (SSH key or PAT-backed credential helper). "
+            "Interactive username/password prompts are disabled."
+        )
+    return None
 
 
 # ---------------------------------------------------------------------------
@@ -27,14 +48,25 @@ def _run(
     cwd = cwd or settings.vault_path
     cmd = ["git", *args]
     log.debug("git %s (cwd=%s)", " ".join(args), cwd)
+    env = os.environ.copy()
+    # Services must run without interactive terminal prompts.
+    env["GIT_TERMINAL_PROMPT"] = "0"
+    env["GCM_INTERACTIVE"] = "never"
     result = subprocess.run(
         cmd,
         cwd=cwd,
         capture_output=True,
         text=True,
         timeout=120,
+        env=env,
     )
     if check and result.returncode != 0:
+        hint = _auth_failure_hint(result.stderr, result.stdout)
+        if hint:
+            raise GitError(
+                f"git {' '.join(args)} failed (rc={result.returncode}): "
+                f"{result.stderr.strip()} | {hint}"
+            )
         raise GitError(
             f"git {' '.join(args)} failed (rc={result.returncode}): "
             f"{result.stderr.strip()}"

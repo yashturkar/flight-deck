@@ -81,6 +81,8 @@ vault/
 | `API_PORT` | `8000` | API bind port |
 
 > **Note:** Unknown env keys in `.env` are silently ignored, so extra variables won't break startup.
+> **Note:** `GITHUB_TOKEN` is used for GitHub API PR calls, not for `git push/pull` auth.
+> Git CLI operations run non-interactively and require preconfigured credentials (SSH key or PAT-backed credential helper).
 
 ## Process model
 
@@ -307,7 +309,7 @@ The database is metadata only. If lost, you lose job history and event logs, but
 | `/ready` reports `db` error | Verify `DATABASE_URL` and that Postgres is running |
 | `/ready` reports vault missing | Verify `VAULT_PATH` points to a git-initialized directory |
 | Autosave not triggering | Check worker logs; verify `AUTOSAVE_DEBOUNCE_SECONDS` isn't too high |
-| Push failing | Verify git remote is configured and SSH keys / credentials are in place |
+| Push failing | Verify git remote/auth is preconfigured for non-interactive use (SSH key or PAT credential helper); GitHub password auth is not supported |
 | Publish not running | Verify `QUARTZ_BUILD_COMMAND` or `QUARTZ_WEBHOOK_URL` is set |
 
 ## Running tests
