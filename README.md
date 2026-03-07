@@ -41,3 +41,11 @@ python3 scripts/docs_lint.py
 python3 scripts/generate_context_artifacts.py
 python3 scripts/docs_garden.py --output docs/generated/stale-docs-report.md
 ```
+
+Optional local automation with pre-commit:
+
+```bash
+pip install pre-commit
+pre-commit install
+pre-commit run --all-files
+```

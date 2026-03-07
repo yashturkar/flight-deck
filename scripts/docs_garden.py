@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import datetime as dt
+import re
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
@@ -34,6 +35,24 @@ def _docs() -> list[Path]:
     files = [p for p in DOCS_ROOT.rglob("*.md")]
     files.extend([REPO_ROOT / "AGENTS.md", REPO_ROOT / "ARCHITECTURE.md"])
     return sorted(set(files))
+
+
+def _update_last_verified(path: Path, today: dt.date) -> bool:
+    text = path.read_text(encoding="utf-8")
+    frontmatter = _extract_frontmatter(text)
+    if frontmatter is None:
+        return False
+    updated_frontmatter, count = re.subn(
+        r"(?m)^last_verified:\s*\d{4}-\d{2}-\d{2}\s*$",
+        f"last_verified: {today.isoformat()}",
+        frontmatter,
+        count=1,
+    )
+    if count == 0 or updated_frontmatter == frontmatter:
+        return False
+    new_text = text.replace(frontmatter, updated_frontmatter, 1)
+    path.write_text(new_text, encoding="utf-8")
+    return True
 
 
 def build_report() -> str:
@@ -121,6 +140,28 @@ def build_report() -> str:
     return "\n".join(lines) + "\n"
 
 
+def autofix_stale_last_verified(today: dt.date) -> int:
+    fixed = 0
+    for path in _docs():
+        text = path.read_text(encoding="utf-8")
+        frontmatter = _extract_frontmatter(text)
+        if not frontmatter:
+            continue
+        meta = _parse_frontmatter(frontmatter)
+        status = meta.get("status", "draft")
+        if status in {"deprecated", "generated"}:
+            continue
+        try:
+            verified = dt.date.fromisoformat(meta.get("last_verified", ""))
+            cycle = int(meta.get("review_cycle_days", "0"))
+        except ValueError:
+            continue
+        age = (today - verified).days
+        if cycle > 0 and age > cycle and _update_last_verified(path, today):
+            fixed += 1
+    return fixed
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="Generate stale documentation report.")
     parser.add_argument(
@@ -128,7 +169,17 @@ def main() -> int:
         default="docs/generated/stale-docs-report.md",
         help="Output path relative to repository root.",
     )
+    parser.add_argument(
+        "--autofix-last-verified",
+        action="store_true",
+        help="Update last_verified to today for stale docs before generating the report.",
+    )
     args = parser.parse_args()
+
+    today = dt.date.today()
+    if args.autofix_last_verified:
+        fixed = autofix_stale_last_verified(today)
+        print(f"Auto-fixed stale last_verified for {fixed} document(s)")
 
     out_path = (REPO_ROOT / args.output).resolve()
     out_path.parent.mkdir(parents=True, exist_ok=True)
@@ -139,4 +190,3 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-

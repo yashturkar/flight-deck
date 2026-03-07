@@ -1,0 +1,23 @@
+repos:
+  - repo: local
+    hooks:
+      - id: docs-lint
+        name: docs-lint
+        entry: python3 scripts/docs_lint.py
+        language: system
+        pass_filenames: false
+        files: ^(docs/|AGENTS\.md|ARCHITECTURE\.md|README\.md|kb-server/README\.md|vault-sync/README\.md)
+
+      - id: docs-generate-context-artifacts
+        name: docs-generate-context-artifacts
+        entry: python3 scripts/generate_context_artifacts.py
+        language: system
+        pass_filenames: false
+        files: ^(docs/|AGENTS\.md|ARCHITECTURE\.md|README\.md|kb-server/README\.md|vault-sync/README\.md)
+
+      - id: docs-garden-report
+        name: docs-garden-report
+        entry: python3 scripts/docs_garden.py --output docs/generated/stale-docs-report.md
+        language: system
+        pass_filenames: false
+        files: ^(docs/|AGENTS\.md|ARCHITECTURE\.md|README\.md|kb-server/README\.md|vault-sync/README\.md)

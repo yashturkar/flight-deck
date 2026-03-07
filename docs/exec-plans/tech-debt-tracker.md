@@ -18,11 +18,12 @@ review_cycle_days: 14
 
 | Item | Area | Severity | Owner | Next Action |
 | --- | --- | --- | --- | --- |
-| Improve stale-doc auto-fix coverage | docs-automation | low | platform | extend docs_garden script |
-| Add docs checks to local pre-commit workflow | devex | low | platform | evaluate pre-commit adoption |
+| _none_ | - | - | - | - |
 
 ## Recently Closed
 
 | Item | Closed On | Notes |
 | --- | --- | --- |
 | Normalize auth docs vs runtime behavior | 2026-03-07 | Aligned auth behavior in `kb-server/README.md` and `docs/SECURITY.md` with middleware in `kb-server/app/core/auth.py`. |
+| Improve stale-doc auto-fix coverage | 2026-03-07 | Added `--autofix-last-verified` mode in `scripts/docs_garden.py` for stale metadata refresh before report generation. |
+| Add docs checks to local pre-commit workflow | 2026-03-07 | Added `.pre-commit-config.yaml` with docs lint and generated-artifact hooks, documented in root README. |
