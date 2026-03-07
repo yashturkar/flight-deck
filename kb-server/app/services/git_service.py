@@ -170,6 +170,45 @@ def current_sha() -> str:
     return _run("rev-parse", "HEAD").stdout.strip()
 
 
+def show_file(branch: str, path: str) -> str | None:
+    """Read file content from a branch without checking it out.
+
+    Returns the file contents as a string, or ``None`` if the file does
+    not exist on that branch.
+    """
+    result = _run("show", f"{branch}:{path}", check=False)
+    if result.returncode != 0:
+        return None
+    return result.stdout
+
+
+def list_branches(pattern: str | None = None) -> list[str]:
+    """Return local branch names, optionally filtered by a glob *pattern*."""
+    args = ["branch", "--list", "--format=%(refname:short)"]
+    if pattern:
+        args.append(pattern)
+    result = _run(*args, check=False)
+    if result.returncode != 0 or not result.stdout.strip():
+        return []
+    return [b.strip() for b in result.stdout.strip().splitlines() if b.strip()]
+
+
+def list_tree(branch: str, prefix: str = "") -> list[str]:
+    """List file paths on *branch* under *prefix* using ``git ls-tree``.
+
+    Returns paths relative to the repository root (blobs only).
+    """
+    target = f"{branch}:{prefix}" if prefix else branch
+    result = _run("ls-tree", "-r", "--name-only", target, check=False)
+    if result.returncode != 0 or not result.stdout.strip():
+        return []
+    lines = [p.strip() for p in result.stdout.strip().splitlines() if p.strip()]
+    if prefix:
+        pfx = prefix.rstrip("/") + "/"
+        lines = [pfx + p for p in lines]
+    return lines
+
+
 def current_branch() -> str:
     """Return the name of the current branch."""
     return _run("rev-parse", "--abbrev-ref", "HEAD").stdout.strip()

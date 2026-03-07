@@ -78,6 +78,20 @@ def write_note(relative_path: str, content: str) -> datetime:
     return mtime
 
 
+def delete_note(relative_path: str) -> None:
+    """Delete a note from the vault.
+
+    Raises ``NoteNotFound`` if the file does not exist.
+    """
+    target = safe_resolve(relative_path)
+
+    if not target.is_file():
+        raise NoteNotFound(f"No file at {relative_path}")
+
+    target.unlink()
+    log.info("deleted %s", relative_path)
+
+
 def list_notes(prefix: str = "") -> list[tuple[str, datetime]]:
     """List all notes under *prefix* (relative to vault root).
 

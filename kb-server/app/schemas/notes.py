@@ -7,6 +7,8 @@ class NoteContent(BaseModel):
     path: str
     content: str
     modified_at: datetime
+    view: str = "main"
+    sources: list[str] | None = None
 
 
 class NoteWrite(BaseModel):
@@ -16,6 +18,8 @@ class NoteWrite(BaseModel):
 class NoteListItem(BaseModel):
     path: str
     modified_at: datetime
+    view: str = "main"
+    sources: list[str] | None = None
 
 
 class PublishRequest(BaseModel):

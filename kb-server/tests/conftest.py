@@ -15,7 +15,7 @@ def tmp_vault(tmp_path: Path):
 
     vault = tmp_path / "vault"
     vault.mkdir()
-    subprocess.run(["git", "init", str(vault)], check=True, capture_output=True)
+    subprocess.run(["git", "init", "-b", "main", str(vault)], check=True, capture_output=True)
     subprocess.run(
         ["git", "config", "user.email", "test@test.local"],
         cwd=vault,

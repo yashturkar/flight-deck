@@ -127,6 +127,40 @@ def update_pr(
     return pr
 
 
+def list_open_prs(base_branch: str | None = None) -> list[dict[str, Any]]:
+    """Return all open PRs targeting *base_branch* (default: main).
+
+    Each dict contains at least ``number``, ``html_url``, and
+    ``head.ref`` (the source branch name).
+    """
+    base = base_branch or settings.git_branch
+    repo = _repo_path()
+    url = f"{GITHUB_API}/repos/{repo}/pulls"
+    params: dict[str, str] = {"base": base, "state": "open", "per_page": "100"}
+
+    with httpx.Client(timeout=30) as client:
+        resp = client.get(url, headers=_headers(), params=params)
+
+    if resp.status_code != 200:
+        log.warning("GitHub API error listing PRs: %s %s", resp.status_code, resp.text)
+        return []
+
+    return resp.json()
+
+
+def list_open_kb_api_prs(base_branch: str | None = None) -> list[dict[str, Any]]:
+    """Return open PRs whose head branch starts with the configured prefix.
+
+    Typically these are ``kb-api/YYYY-MM-DD`` branches.
+    """
+    prefix = settings.git_batch_branch_prefix
+    return [
+        pr
+        for pr in list_open_prs(base_branch)
+        if pr.get("head", {}).get("ref", "").startswith(prefix)
+    ]
+
+
 def ensure_pr(
     head_branch: str,
     title: str,

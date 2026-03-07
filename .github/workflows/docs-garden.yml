@@ -1,0 +1,48 @@
+name: docs-garden
+
+on:
+  schedule:
+    - cron: "17 6 * * 1"
+  workflow_dispatch:
+
+jobs:
+  garden:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Generate stale report
+        run: python3 scripts/docs_garden.py --output docs/generated/stale-docs-report.md
+
+      - name: Lint docs (including stale enforcement)
+        run: python3 scripts/docs_lint.py --enforce-stale
+        continue-on-error: true
+
+      - name: Open automated docs maintenance PR
+        uses: peter-evans/create-pull-request@v6
+        with:
+          commit-message: "docs: refresh stale-docs report"
+          title: "docs: weekly context-gardening report"
+          body: |
+            Automated doc-gardening update.
+
+            Included:
+            - refreshed stale-doc report at `docs/generated/stale-docs-report.md`
+            - latest docs lint signal from workflow logs
+
+            Please review stale ownership items and update docs metadata/content.
+          branch: automation/docs-garden
+          delete-branch: true
+          labels: documentation, maintenance
+
