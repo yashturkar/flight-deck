@@ -31,8 +31,8 @@ def pull_current(
         sync_dir: Local directory to sync.
         client: API client for the kb-server.
         pending_local: Paths with pending local changes that should not be
-            deleted even if missing from the server. This prevents pull from
-            removing newly created files before they are pushed.
+            overwritten or deleted. This prevents pull from clobbering files
+            the user is actively editing before they are pushed.
     """
     sync_dir.mkdir(parents=True, exist_ok=True)
     pending_local = pending_local or set()
@@ -45,6 +45,10 @@ def pull_current(
         rel_path = item["path"]
         remote_paths.add(rel_path)
         local_file = sync_dir / rel_path
+
+        if rel_path in pending_local:
+            log.debug("skipping %s (pending local changes)", rel_path)
+            continue
 
         note = client.read_note(rel_path, view="current")
         content = note["content"]

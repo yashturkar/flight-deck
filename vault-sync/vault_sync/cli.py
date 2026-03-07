@@ -45,6 +45,8 @@ def _run_loop(
 
     last_pull = time.monotonic()
 
+    recently_pushed: set[str] = set()
+
     try:
         while not stop:
             time.sleep(debounce)
@@ -57,12 +59,15 @@ def _run_loop(
                     len(deleted),
                 )
                 push_changes(sync_dir, changed, deleted, client)
+                recently_pushed.update(changed)
+                last_pull = time.monotonic()
 
-            if time.monotonic() - last_pull >= pull_interval:
+            elif time.monotonic() - last_pull >= pull_interval:
                 pending = watcher.peek_changed()
                 touched = pull_current(sync_dir, client, pending_local=pending)
                 echo_guard.mark(touched)
                 last_pull = time.monotonic()
+                recently_pushed.clear()
     finally:
         watcher.stop()
         log.info("stopped")

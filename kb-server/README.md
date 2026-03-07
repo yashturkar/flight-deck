@@ -91,6 +91,30 @@ Two processes run side-by-side:
 
 Both share the vault filesystem and the Postgres database.
 
+## Runtime supervision (current vs target)
+
+Current standard in this repo is to run `kb-api` and `kb-worker` in a
+dedicated `tmux` session.
+
+Example:
+
+```bash
+tmux new -s kb-runtime
+
+# Pane/window 1
+cd /path/to/flight-deck/kb-server
+source .venv/bin/activate
+python -m uvicorn app.main:app --host 0.0.0.0 --port 8000
+
+# Pane/window 2
+cd /path/to/flight-deck/kb-server
+source .venv/bin/activate
+python -m app.workers.autosave
+```
+
+Planned next step is migrating this runtime to `systemctl`-managed services
+for more durable process supervision.
+
 ## API endpoints
 
 | Method | Path | Description |
@@ -221,7 +245,7 @@ Example:
 curl "http://localhost:8000/notes/notes/My%20Note.md"
 ```
 
-## Production deployment (systemd)
+## Service deployment (planned systemd migration)
 
 Install the project:
 

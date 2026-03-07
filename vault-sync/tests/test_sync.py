@@ -93,6 +93,18 @@ class TestPullCurrent:
         assert (sync_dir / "notes" / "new_local.md").read_text() == "new file\n"
         assert "notes/new_local.md" not in touched
 
+    def test_skips_overwriting_pending_local_files(self, sync_dir: Path):
+        """Files in pending_local should not be overwritten by remote content."""
+        (sync_dir / "notes").mkdir(parents=True)
+        (sync_dir / "notes" / "editing.md").write_text("local edits in progress\n")
+
+        client = _mock_client({"notes/editing.md": "old server content\n"})
+        touched = pull_current(sync_dir, client, pending_local={"notes/editing.md"})
+
+        assert (sync_dir / "notes" / "editing.md").read_text() == "local edits in progress\n"
+        assert "notes/editing.md" not in touched
+        client.read_note.assert_not_called()
+
 
 class TestPushChanges:
     def test_writes_changed_files(self, sync_dir: Path):
