@@ -1,7 +1,7 @@
 ---
 owner: platform
 status: generated
-last_verified: 2026-03-07
+last_verified: 2026-03-09
 source_of_truth:
   - ../../scripts/docs_garden.py
 related_code:
@@ -14,7 +14,7 @@ review_cycle_days: 7
 
 # Stale Documentation Report
 
-Generated: `2026-03-07`
+Generated: `2026-03-09`
 
 ## Ownership Summary
 
