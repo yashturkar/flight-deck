@@ -139,7 +139,7 @@ def commit(message: str, actor: GitActor | None = None) -> str | None:
 
     stage_all(actor=actor)
 
-    status = _run("status", "--porcelain", check=False)
+    status = _run("status", "--porcelain", check=False, actor=actor)
     if not status.stdout.strip():
         log.info("staging produced no committable changes")
         return None
@@ -163,7 +163,7 @@ def commit_files(
     
     stage_files(files, actor=actor)
     
-    status = _run("status", "--porcelain", check=False)
+    status = _run("status", "--porcelain", check=False, actor=actor)
     if not status.stdout.strip():
         log.info("staging produced no committable changes")
         return None
@@ -574,7 +574,7 @@ def commit_for_batch(
     """Stage and create a batch commit for changed files (including deletions)."""
     stage_all(actor=actor)
 
-    status = _run("status", "--porcelain", check=False)
+    status = _run("status", "--porcelain", check=False, actor=actor)
     status_output = status.stdout.strip()
     if not status_output:
         log.info("batch commit: nothing to commit")
