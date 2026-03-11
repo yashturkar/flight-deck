@@ -18,6 +18,16 @@ class Settings(BaseSettings):
     git_remote: str = "origin"
     git_branch: str = "main"
     git_push_enabled: bool = True
+    git_user_author_name: str = ""
+    git_user_author_email: str = ""
+    git_user_committer_name: str = ""
+    git_user_committer_email: str = ""
+    git_user_ssh_command: str = ""
+    git_agent_author_name: str = ""
+    git_agent_author_email: str = ""
+    git_agent_committer_name: str = ""
+    git_agent_committer_email: str = ""
+    git_agent_ssh_command: str = ""
 
     # API write batching - commits go to a daily branch and create/update a PR
     git_batch_debounce_seconds: int = 10
@@ -25,6 +35,7 @@ class Settings(BaseSettings):
 
     # GitHub API for PR creation (required for API write workflow)
     github_token: str = ""
+    github_agent_token: str = ""
     github_repo: str = ""  # e.g., "owner/repo"
 
     # Autosave (file watcher) settings

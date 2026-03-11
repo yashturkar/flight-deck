@@ -81,7 +81,10 @@ class AutosaveWatcher:
         while True:
             await asyncio.sleep(self.pull_interval_seconds)
             try:
-                pulled = await asyncio.to_thread(git_service.pull)
+                pulled = await asyncio.to_thread(
+                    git_service.pull,
+                    actor=git_service.USER_ACTOR,
+                )
                 if pulled:
                     log.info("periodic pull: synced new commits from remote")
             except Exception:
@@ -130,7 +133,11 @@ class AutosaveWatcher:
             message = f"autosave: {now}"
 
             # Only commit the specific files, not everything in the working tree
-            sha = git_service.commit_files(sorted(files), message)
+            sha = git_service.commit_files(
+                sorted(files),
+                message,
+                actor=git_service.USER_ACTOR,
+            )
             if sha is None:
                 job.status = "skipped"
                 job.completed_at = datetime.now(timezone.utc)
@@ -147,7 +154,7 @@ class AutosaveWatcher:
             session.commit()
 
             if settings.git_push_enabled:
-                git_service.push()
+                git_service.push(actor=git_service.USER_ACTOR)
                 session.add(
                     VaultEvent(
                         event_type="autosave_push",
