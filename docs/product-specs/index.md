@@ -19,6 +19,7 @@ review_cycle_days: 21
 ## Domain Specs
 
 - `kb-server.md`: API and branch/workflow product contract.
+- `mcp-server.md`: MCP adapter contract for agent tools/resources.
 - `vault-sync.md`: local sync and human-edit UX contract.
 
 ## Scope
@@ -31,4 +32,3 @@ Implementation details belong in design docs or code comments.
 - `../DESIGN.md`
 - `../PRODUCT_SENSE.md`
 - `../RELIABILITY.md`
-

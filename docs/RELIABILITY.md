@@ -20,6 +20,7 @@ review_cycle_days: 21
 
 - `kb-server` readiness requires database and Git-backed vault access.
 - `kb-server` retrieval endpoints should rebuild or refresh in-process graph state when visible note state changes.
+- `mcp-server` should surface upstream `kb-server` failures as explicit tool errors rather than hanging or fabricating output.
 - Autosave worker should tolerate transient Git/network failures.
 - `vault-sync` should converge after temporary API outages.
 
@@ -55,6 +56,12 @@ review_cycle_days: 21
 - Signal: sync loop logs pull/push request failures and keeps retrying on interval.
 - Signal: local filesystem remains intact; no destructive cleanup on transient failures.
 - Recovery check: after API is reachable, next pull repopulates `view=current` and pending local changes push successfully.
+
+### API outage (`mcp-server`)
+
+- Signal: MCP tools return upstream request failures with `kb-server` status/detail.
+- Signal: note/resource reads fail closed rather than returning stale fabricated content.
+- Recovery check: once `kb-server` is reachable, the next MCP tool invocation succeeds without restarting the adapter.
 
 ## Runbook Links
 

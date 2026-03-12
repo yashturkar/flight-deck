@@ -118,10 +118,12 @@ def _write_api_surface() -> None:
 def _write_env_catalog() -> None:
     kb_env_path = REPO_ROOT / "kb-server" / ".env.example"
     kb_config_path = REPO_ROOT / "kb-server" / "app" / "core" / "config.py"
+    mcp_config_path = REPO_ROOT / "mcp-server" / "mcp_server" / "config.py"
     vs_config_path = REPO_ROOT / "vault-sync" / "vault_sync" / "config.py"
-    date = _git_last_change_date([kb_env_path, kb_config_path, vs_config_path])
+    date = _git_last_change_date([kb_env_path, kb_config_path, mcp_config_path, vs_config_path])
     kb_env = _parse_env_example(kb_env_path)
     kb_defaults = _parse_settings_defaults(kb_config_path)
+    mcp_defaults = _parse_settings_defaults(mcp_config_path, class_name="MCPServerSettings")
     vs_defaults = _parse_settings_defaults(vs_config_path)
 
     content = [
@@ -132,11 +134,13 @@ def _write_env_catalog() -> None:
         "source_of_truth:",
         "  - ../../kb-server/.env.example",
         "  - ../../kb-server/app/core/config.py",
+        "  - ../../mcp-server/mcp_server/config.py",
         "  - ../../vault-sync/vault_sync/config.py",
         "related_code:",
         "  - ../../scripts/generate_context_artifacts.py",
         "related_tests:",
         "  - ../../kb-server/tests",
+        "  - ../../mcp-server/tests",
         "  - ../../vault-sync/tests",
         "review_cycle_days: 7",
         "---",
@@ -164,6 +168,18 @@ def _write_env_catalog() -> None:
         ]
     )
     for key, value in kb_defaults:
+        content.append(f"| `{key}` | `{value}` |")
+
+    content.extend(
+        [
+            "",
+            "## mcp-server Settings Defaults",
+            "",
+            "| Field | Default Expression |",
+            "| --- | --- |",
+        ]
+    )
+    for key, value in mcp_defaults:
         content.append(f"| `{key}` | `{value}` |")
 
     content.extend(

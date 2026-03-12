@@ -26,6 +26,7 @@ This file is the entry point for agents. It is intentionally short.
 2. Read `docs/design-docs/index.md` for design invariants.
 3. Pick a domain:
   - `kb-server`: API, Git workflows, current-view composition.
+  - `mcp-server`: MCP adapter for structured agent access to notes and context bundles.
   - `vault-sync`: local mirror and push/pull convergence.
 4. Read topical constraints before implementation:
   - `docs/SECURITY.md`
@@ -38,6 +39,7 @@ This file is the entry point for agents. It is intentionally short.
 ## Domain Maps
 
 - Backend domain: `docs/product-specs/kb-server.md`
+- MCP adapter domain: `docs/product-specs/mcp-server.md`
 - Sync client domain: `docs/product-specs/vault-sync.md`
 - Branching + current view model: `kb-server/BRANCHING_AND_CURRENT_VIEW.md`
 
@@ -86,4 +88,3 @@ Update docs in the same PR when changing:
 - Security: `docs/SECURITY.md`
 - Reliability: `docs/RELIABILITY.md`
 - Autonomous E2E workflow: `docs/runbooks/autonomous-agent-e2e.md`
-
