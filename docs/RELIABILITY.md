@@ -19,6 +19,7 @@ review_cycle_days: 21
 ## Service Expectations
 
 - `kb-server` readiness requires database and Git-backed vault access.
+- `kb-server` retrieval endpoints should rebuild or refresh in-process graph state when visible note state changes.
 - Autosave worker should tolerate transient Git/network failures.
 - `vault-sync` should converge after temporary API outages.
 
@@ -31,6 +32,7 @@ review_cycle_days: 21
 ## Reliability Signals
 
 - API health and readiness checks.
+- Retrieval endpoint latency/error rate and cache rebuild logs.
 - Job/event tables for write and publish operations.
 - Sync logs for pull/push loop success and retries.
 

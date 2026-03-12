@@ -41,10 +41,12 @@ def create_app() -> FastAPI:
     app.add_middleware(APIKeyMiddleware)
 
     from app.api.routes.health import router as health_router
+    from app.api.routes.context import router as context_router
     from app.api.routes.notes import router as notes_router
     from app.api.routes.publish import router as publish_router
 
     app.include_router(health_router)
+    app.include_router(context_router)
     app.include_router(notes_router)
     app.include_router(publish_router)
 
