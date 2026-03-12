@@ -19,6 +19,7 @@ review_cycle_days: 21
 ## Service Expectations
 
 - `kb-server` readiness requires database and Git-backed vault access.
+- `/admin` should surface the same readiness blockers and recent operational signals visible through logs and DB-backed job/event tables.
 - Autosave worker should tolerate transient Git/network failures.
 - `vault-sync` should converge after temporary API outages.
 
@@ -31,6 +32,7 @@ review_cycle_days: 21
 ## Reliability Signals
 
 - API health and readiness checks.
+- Admin dashboard state for config source, readiness blockers, git state, pending batch paths, and PR visibility.
 - Job/event tables for write and publish operations.
 - Sync logs for pull/push loop success and retries.
 
@@ -39,14 +41,22 @@ review_cycle_days: 21
 ### DB outage (`kb-server`)
 
 - Signal: `GET /health` stays 200 while `GET /ready` returns non-200 with DB failure detail.
+- Signal: `/admin` shows DB not ready and surfaces the same readiness error.
 - Signal: API logs show database connection failures from readiness and write paths.
 - Recovery check: when DB is restored, `GET /ready` returns 200 without process restart.
 
 ### Git remote / GitHub outage (`kb-server`)
 
 - Signal: autosave or batcher logs show push/PR failures while local commits continue.
+- Signal: `/admin` PR summary shows GitHub/API errors or empty PR visibility despite queued/pushed work.
 - Signal: pending API changes remain on `kb-api/*` branch until push/PR succeeds.
 - Recovery check: retry loop or next batch cycle pushes and re-establishes PR state.
+
+### Config drift / restart-needed state (`kb-server`)
+
+- Signal: `/admin` shows updated `.env` values, but runtime behavior still reflects old DB/auth/process settings.
+- Cause: some settings are effectively startup-bound because the API process and worker initialize long-lived config or connections at startup.
+- Recovery check: restart `kb-api` and `kb-worker`, then confirm `/admin` and `/ready` reflect the expected state.
 
 ### API outage (`vault-sync`)
 
