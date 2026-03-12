@@ -10,6 +10,10 @@ from app.services import admin_service
 
 
 def test_update_env_file_preserves_existing_content(tmp_path, monkeypatch):
+    previous_vault = settings.vault_path
+    previous_key = settings.kb_api_key
+    previous_push_enabled = settings.git_push_enabled
+    previous_api_port = settings.api_port
     env_file = tmp_path / ".env"
     env_file.write_text(
         "# comment\nVAULT_PATH=/tmp/vault\nKB_API_KEY=old-key\n",
@@ -17,20 +21,35 @@ def test_update_env_file_preserves_existing_content(tmp_path, monkeypatch):
     )
     monkeypatch.setattr(admin_service, "ENV_FILE_PATH", env_file)
 
-    result = admin_service.update_env_file(
-        {
-            "VAULT_PATH": "/srv/new-vault",
-            "KB_API_KEY": "new-key",
-            "GITHUB_REPO": "owner/repo",
-        }
-    )
+    try:
+        result = admin_service.update_env_file(
+            {
+                "VAULT_PATH": "/srv/new-vault",
+                "KB_API_KEY": "new-key",
+                "GITHUB_REPO": "owner/repo",
+                "GIT_PUSH_ENABLED": "false",
+                "API_PORT": "9000",
+            }
+        )
 
-    updated = env_file.read_text(encoding="utf-8")
-    assert "# comment" in updated
-    assert "VAULT_PATH=/srv/new-vault" in updated
-    assert "KB_API_KEY=new-key" in updated
-    assert "GITHUB_REPO=owner/repo" in updated
-    assert result["restart_required"] is True
+        updated = env_file.read_text(encoding="utf-8")
+        assert "# comment" in updated
+        assert "VAULT_PATH=/srv/new-vault" in updated
+        assert "KB_API_KEY=new-key" in updated
+        assert "GITHUB_REPO=owner/repo" in updated
+        assert "GIT_PUSH_ENABLED=false" in updated
+        assert "API_PORT=9000" in updated
+        assert result["restart_required"] is True
+
+        assert settings.vault_path == Path("/srv/new-vault")
+        assert settings.kb_api_key == "new-key"
+        assert settings.git_push_enabled is False
+        assert settings.api_port == 9000
+    finally:
+        settings.vault_path = previous_vault
+        settings.kb_api_key = previous_key
+        settings.git_push_enabled = previous_push_enabled
+        settings.api_port = previous_api_port
 
 
 def test_admin_state_hides_secret_values(monkeypatch, tmp_vault: Path):

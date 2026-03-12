@@ -8,7 +8,7 @@ from typing import Any
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
-from app.core.config import settings
+from app.core.config import Settings, settings
 from app.models.db import Job, PublishRun, VaultEvent
 from app.services import git_service, github_service
 from app.services.git_batcher import batcher
@@ -60,6 +60,19 @@ def _setting_value(key: str) -> str:
     attr = key.lower()
     value = getattr(settings, attr)
     return _stringify(value)
+
+
+def _coerce_setting_value(key: str, value: str) -> Any:
+    field = Settings.model_fields[key.lower()]
+    annotation = field.annotation
+
+    if annotation is Path:
+        return Path(value)
+    if annotation is bool:
+        return value.strip().lower() in {"1", "true", "yes", "on"}
+    if annotation is int:
+        return int(value)
+    return value
 
 
 def _value_source(key: str, env_file_values: dict[str, str]) -> str:
@@ -133,7 +146,7 @@ def update_env_file(updates: dict[str, str]) -> dict[str, Any]:
     for key, value in updates.items():
         if value is None:
             continue
-        setattr(settings, key.lower(), value)
+        setattr(settings, key.lower(), _coerce_setting_value(key, value))
 
     return {
         "written_keys": written_keys,
