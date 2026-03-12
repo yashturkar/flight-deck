@@ -17,12 +17,16 @@ review_cycle_days: 21
 
 ## Auth Boundary
 
-- API key auth is enforced by server middleware when configured (`KB_API_KEY` non-empty).
-- With auth enabled, all HTTP routes require `X-API-Key`, including `/health`, `/ready`, `/docs`, and `/openapi.json`.
-- With auth disabled (`KB_API_KEY` empty), requests are accepted without API-key checks.
+- `/health` and `/ready` are always open for probes.
+- All other HTTP routes require `X-API-Key`.
+- Preferred auth uses hashed API keys stored in the `api_keys` table.
+- `KB_API_KEY` is a deprecated fallback that only applies when the `api_keys` table has no rows.
+- Caller identity is derived from the authenticated key role:
+  - `readonly`: read-only access
+  - `user`: direct approved writes
+  - `agent`: PR-gated writes
+  - `admin`: direct approved writes plus future admin-only actions
 - `KB_API_KEY` must never be committed in docs examples with live values.
-
-> **TODO:** Actor identity (USER vs AGENT) is currently self-declared by the caller via the `source` query parameter. This should be derived from authentication — e.g., separate API keys or tokens per actor — so that the server enforces which identity is used rather than trusting the client.
 
 ## Secret Handling
 
@@ -35,7 +39,9 @@ review_cycle_days: 21
 
 - Path traversal and absolute-path writes are denied.
 - Only approved file types are writable.
-- Writes from `source=api` remain review-gated through PR workflow.
+- `agent`-role writes remain review-gated through PR workflow.
+- `user` and `admin` writes commit directly to the configured base branch.
+- `readonly` keys receive `403` on write or publish endpoints.
 - Git subprocesses must use per-command identity env (`GIT_AUTHOR_*`, `GIT_COMMITTER_*`, `GIT_SSH_COMMAND`) instead of mutating shared repo config at runtime.
 
 ## Security Review Triggers

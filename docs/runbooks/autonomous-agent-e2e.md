@@ -75,10 +75,10 @@ vault-sync --server http://localhost:8000 --dir /tmp/flightdeck-sync --interval 
 
 Agent should execute and validate all of the following:
 
-1. **API write path (`source=api`)**
+1. **Agent-key API write path**
    - write/update/delete note through API
    - confirm batching branch + PR workflow behavior
-2. **Human write path (`source=human`)**
+2. **User-key human write path**
    - update and delete via sync dir edits
    - confirm direct commit/push behavior
 3. **Current view behavior**

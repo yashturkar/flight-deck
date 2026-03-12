@@ -57,7 +57,7 @@ Generated on `2026-03-12` from settings and env sources.
 | --- | --- |
 | `vault_path` | `Path("/srv/flightdeck/vault")` |
 | `database_url` | `"postgresql://kb:kb@localhost:5432/kb"` |
-| `kb_api_key` | `""` |
+| `kb_api_key` | `""  # Deprecated fallback; prefer DB-backed keys via app.cli.keys` |
 | `git_remote` | `"origin"` |
 | `git_branch` | `"main"` |
 | `git_push_enabled` | `True` |

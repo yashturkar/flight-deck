@@ -12,7 +12,7 @@ class Settings(BaseSettings):
 
     vault_path: Path = Path("/srv/flightdeck/vault")
     database_url: str = "postgresql://kb:kb@localhost:5432/kb"
-    kb_api_key: str = ""
+    kb_api_key: str = ""  # Deprecated fallback; prefer DB-backed keys via app.cli.keys
 
     # Git settings
     git_remote: str = "origin"

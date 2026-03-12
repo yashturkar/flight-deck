@@ -59,6 +59,8 @@ class PublishRun(Base):
 
 
 def ensure_tables() -> None:
+    from app.models.api_key import ApiKey  # noqa: F401 — register with Base.metadata
+
     Base.metadata.create_all(bind=engine)
 
 
