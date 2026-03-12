@@ -8,37 +8,51 @@ File-first knowledge base server. Watches a Markdown vault, auto-commits to Git,
 - Git 2.34+
 - PostgreSQL 15+
 
+
 ## Quick start (development)
 
 ```bash
 # Clone and enter the project
-cd kb-server
+cd kb-server 
 
-# Create virtualenv and install
-python -m venv .venv
-source .venv/bin/activate
-pip install -e ".[dev]"
+python -m venv .venv 
+source .venv/bin/activate 
+pip install -e ".[dev]" 
 
-# Copy and edit environment
-cp .env.example .env
-# Edit .env: set VAULT_PATH, DATABASE_URL, etc.
+cp .env.example .env # edit .env (VAULT_PATH and DATABASE_URL) 
 
-# Create the database
-createdb kb
+# Optional secrets: prefer exporting these in your shell instead of storing them in .env
+# Non-secret repo config like GITHUB_REPO should stay in .env
+export KB_API_KEY=dev-key
+export GITHUB_TOKEN=ghp_your_token
 
-# Run migrations
-alembic upgrade head
+psql postgres 
+CREATE ROLE kb WITH LOGIN PASSWORD 'kb'; 
+CREATE DATABASE kb OWNER kb; # or ALTER DATABASE kb OWNER TO kb; 
+\q # to quit
 
-# Start the API
-python -m uvicorn app.main:app --reload
-
-# In another terminal, start the autosave worker
+alembic upgrade head 
+python -m uvicorn app.main:app --reload 
+# in another terminal: 
 python -m app.workers.autosave
+```
+
+Optional: run them in separate `tmux` sessions instead of keeping two terminal tabs open:
+
+```bash
+tmux new -d -s kb-api 'cd /path/to/flight-deck/kb-server && source .venv/bin/activate && python -m uvicorn app.main:app --reload'
+tmux new -d -s kb-worker 'cd /path/to/flight-deck/kb-server && source .venv/bin/activate && python -m app.workers.autosave'
+
+# attach when needed
+tmux attach -t kb-api
+tmux attach -t kb-worker
 ```
 
 ## Vault setup
 
-The vault must be an existing Git repository:
+`kb-server` does not create your notes repository for you. Create the notes repo manually first, then set `VAULT_PATH` in `.env` to that existing local Git repository.
+
+Example:
 
 ```bash
 mkdir -p /srv/flightdeck/vault
@@ -47,7 +61,7 @@ git init
 git remote add origin git@github.com:you/your-vault.git
 ```
 
-Create the directory structure you want (these are conventions, not enforced):
+After that, point `VAULT_PATH` at this repo. The directory structure inside the repo is up to you. These folders are common conventions, but not required by the server:
 
 ```text
 vault/
@@ -81,6 +95,7 @@ vault/
 | `API_PORT` | `8000` | API bind port |
 
 > **Note:** Unknown env keys in `.env` are silently ignored, so extra variables won't break startup.
+> **Note:** Process environment variables override values from `.env`. Keep long-lived machine config in `.env`, including non-secret values like `GITHUB_REPO`, and prefer exporting secrets like `KB_API_KEY` and `GITHUB_TOKEN` from your shell, `tmux`, or service manager.
 > **Note:** `GITHUB_TOKEN` is used for GitHub API PR calls, not for `git push/pull` auth.
 > Git CLI operations run non-interactively and require preconfigured credentials (SSH key or PAT-backed credential helper).
 
