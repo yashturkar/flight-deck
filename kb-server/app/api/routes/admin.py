@@ -148,7 +148,18 @@ ADMIN_HTML = """<!doctype html>
 
     function loadState() {
       fetch("/admin/api/state")
-        .then((resp) => resp.json())
+        .then(async (resp) => {
+          const contentType = resp.headers.get("content-type") || "";
+          if (resp.redirected) {
+            window.location.href = resp.url;
+            throw new Error("redirected to login");
+          }
+          if (!resp.ok || !contentType.includes("application/json")) {
+            const body = await resp.text();
+            throw new Error(body || `request failed (${resp.status})`);
+          }
+          return resp.json();
+        })
         .then((payload) => {
           const state = payload.state;
           document.getElementById("config-fields").innerHTML = payload.config.map(fieldMarkup).join("");
@@ -197,7 +208,18 @@ ADMIN_HTML = """<!doctype html>
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ config })
       })
-        .then(async (resp) => ({ ok: resp.ok, data: await resp.json() }))
+        .then(async (resp) => {
+          const contentType = resp.headers.get("content-type") || "";
+          if (resp.redirected) {
+            window.location.href = resp.url;
+            throw new Error("redirected to login");
+          }
+          if (!contentType.includes("application/json")) {
+            const body = await resp.text();
+            throw new Error(body || `request failed (${resp.status})`);
+          }
+          return { ok: resp.ok, data: await resp.json() };
+        })
         .then(({ ok, data }) => {
           if (!ok) {
             throw new Error(data.detail || "save failed");
@@ -314,7 +336,7 @@ def admin_state(session: Session = Depends(get_session)) -> dict[str, Any]:
 
 
 @router.post("/admin/api/config")
-async def admin_update_config(request: Request) -> dict[str, Any]:
+async def admin_update_config(request: Request) -> JSONResponse:
     payload = await request.json()
     config = payload.get("config", {})
     if not isinstance(config, dict):
@@ -331,7 +353,15 @@ async def admin_update_config(request: Request) -> dict[str, Any]:
         updates[key] = str(value)
 
     result = admin_service.update_env_file(updates)
-    return {
+    response = JSONResponse({
         "message": "Saved to .env. Restart kb-api and kb-worker to apply auth/database changes reliably.",
         **result,
-    }
+    })
+    if "KB_API_KEY" in updates:
+        response.set_cookie(
+            "kb_admin_api_key",
+            updates["KB_API_KEY"],
+            httponly=True,
+            samesite="lax",
+        )
+    return response
