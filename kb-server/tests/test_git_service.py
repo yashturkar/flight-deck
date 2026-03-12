@@ -5,7 +5,9 @@ from unittest.mock import patch
 import pytest
 
 from app.services.git_service import (
+    AGENT_ACTOR,
     GitError,
+    USER_ACTOR,
     _run,
     commit,
     commit_for_batch,
@@ -22,6 +24,16 @@ def _patch_vault(tmp_vault: Path):
         mock_settings.vault_path = tmp_vault
         mock_settings.git_remote = "origin"
         mock_settings.git_branch = "main"
+        mock_settings.git_user_author_name = ""
+        mock_settings.git_user_author_email = ""
+        mock_settings.git_user_committer_name = ""
+        mock_settings.git_user_committer_email = ""
+        mock_settings.git_user_ssh_command = ""
+        mock_settings.git_agent_author_name = ""
+        mock_settings.git_agent_author_email = ""
+        mock_settings.git_agent_committer_name = ""
+        mock_settings.git_agent_committer_email = ""
+        mock_settings.git_agent_ssh_command = ""
         yield
 
 
@@ -55,6 +67,37 @@ class TestCommit:
             text=True,
         )
         assert result.stdout.strip() == "my message"
+
+    def test_commit_uses_actor_identity(self, tmp_vault: Path):
+        (tmp_vault / "note.md").write_text("hello")
+        with patch("app.services.git_service.settings") as mock_settings:
+            mock_settings.vault_path = tmp_vault
+            mock_settings.git_remote = "origin"
+            mock_settings.git_branch = "main"
+            mock_settings.git_user_author_name = "Human User"
+            mock_settings.git_user_author_email = "human@example.com"
+            mock_settings.git_user_committer_name = "Human Committer"
+            mock_settings.git_user_committer_email = "human-commit@example.com"
+            mock_settings.git_user_ssh_command = ""
+            mock_settings.git_agent_author_name = ""
+            mock_settings.git_agent_author_email = ""
+            mock_settings.git_agent_committer_name = ""
+            mock_settings.git_agent_committer_email = ""
+            mock_settings.git_agent_ssh_command = ""
+
+            commit("my message", actor=USER_ACTOR)
+
+        result = subprocess.run(
+            ["git", "log", "-1", "--format=%an <%ae>|%cn <%ce>"],
+            cwd=tmp_vault,
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+        assert (
+            result.stdout.strip()
+            == "Human User <human@example.com>|Human Committer <human-commit@example.com>"
+        )
 
 
 class TestPush:
@@ -92,6 +135,36 @@ class TestRunAuthBehavior:
             )
             with pytest.raises(GitError, match="Configure non-interactive credentials"):
                 _run("push", "origin", "main")
+
+    def test_actor_env_sets_identity_and_ssh_command(self):
+        with patch("app.services.git_service.subprocess.run") as run_mock, \
+             patch("app.services.git_service.settings") as mock_settings:
+            mock_settings.vault_path = Path("/tmp/vault")
+            mock_settings.git_user_author_name = "User Author"
+            mock_settings.git_user_author_email = "user-author@example.com"
+            mock_settings.git_user_committer_name = "User Committer"
+            mock_settings.git_user_committer_email = "user-committer@example.com"
+            mock_settings.git_user_ssh_command = "ssh -i /tmp/user-key"
+            mock_settings.git_agent_author_name = ""
+            mock_settings.git_agent_author_email = ""
+            mock_settings.git_agent_committer_name = ""
+            mock_settings.git_agent_committer_email = ""
+            mock_settings.git_agent_ssh_command = ""
+            run_mock.return_value = subprocess.CompletedProcess(
+                args=["git", "push", "origin", "main"],
+                returncode=0,
+                stdout="",
+                stderr="",
+            )
+
+            _run("push", "origin", "main", actor=USER_ACTOR)
+
+            _, kwargs = run_mock.call_args
+            assert kwargs["env"]["GIT_AUTHOR_NAME"] == "User Author"
+            assert kwargs["env"]["GIT_AUTHOR_EMAIL"] == "user-author@example.com"
+            assert kwargs["env"]["GIT_COMMITTER_NAME"] == "User Committer"
+            assert kwargs["env"]["GIT_COMMITTER_EMAIL"] == "user-committer@example.com"
+            assert kwargs["env"]["GIT_SSH_COMMAND"] == "ssh -i /tmp/user-key"
 
 
 class TestCurrentSha:
@@ -138,3 +211,35 @@ class TestCommitForBatch:
             text=True,
         )
         assert "D\tto_delete.md" in result.stdout
+
+    def test_uses_agent_identity(self, tmp_vault: Path):
+        (tmp_vault / "note.md").write_text("batch test")
+        with patch("app.services.git_service.settings") as mock_settings:
+            mock_settings.vault_path = tmp_vault
+            mock_settings.git_remote = "origin"
+            mock_settings.git_branch = "main"
+            mock_settings.git_user_author_name = ""
+            mock_settings.git_user_author_email = ""
+            mock_settings.git_user_committer_name = ""
+            mock_settings.git_user_committer_email = ""
+            mock_settings.git_user_ssh_command = ""
+            mock_settings.git_agent_author_name = "API Agent"
+            mock_settings.git_agent_author_email = "agent@example.com"
+            mock_settings.git_agent_committer_name = "Agent Committer"
+            mock_settings.git_agent_committer_email = "agent-commit@example.com"
+            mock_settings.git_agent_ssh_command = ""
+            mock_settings.git_agent_https_token = ""
+
+            commit_for_batch(["note.md"], actor=AGENT_ACTOR)
+
+        result = subprocess.run(
+            ["git", "log", "-1", "--format=%an <%ae>|%cn <%ce>"],
+            cwd=tmp_vault,
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+        assert (
+            result.stdout.strip()
+            == "API Agent <agent@example.com>|Agent Committer <agent-commit@example.com>"
+        )

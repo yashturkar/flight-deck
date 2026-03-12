@@ -1,11 +1,14 @@
 """Tests for source=human direct-to-main writes and DELETE endpoint."""
 
 import subprocess
+from datetime import datetime, timezone
 from pathlib import Path
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 import pytest
 
+from app.api.routes import notes
+from app.schemas.notes import NoteWrite
 from app.services import git_service, vault_service
 
 
@@ -48,6 +51,16 @@ def _patch_vault(tmp_vault: Path):
             s.git_branch = "main"
             s.git_push_enabled = False
             s.git_batch_branch_prefix = "kb-api"
+            s.git_user_author_name = ""
+            s.git_user_author_email = ""
+            s.git_user_committer_name = ""
+            s.git_user_committer_email = ""
+            s.git_user_ssh_command = ""
+            s.git_agent_author_name = ""
+            s.git_agent_author_email = ""
+            s.git_agent_committer_name = ""
+            s.git_agent_committer_email = ""
+            s.git_agent_ssh_command = ""
         yield
 
 
@@ -113,7 +126,9 @@ class TestSourceHumanWrite:
     def test_creates_new_file_on_main(self, tmp_vault: Path):
         vault_service.write_note("notes/brand-new.md", "# Fresh\n")
         sha = git_service.commit_files(
-            ["notes/brand-new.md"], "human: update notes/brand-new.md"
+            ["notes/brand-new.md"],
+            "human: update notes/brand-new.md",
+            actor=git_service.USER_ACTOR,
         )
         assert sha is not None
         assert (tmp_vault / "notes" / "brand-new.md").read_text() == "# Fresh\n"
@@ -143,3 +158,66 @@ class TestDeleteFlow:
 
         log_output = _git(tmp_vault, "log", "-1", "--name-status", "--format=")
         assert "D\tnotes/remove-me.md" in log_output
+
+
+class TestNotesRouteActorMapping:
+    def test_human_write_uses_user_actor(self):
+        session = MagicMock()
+        modified_at = datetime.now(timezone.utc)
+        with patch("app.api.routes.notes.vault_service.write_note", return_value=modified_at), \
+             patch("app.api.routes.notes.git_service") as gs, \
+             patch("app.api.routes.notes.settings") as route_settings:
+            route_settings.git_push_enabled = True
+
+            notes.write_note(
+                "notes/test.md",
+                NoteWrite(content="hello"),
+                view=notes.ViewType.main,
+                source=notes.SourceType.human,
+                session=session,
+            )
+
+            gs.commit_files.assert_called_once_with(
+                ["notes/test.md"],
+                "human: update notes/test.md",
+                actor=gs.USER_ACTOR,
+            )
+            gs.push.assert_called_once_with(actor=gs.USER_ACTOR)
+
+    def test_api_write_enqueues_without_direct_commit(self):
+        session = MagicMock()
+        modified_at = datetime.now(timezone.utc)
+        with patch("app.api.routes.notes.vault_service.write_note", return_value=modified_at), \
+             patch("app.api.routes.notes.git_service") as gs, \
+             patch("app.api.routes.notes.batcher") as batcher:
+            notes.write_note(
+                "notes/test.md",
+                NoteWrite(content="hello"),
+                view=notes.ViewType.main,
+                source=notes.SourceType.api,
+                session=session,
+            )
+
+            batcher.enqueue.assert_called_once_with("notes/test.md")
+            gs.commit_files.assert_not_called()
+            gs.push.assert_not_called()
+
+    def test_human_delete_uses_user_actor(self):
+        session = MagicMock()
+        with patch("app.api.routes.notes.vault_service.delete_note"), \
+             patch("app.api.routes.notes.git_service") as gs, \
+             patch("app.api.routes.notes.settings") as route_settings:
+            route_settings.git_push_enabled = True
+
+            notes.delete_note(
+                "notes/test.md",
+                source=notes.SourceType.human,
+                session=session,
+            )
+
+            gs.commit_files.assert_called_once_with(
+                ["notes/test.md"],
+                "human: delete notes/test.md",
+                actor=gs.USER_ACTOR,
+            )
+            gs.push.assert_called_once_with(actor=gs.USER_ACTOR)

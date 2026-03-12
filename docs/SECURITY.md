@@ -27,12 +27,14 @@ review_cycle_days: 21
 - Secrets remain in local `.env` files or deployment secret stores.
 - Docs should only reference secret names, not values.
 - Generated docs must redact secrets by default.
+- When dual Git identities are configured, keep USER and AGENT SSH commands/keys and `GITHUB_AGENT_TOKEN` in secret storage only.
 
 ## Write Safety
 
 - Path traversal and absolute-path writes are denied.
 - Only approved file types are writable.
 - Writes from `source=api` remain review-gated through PR workflow.
+- Git subprocesses must use per-command identity env (`GIT_AUTHOR_*`, `GIT_COMMITTER_*`, `GIT_SSH_COMMAND`) instead of mutating shared repo config at runtime.
 
 ## Security Review Triggers
 
