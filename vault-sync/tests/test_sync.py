@@ -116,12 +116,12 @@ class TestPushChanges:
 
         push_changes(sync_dir, {"notes/edit.md"}, set(), client)
 
-        client.write_note.assert_called_once_with("notes/edit.md", "edited\n", source="human")
+        client.write_note.assert_called_once_with("notes/edit.md", "edited\n")
 
     def test_deletes_removed_files(self, sync_dir: Path):
         client = MagicMock()
         push_changes(sync_dir, set(), {"notes/gone.md"}, client)
-        client.delete_note.assert_called_once_with("notes/gone.md", source="human")
+        client.delete_note.assert_called_once_with("notes/gone.md")
 
     def test_skips_missing_changed_file(self, sync_dir: Path):
         client = MagicMock()

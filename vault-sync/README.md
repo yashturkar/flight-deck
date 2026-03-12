@@ -6,7 +6,7 @@ Daemon that keeps a local directory in sync with the kb-server **current** view 
 
 1. On startup, pulls every note from the server's `current` view into a local directory.
 2. Watches that directory for file changes (create, edit, delete).
-3. When you save a file, it pushes the change to the kb-server API with `source=human`, which commits directly to `main`.
+3. When you save a file, it pushes the change to the kb-server API using the authenticated API key's role.
 4. Periodically re-pulls from the server to pick up new agent-written content or merged PRs.
 
 Supported file types: `.md`, `.markdown`, `.txt`.
@@ -203,4 +203,4 @@ python3 -m pytest -v
 
 **Files not appearing locally** -- Run with `-v` to see debug output. Check that the server has notes (try `curl -H "X-API-Key: $KB_API_KEY" $KB_SERVER_URL/notes/?view=current`).
 
-**Edits not pushing** -- The daemon debounces changes (default 2s). Wait a moment and check the logs. Verify the server accepts writes (`PUT /notes/{path}?source=human`).
+**Edits not pushing** -- The daemon debounces changes (default 2s). Wait a moment and check the logs. Verify the configured API key has a write-capable role, typically `user`.
