@@ -22,6 +22,8 @@ review_cycle_days: 21
 - With auth disabled (`KB_API_KEY` empty), requests are accepted without API-key checks.
 - `KB_API_KEY` must never be committed in docs examples with live values.
 
+> **TODO:** Actor identity (USER vs AGENT) is currently self-declared by the caller via the `source` query parameter. This should be derived from authentication — e.g., separate API keys or tokens per actor — so that the server enforces which identity is used rather than trusting the client.
+
 ## Secret Handling
 
 - Secrets remain in local `.env` files or deployment secret stores.
