@@ -1,7 +1,7 @@
 ---
 owner: platform
 status: draft
-last_verified: 2026-03-07
+last_verified: 2026-03-12
 source_of_truth:
   - ../../kb-server/README.md
   - ../../vault-sync/README.md
@@ -22,6 +22,9 @@ review_cycle_days: 14
 
 Use this runbook when an agent needs to autonomously build, review, test, and
 fix features across `kb-server` and `vault-sync`.
+
+For a shorter local validation focused specifically on role-based API keys and
+the `vault-sync` client path, use `local-role-auth-e2e.md`.
 
 ## Primary goal
 

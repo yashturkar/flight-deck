@@ -1,7 +1,7 @@
 ---
 owner: platform
 status: draft
-last_verified: 2026-03-07
+last_verified: 2026-03-12
 source_of_truth:
   - ../AGENTS.md
   - ../ARCHITECTURE.md
@@ -49,4 +49,4 @@ review_cycle_days: 14
 - `runbooks/incident-response.md`
 - `runbooks/backup-restore.md`
 - `runbooks/autonomous-agent-e2e.md`
-
+- `runbooks/local-role-auth-e2e.md`

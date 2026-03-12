@@ -98,6 +98,9 @@ Both share the vault filesystem and the Postgres database.
 Current standard in this repo is to run `kb-api` and `kb-worker` in a
 dedicated `tmux` session.
 
+For a copy-paste local `tmux` validation of role-based API keys plus
+`vault-sync`, use `../docs/runbooks/local-role-auth-e2e.md`.
+
 Example:
 
 ```bash
