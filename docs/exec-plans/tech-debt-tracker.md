@@ -18,7 +18,7 @@ review_cycle_days: 14
 
 | Item | Area | Severity | Owner | Next Action |
 | --- | --- | --- | --- | --- |
-| _none_ | - | - | - | - |
+| Actor identity is caller-declared via `source` query param instead of derived from auth | security | high | backend | Implement per-actor API keys or tokens so the server enforces USER vs AGENT identity. See `docs/SECURITY.md` and `docs/product-specs/kb-server.md` TODOs. |
 
 ## Recently Closed
 

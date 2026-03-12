@@ -78,6 +78,15 @@ class TestDoCommitAndPR:
 
             batcher_fast._do_commit_and_pr(["notes/a.md"])
 
+            gs.commit_for_batch.assert_called_once_with(
+                ["notes/a.md"],
+                actor=gs.AGENT_ACTOR,
+            )
+            branch_arg = gs.checkout_or_create_from_main.call_args.args[0]
+            assert branch_arg.startswith("kb-api/")
+            assert gs.checkout_or_create_from_main.call_args.kwargs == {
+                "actor": gs.AGENT_ACTOR
+            }
             gs.push_branch.assert_not_called()
 
     def test_calls_push_branch_and_ensure_pr_on_commit(self, batcher_fast: GitBatcher):
@@ -92,8 +101,11 @@ class TestDoCommitAndPR:
 
             batcher_fast._do_commit_and_pr(["notes/a.md"])
 
-            gs.push_branch.assert_called_once()
-            gh.ensure_pr.assert_called_once()
+            push_branch_arg = gs.push_branch.call_args.args[0]
+            assert push_branch_arg.startswith("kb-api/")
+            assert gs.push_branch.call_args.kwargs == {"actor": gs.AGENT_ACTOR}
+            assert gh.ensure_pr.call_args.kwargs["head_branch"].startswith("kb-api/")
+            assert gh.ensure_pr.call_args.kwargs["actor"] == gs.AGENT_ACTOR
 
     def test_handles_push_failure(self, batcher_fast: GitBatcher):
         from app.services.git_service import GitError

@@ -107,9 +107,11 @@ def write_note(
     session.commit()
 
     if source == SourceType.human:
-        git_service.commit_files([path], f"human: update {path}")
+        git_service.commit_files(
+            [path], f"human: update {path}", actor=git_service.USER_ACTOR
+        )
         if settings.git_push_enabled:
-            git_service.push()
+            git_service.push(actor=git_service.USER_ACTOR)
     else:
         batcher.enqueue(path)
 
@@ -139,8 +141,10 @@ def delete_note(
     session.commit()
 
     if source == SourceType.human:
-        git_service.commit_files([path], f"human: delete {path}")
+        git_service.commit_files(
+            [path], f"human: delete {path}", actor=git_service.USER_ACTOR
+        )
         if settings.git_push_enabled:
-            git_service.push()
+            git_service.push(actor=git_service.USER_ACTOR)
     else:
         batcher.enqueue(path)

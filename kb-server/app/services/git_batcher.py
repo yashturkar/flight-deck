@@ -105,12 +105,15 @@ class GitBatcher:
             session.commit()
 
             original_branch = git_service.current_branch()
-            was_stashed = git_service.checkout_or_create_from_main(branch_name)
+            was_stashed = git_service.checkout_or_create_from_main(
+                branch_name,
+                actor=git_service.AGENT_ACTOR,
+            )
 
             if was_stashed:
-                git_service.stash_pop()
+                git_service.stash_pop(actor=git_service.AGENT_ACTOR)
 
-            sha = git_service.commit_for_batch(files)
+            sha = git_service.commit_for_batch(files, actor=git_service.AGENT_ACTOR)
             if sha is None:
                 job.status = "skipped"
                 job.completed_at = datetime.now(timezone.utc)
@@ -128,7 +131,7 @@ class GitBatcher:
             session.commit()
 
             try:
-                git_service.push_branch(branch_name)
+                git_service.push_branch(branch_name, actor=git_service.AGENT_ACTOR)
             except git_service.GitError as exc:
                 log.error("git push failed: %s", exc)
                 session.add(
@@ -166,6 +169,7 @@ class GitBatcher:
                     head_branch=branch_name,
                     title=pr_title,
                     body=pr_body,
+                    actor=git_service.AGENT_ACTOR,
                 )
                 pr_url = pr.get("html_url")
                 pr_number = pr.get("number")
@@ -215,7 +219,7 @@ class GitBatcher:
         finally:
             if original_branch and original_branch != branch_name:
                 try:
-                    git_service.checkout(original_branch)
+                    git_service.checkout(original_branch, actor=git_service.AGENT_ACTOR)
                 except Exception:
                     log.warning("Failed to return to original branch %s", original_branch)
             session.close()

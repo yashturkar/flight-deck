@@ -75,3 +75,19 @@ class TestFilter:
         from watchfiles import Change
 
         assert watcher._filter(Change.modified, "/vault/image.png") is False
+
+
+class TestActorRouting:
+    def test_autosave_commits_and_pushes_as_user(self, watcher: AutosaveWatcher):
+        with patch("app.workers.autosave.git_service") as gs, \
+             patch("app.workers.autosave.SessionLocal") as sl, \
+             patch("app.workers.autosave.publish_service.trigger_publish"):
+            mock_session = MagicMock()
+            sl.return_value = mock_session
+            gs.commit_files.return_value = "a" * 40
+
+            watcher._do_autosave({"notes/test.md"})
+
+            gs.commit_files.assert_called_once()
+            assert gs.commit_files.call_args.kwargs["actor"] == gs.USER_ACTOR
+            gs.push.assert_called_once_with(actor=gs.USER_ACTOR)
