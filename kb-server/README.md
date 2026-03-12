@@ -31,7 +31,7 @@ CREATE ROLE kb WITH LOGIN PASSWORD 'kb';
 CREATE DATABASE kb OWNER kb; # or ALTER DATABASE kb OWNER TO kb; 
 \q # to quit
 
-alembic upgrade head 
+python -m alembic upgrade head 
 python -m uvicorn app.main:app --reload 
 # in another terminal: 
 python -m app.workers.autosave
@@ -151,6 +151,83 @@ FastAPI also exposes interactive docs:
 
 - Swagger UI: `GET /docs`
 - OpenAPI JSON: `GET /openapi.json`
+- Admin UI: `GET /admin`
+
+## Admin UI
+
+`/admin` is a lightweight management surface for setup and operations. The initial version includes:
+
+- current config visibility for the main `.env` fields
+- write support for updating `.env` from the browser
+- write-only secret update fields for `KB_API_KEY` and `GITHUB_TOKEN`
+- readiness, vault, database, Git, and pending PR workflow status
+- recent jobs, vault events, and publish runs
+
+Important behavior:
+
+- The admin UI is not a note editor.
+- When `KB_API_KEY` is configured, open `/admin/login` and authenticate with that key once. The admin UI stores it in an HTTP-only cookie for browser requests to `/admin`.
+- Process environment variables still override `.env`.
+- Saving config writes to `.env`, but you should restart `kb-api` and `kb-worker` after changing database or auth settings.
+
+### Using Admin UI For First-Time Setup
+
+The current admin UI helps configure and validate an instance, but it does not provision host dependencies for you.
+
+Before using `/admin`, you still need to create or provide:
+
+- a running PostgreSQL instance
+- a database and DB credentials referenced by `DATABASE_URL`
+- an existing local notes repository for `VAULT_PATH`
+- a configured Git remote if you want push/PR workflows
+
+First-time setup flow:
+
+1. Start `kb-server` with a minimal working `.env` so the app can boot.
+2. Open `GET /admin`.
+3. Fill in the non-secret instance config:
+   - `VAULT_PATH`
+   - `DATABASE_URL`
+   - `GITHUB_REPO`
+   - Git branch / remote settings
+   - optional Quartz settings
+4. Save the form. This writes the values to `kb-server/.env`.
+5. Restart `kb-api` and `kb-worker`.
+6. Reopen `/admin` and verify readiness, vault, database, Git, and PR status.
+
+What `/admin` does not do yet:
+
+- it does not create the Postgres server, role, or database
+- it does not create the notes repo for you
+- it does not create the GitHub repo or remote
+- it does not restart services automatically
+
+### Secret Handling
+
+There are two supported ways to establish secrets:
+
+1. Preferred: process environment variables
+   - set `KB_API_KEY` and `GITHUB_TOKEN` outside `.env`
+   - use shell exports, `tmux` startup commands, or service-manager environment config
+   - process environment values override `.env`
+
+2. Optional: save through `/admin`
+   - the admin UI provides write-only fields for `KB_API_KEY` and `GITHUB_TOKEN`
+   - saving writes them into `kb-server/.env`
+   - the UI does not read them back after save
+
+Recommended split:
+
+- Keep in `.env`: `VAULT_PATH`, `DATABASE_URL`, `GITHUB_REPO`, and other non-secret machine config
+- Keep in process env when possible: `KB_API_KEY`, `GITHUB_TOKEN`
+
+Example:
+
+```bash
+export KB_API_KEY=your_api_key
+export GITHUB_TOKEN=your_github_token
+python -m uvicorn app.main:app --reload
+```
 
 ### Authentication
 
