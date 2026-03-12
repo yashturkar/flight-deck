@@ -3,13 +3,14 @@
 Uses SQLite in-memory so no Postgres is required to run tests.
 """
 
+from contextlib import ExitStack
 from pathlib import Path
 from unittest.mock import patch
 
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
-from sqlalchemy.orm import Session, sessionmaker
+from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 
 from app.models.db import Base, get_session
@@ -33,52 +34,64 @@ def _make_client(tmp_vault: Path, *, api_key: str = TEST_API_KEY):
         finally:
             s.close()
 
-    with patch("app.services.vault_service.settings") as vs, \
-         patch("app.services.git_service.settings") as gs, \
-         patch("app.api.deps.settings") as auth_s:
-        vs.vault_path = tmp_vault
-        gs.vault_path = tmp_vault
-        gs.git_remote = "origin"
-        gs.git_branch = "main"
-        auth_s.kb_api_key = api_key
+    stack = ExitStack()
+    vs = stack.enter_context(patch("app.services.vault_service.settings"))
+    gs = stack.enter_context(patch("app.services.git_service.settings"))
+    auth_s = stack.enter_context(patch("app.api.deps.settings"))
+    middleware_s = stack.enter_context(patch("app.core.auth.settings"))
+    notes_s = stack.enter_context(patch("app.api.routes.notes.settings"))
+    batcher = stack.enter_context(patch("app.api.routes.notes.batcher"))
 
     vs.vault_path = tmp_vault
     gs.vault_path = tmp_vault
     gs.git_remote = "origin"
     gs.git_branch = "main"
+    gs.git_user_author_name = ""
+    gs.git_user_author_email = ""
+    gs.git_user_committer_name = ""
+    gs.git_user_committer_email = ""
+    gs.git_user_ssh_command = ""
+    gs.git_agent_author_name = ""
+    gs.git_agent_author_email = ""
+    gs.git_agent_committer_name = ""
+    gs.git_agent_committer_email = ""
+    gs.git_agent_ssh_command = ""
     auth_s.kb_api_key = api_key
+    middleware_s.kb_api_key = api_key
+    notes_s.git_push_enabled = False
+    batcher.enqueue.return_value = None
 
     from app.main import create_app
 
     app = create_app()
     app.dependency_overrides[get_session] = _override_session
-
-    client = TestClient(app)
-    return client, app, patches
+    client = stack.enter_context(TestClient(app))
+    return client, app, stack
 
 
 @pytest.fixture()
 def client(tmp_vault: Path):
-    """Client with auth disabled (no API key configured)."""
-    c, app, patches = _make_client(tmp_vault, api_key="")
+    c, app, stack = _make_client(tmp_vault, api_key=TEST_API_KEY)
     yield c
     app.dependency_overrides.clear()
-    for p in patches:
-        p.stop()
+    stack.close()
 
 
 @pytest.fixture()
-def authed_client(tmp_vault: Path):
-    """Client with auth enabled — must send X-API-Key."""
-    c, app, patches = _make_client(tmp_vault, api_key=TEST_API_KEY)
+def authed_client(client: TestClient):
+    yield client
+
+
+@pytest.fixture()
+def client_no_key(tmp_vault: Path):
+    c, app, stack = _make_client(tmp_vault, api_key="")
     yield c
     app.dependency_overrides.clear()
-    for p in patches:
-        p.stop()
+    stack.close()
 
 
 class TestAPIKeyAuth:
-    """Verify that the API-key middleware gates every endpoint."""
+    """Verify that the API-key middleware gates every endpoint when configured."""
 
     def test_no_key_returns_401(self, authed_client: TestClient):
         resp = authed_client.get("/health")
@@ -110,25 +123,10 @@ class TestAPIKeyAuth:
         )
         assert resp.status_code == 200
 
-    def test_empty_key_config_disables_auth(self, client: TestClient):
-        resp = client.get("/health")
-        assert resp.status_code == 200
-
-
-@pytest.fixture()
-def client(tmp_vault: Path):
-    yield from _make_client(tmp_vault)
-
-
-@pytest.fixture()
-def client_no_key(tmp_vault: Path):
-    """Client where server has no API key configured (empty)."""
-    yield from _make_client(tmp_vault, api_key="")
-
 
 class TestHealth:
-    def test_health(self, client: TestClient):
-        resp = client.get("/health")
+    def test_health_without_server_key(self, client_no_key: TestClient):
+        resp = client_no_key.get("/health")
         assert resp.status_code == 200
         assert resp.json()["status"] == "ok"
 
@@ -191,14 +189,12 @@ class TestNotesAPI:
         assert "notes/b.md" in paths
 
 
-class TestAPIKeyAuth:
-    """Verify X-API-Key enforcement on /notes endpoints."""
-
+class TestNotesEndpointAuth:
     valid_headers = {"X-API-Key": TEST_API_KEY}
 
-    def test_missing_key_returns_422(self, client: TestClient):
+    def test_missing_key_returns_401(self, client: TestClient):
         resp = client.get("/notes/?prefix=notes")
-        assert resp.status_code == 422
+        assert resp.status_code == 401
 
     def test_wrong_key_returns_401(self, client: TestClient):
         resp = client.get(
@@ -219,7 +215,7 @@ class TestAPIKeyAuth:
             "/notes/notes/test.md",
             json={"content": "# Nope\n"},
         )
-        assert resp.status_code == 422
+        assert resp.status_code == 401
 
     def test_write_wrong_key_rejected(self, client: TestClient):
         resp = client.put(
@@ -228,10 +224,6 @@ class TestAPIKeyAuth:
             headers={"X-API-Key": "bad"},
         )
         assert resp.status_code == 401
-
-    def test_health_no_key_required(self, client: TestClient):
-        resp = client.get("/health")
-        assert resp.status_code == 200
 
     def test_empty_server_key_returns_401(self, client_no_key: TestClient):
         resp = client_no_key.get(

@@ -37,6 +37,7 @@ Provide a file-first API over a Git-backed vault with explicit approval boundari
 - Human-origin changes go to base branch directly.
 - `source=human` Git commits and pushes use the configured USER identity.
 - `source=api` Git commits, pushes, and PR API calls use the configured AGENT identity.
+- USER and AGENT credentials are configured independently for author/committer metadata, SSH transport, and AGENT GitHub PR automation.
 - Mainline approval remains controlled by maintainers.
 
 ## Guardrails

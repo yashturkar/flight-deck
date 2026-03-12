@@ -28,6 +28,7 @@ class TestEnqueueAndDebounce:
         def mock_commit_and_pr(files: list[str]) -> None:
             captured_files.append(files)
             flush_called.set()
+            return True
 
         with patch.object(batcher_fast, "_do_commit_and_pr", side_effect=mock_commit_and_pr):
             batcher_fast.enqueue("notes/a.md")
@@ -43,6 +44,7 @@ class TestEnqueueAndDebounce:
         def mock_commit_and_pr(files: list[str]) -> None:
             captured_files.append(files)
             flush_called.set()
+            return True
 
         with patch.object(batcher_fast, "_do_commit_and_pr", side_effect=mock_commit_and_pr):
             batcher_fast.enqueue("notes/a.md")
@@ -60,6 +62,7 @@ class TestEnqueueAndDebounce:
 
         def mock_commit_and_pr(files: list[str]) -> None:
             flush_called.set()
+            return True
 
         with patch.object(batcher_fast, "_do_commit_and_pr", side_effect=mock_commit_and_pr):
             batcher_fast._reset_timer()

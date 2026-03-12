@@ -73,7 +73,18 @@ vault/
 | `GIT_PULL_INTERVAL_SECONDS` | `60` | How often to pull from remote (syncs merged PRs) |
 | `GIT_BATCH_DEBOUNCE_SECONDS` | `10` | Seconds to debounce API-write batching |
 | `GIT_BATCH_BRANCH_PREFIX` | `kb-api` | Prefix for daily feature branches (e.g., `kb-api/2026-03-05`) |
-| `GITHUB_TOKEN` | (empty) | GitHub personal access token with `repo` scope for PR creation |
+| `GIT_USER_AUTHOR_NAME` | (empty) | Git author name for `source=human` writes and autosave commits |
+| `GIT_USER_AUTHOR_EMAIL` | (empty) | Git author email for `source=human` writes and autosave commits |
+| `GIT_USER_COMMITTER_NAME` | (empty) | Optional Git committer name for human-origin writes (defaults to author name) |
+| `GIT_USER_COMMITTER_EMAIL` | (empty) | Optional Git committer email for human-origin writes (defaults to author email) |
+| `GIT_USER_SSH_COMMAND` | (empty) | Optional SSH command for human-origin `git push/pull` (for example a USER SSH key) |
+| `GIT_AGENT_AUTHOR_NAME` | (empty) | Git author name for `source=api` batch commits |
+| `GIT_AGENT_AUTHOR_EMAIL` | (empty) | Git author email for `source=api` batch commits |
+| `GIT_AGENT_COMMITTER_NAME` | (empty) | Optional Git committer name for API-origin writes (defaults to author name) |
+| `GIT_AGENT_COMMITTER_EMAIL` | (empty) | Optional Git committer email for API-origin writes (defaults to author email) |
+| `GIT_AGENT_SSH_COMMAND` | (empty) | Optional SSH command for API-origin branch pushes (for example an AGENT SSH key) |
+| `GITHUB_TOKEN` | (empty) | Legacy fallback GitHub personal access token for PR creation |
+| `GITHUB_AGENT_TOKEN` | (empty) | Preferred GitHub personal access token with `repo` scope for AGENT PR creation/update |
 | `GITHUB_REPO` | (empty) | GitHub repository in `owner/repo` format |
 | `QUARTZ_BUILD_COMMAND` | (empty) | Shell command to build Quartz site |
 | `QUARTZ_WEBHOOK_URL` | (empty) | URL to POST after push to trigger rebuild |
@@ -81,8 +92,8 @@ vault/
 | `API_PORT` | `8000` | API bind port |
 
 > **Note:** Unknown env keys in `.env` are silently ignored, so extra variables won't break startup.
-> **Note:** `GITHUB_TOKEN` is used for GitHub API PR calls, not for `git push/pull` auth.
-> Git CLI operations run non-interactively and require preconfigured credentials (SSH key or PAT-backed credential helper).
+> **Note:** `GITHUB_AGENT_TOKEN` is preferred for AGENT PR calls; `GITHUB_TOKEN` remains a fallback for backward compatibility.
+> Git CLI operations run non-interactively and require preconfigured credentials (SSH key or PAT-backed credential helper). USER and AGENT credentials are injected per command rather than written into shared git config.
 
 ## Process model
 
@@ -199,6 +210,27 @@ API writes are batched in the background (configurable via
 4. Creates or updates a PR targeting `GIT_BRANCH`
 
 This ensures API writes never push directly to main — they always go through a PR.
+
+By default, `PUT /notes/...` uses `source=api`. To route writes explicitly:
+
+```bash
+# Human-origin write: commit/push directly to GIT_BRANCH as USER
+curl -X PUT "http://localhost:8000/notes/notes/human.md?source=human" \
+  -H "X-API-Key: $KB_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"content":"# Human change\n"}'
+
+# API-origin write: batch to kb-api/* branch and PR as AGENT
+curl -X PUT "http://localhost:8000/notes/notes/agent.md?source=api" \
+  -H "X-API-Key: $KB_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"content":"# Agent change\n"}'
+```
+
+Identity routing rules:
+
+- `source=human` → commit as USER and push as USER
+- `source=api` → commit as AGENT, push as AGENT, and create/update PR as AGENT
 
 Notes:
 

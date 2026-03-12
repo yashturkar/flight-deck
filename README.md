@@ -6,6 +6,7 @@ A file-first knowledge base with Git-backed approval workflows. Edit notes local
 
 - **kb-server**: API and workers that manage a Markdown vault, auto-commit to Git, and expose a `current` view (approved content + pending PRs).
 - **vault-sync**: Daemon that mirrors the current view to a local folder and pushes your edits back as human-origin commits.
+- **Actor-aware Git identities**: human-origin writes use a USER git identity, while API-origin writes and PR automation use a separate AGENT identity.
 
 ## Get started
 
