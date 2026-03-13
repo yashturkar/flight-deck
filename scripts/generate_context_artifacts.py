@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import datetime as dt
 import re
+import subprocess
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
@@ -13,6 +14,24 @@ DOCS_GENERATED = REPO_ROOT / "docs" / "generated"
 
 def _read(path: Path) -> str:
     return path.read_text(encoding="utf-8")
+
+
+def _git_last_change_date(paths: list[Path]) -> str:
+    dates: list[str] = []
+    for path in paths:
+        proc = subprocess.run(
+            ["git", "log", "-1", "--format=%cs", "--", str(path)],
+            cwd=REPO_ROOT,
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+        value = proc.stdout.strip()
+        if value:
+            dates.append(value)
+    if dates:
+        return max(dates)
+    return "1970-01-01"
 
 
 def _parse_env_example(path: Path) -> list[tuple[str, str]]:
@@ -54,11 +73,16 @@ def _parse_routes(path: Path) -> list[tuple[str, str]]:
 
 
 def _write_api_surface() -> None:
-    health_routes = _parse_routes(REPO_ROOT / "kb-server" / "app" / "api" / "routes" / "health.py")
-    notes_routes = _parse_routes(REPO_ROOT / "kb-server" / "app" / "api" / "routes" / "notes.py")
-    publish_routes = _parse_routes(REPO_ROOT / "kb-server" / "app" / "api" / "routes" / "publish.py")
-    all_routes = health_routes + notes_routes + publish_routes
-    date = dt.date.today().isoformat()
+    health_path = REPO_ROOT / "kb-server" / "app" / "api" / "routes" / "health.py"
+    context_path = REPO_ROOT / "kb-server" / "app" / "api" / "routes" / "context.py"
+    notes_path = REPO_ROOT / "kb-server" / "app" / "api" / "routes" / "notes.py"
+    publish_path = REPO_ROOT / "kb-server" / "app" / "api" / "routes" / "publish.py"
+    health_routes = _parse_routes(health_path)
+    context_routes = _parse_routes(context_path)
+    notes_routes = _parse_routes(notes_path)
+    publish_routes = _parse_routes(publish_path)
+    all_routes = health_routes + context_routes + notes_routes + publish_routes
+    date = _git_last_change_date([health_path, context_path, notes_path, publish_path])
 
     content = [
         "---",
@@ -67,6 +91,7 @@ def _write_api_surface() -> None:
         f"last_verified: {date}",
         "source_of_truth:",
         "  - ../../kb-server/app/api/routes/health.py",
+        "  - ../../kb-server/app/api/routes/context.py",
         "  - ../../kb-server/app/api/routes/notes.py",
         "  - ../../kb-server/app/api/routes/publish.py",
         "related_code:",
@@ -87,14 +112,17 @@ def _write_api_surface() -> None:
         content.append(f"| `{method}` | `{path}` |")
     content.append("")
     content.append("Do not edit manually. Regenerate with `python3 scripts/generate_context_artifacts.py`.")
-    (DOCS_GENERATED / "api-surface.md").write_text("\n".join(content), encoding="utf-8")
+    (DOCS_GENERATED / "api-surface.md").write_text("\n".join(content) + "\n", encoding="utf-8")
 
 
 def _write_env_catalog() -> None:
-    date = dt.date.today().isoformat()
-    kb_env = _parse_env_example(REPO_ROOT / "kb-server" / ".env.example")
-    kb_defaults = _parse_settings_defaults(REPO_ROOT / "kb-server" / "app" / "core" / "config.py")
-    vs_defaults = _parse_settings_defaults(REPO_ROOT / "vault-sync" / "vault_sync" / "config.py")
+    kb_env_path = REPO_ROOT / "kb-server" / ".env.example"
+    kb_config_path = REPO_ROOT / "kb-server" / "app" / "core" / "config.py"
+    vs_config_path = REPO_ROOT / "vault-sync" / "vault_sync" / "config.py"
+    date = _git_last_change_date([kb_env_path, kb_config_path, vs_config_path])
+    kb_env = _parse_env_example(kb_env_path)
+    kb_defaults = _parse_settings_defaults(kb_config_path)
+    vs_defaults = _parse_settings_defaults(vs_config_path)
 
     content = [
         "---",
@@ -152,7 +180,7 @@ def _write_env_catalog() -> None:
 
     content.append("")
     content.append("Do not edit manually. Regenerate with `python3 scripts/generate_context_artifacts.py`.")
-    (DOCS_GENERATED / "env-catalog.md").write_text("\n".join(content), encoding="utf-8")
+    (DOCS_GENERATED / "env-catalog.md").write_text("\n".join(content) + "\n", encoding="utf-8")
 
 
 def main() -> int:
@@ -165,4 +193,3 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-

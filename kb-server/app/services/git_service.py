@@ -202,6 +202,11 @@ def current_sha() -> str:
     return _run("rev-parse", "HEAD").stdout.strip()
 
 
+def resolve_ref(ref: str) -> str:
+    """Return the SHA for *ref*."""
+    return _run("rev-parse", ref).stdout.strip()
+
+
 def show_file(branch: str, path: str) -> str | None:
     """Read file content from a branch without checking it out.
 

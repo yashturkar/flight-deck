@@ -3,7 +3,9 @@ pyproject.toml
 app/__init__.py
 app/main.py
 app/api/__init__.py
+app/api/deps.py
 app/api/routes/__init__.py
+app/api/routes/context.py
 app/api/routes/health.py
 app/api/routes/notes.py
 app/api/routes/publish.py
@@ -14,11 +16,15 @@ app/core/logging.py
 app/models/__init__.py
 app/models/db.py
 app/schemas/__init__.py
+app/schemas/context.py
 app/schemas/notes.py
 app/services/__init__.py
+app/services/current_view_service.py
 app/services/git_batcher.py
 app/services/git_service.py
+app/services/github_service.py
 app/services/publish_service.py
+app/services/retrieval_service.py
 app/services/vault_service.py
 app/workers/__init__.py
 app/workers/autosave.py
@@ -28,7 +34,10 @@ kb_server.egg-info/dependency_links.txt
 kb_server.egg-info/requires.txt
 kb_server.egg-info/top_level.txt
 tests/test_autosave.py
+tests/test_context_api.py
+tests/test_current_view.py
 tests/test_git_batcher.py
 tests/test_git_service.py
 tests/test_notes_api.py
+tests/test_source_and_delete.py
 tests/test_vault_service.py

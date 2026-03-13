@@ -1,7 +1,7 @@
 ---
 owner: platform
 status: generated
-last_verified: 2026-03-07
+last_verified: 2026-03-06
 source_of_truth:
   - ../../kb-server/.env.example
   - ../../kb-server/app/core/config.py
@@ -16,7 +16,7 @@ review_cycle_days: 7
 
 # Environment Catalog (Generated)
 
-Generated on `2026-03-07` from settings and env sources.
+Generated on `2026-03-06` from settings and env sources.
 
 ## kb-server `.env.example`
 

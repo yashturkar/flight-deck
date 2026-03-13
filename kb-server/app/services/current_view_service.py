@@ -41,7 +41,10 @@ def _pending_branches() -> list[str]:
     return git_service.list_branches(pattern=f"{prefix}/*")
 
 
-def read_note_current(relative_path: str) -> tuple[str, datetime, list[str]]:
+def read_note_current(
+    relative_path: str,
+    pending_branches: list[str] | None = None,
+) -> tuple[str, datetime, list[str]]:
     """Read a note from the *current* view.
 
     Returns ``(content, modified_at, sources)`` where *sources* is the
@@ -56,7 +59,7 @@ def read_note_current(relative_path: str) -> tuple[str, datetime, list[str]]:
     main_branch = settings.git_branch
     main_content = git_service.show_file(main_branch, relative_path)
 
-    pending = _pending_branches()
+    pending = pending_branches if pending_branches is not None else _pending_branches()
     winning_content: str | None = main_content
     sources: list[str] = []
     if main_content is not None:
@@ -75,14 +78,17 @@ def read_note_current(relative_path: str) -> tuple[str, datetime, list[str]]:
     return winning_content, now, sources
 
 
-def list_notes_current(prefix: str = "") -> list[tuple[str, datetime, list[str]]]:
+def list_notes_current(
+    prefix: str = "",
+    pending_branches: list[str] | None = None,
+) -> list[tuple[str, datetime, list[str]]]:
     """List notes visible in the *current* view.
 
     Returns ``[(relative_path, modified_at, sources), ...]`` sorted by
     path.  Each entry includes which branches provide that file.
     """
     main_branch = settings.git_branch
-    pending = _pending_branches()
+    pending = pending_branches if pending_branches is not None else _pending_branches()
 
     path_sources: dict[str, list[str]] = {}
 
