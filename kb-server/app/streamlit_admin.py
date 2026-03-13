@@ -31,6 +31,37 @@ def run_local_command(command: str, missing_message: str) -> None:
     st.success("Command launched")
 
 
+def format_value(value: object) -> str:
+    if value is None:
+        return "-"
+    if isinstance(value, bool):
+        return "Yes" if value else "No"
+    if isinstance(value, list):
+        return ", ".join(str(item) for item in value) if value else "-"
+    if value == "":
+        return "-"
+    return str(value)
+
+
+def render_kv(title: str, values: dict) -> None:
+    st.subheader(title)
+    rows = [{"Field": key.replace("_", " ").title(), "Value": format_value(value)} for key, value in values.items()]
+    st.dataframe(rows, use_container_width=True, hide_index=True)
+
+
+def render_table(title: str, rows: list[dict], *, empty_message: str) -> None:
+    st.subheader(title)
+    if not rows:
+        st.caption(empty_message)
+        return
+    formatted_rows = []
+    for row in rows:
+        formatted_rows.append(
+            {key.replace("_", " ").title(): format_value(value) for key, value in row.items()}
+        )
+    st.dataframe(formatted_rows, use_container_width=True, hide_index=True)
+
+
 st.set_page_config(page_title="KB Server Dashboard", layout="wide")
 st.title("KB Server Dashboard")
 
@@ -79,12 +110,20 @@ if state["ready_errors"]:
 st.subheader("Configuration")
 with st.form("config"):
     updates: dict[str, str] = {}
-    for row in config_rows:
-        label = f"{row['key']} ({row['source']})"
-        if row["secret"]:
-            updates[row["key"]] = st.text_input(label, type="password")
-        else:
-            updates[row["key"]] = st.text_input(label, value=row["value"])
+    left, right = st.columns(2)
+    for idx, row in enumerate(config_rows):
+        target = left if idx % 2 == 0 else right
+        label = f"{row['key']}"
+        help_text = f"Source: {row['source']}"
+        with target:
+            if row["secret"]:
+                updates[row["key"]] = st.text_input(label, type="password", help=help_text)
+            else:
+                updates[row["key"]] = st.text_input(
+                    label,
+                    value=row["value"],
+                    help=help_text,
+                )
     if st.form_submit_button("Save Config"):
         save_response, save_error = try_api_request("POST", "/admin/api/config", json={"config": updates})
         if save_response is None:
@@ -95,17 +134,30 @@ with st.form("config"):
         else:
             st.error(save_response.text)
 
-st.subheader("Vault and Git")
-st.json({"vault": state["vault"], "git": state["git"]})
+info_left, info_right = st.columns(2)
+with info_left:
+    render_kv("Vault", state["vault"])
+with info_right:
+    render_kv("Git", state["git"])
 
-st.subheader("Pending PRs")
-st.json(state["prs"])
+ops_left, ops_right = st.columns(2)
+with ops_left:
+    render_kv("Database", state["database"])
+with ops_right:
+    render_kv("Batcher", state["batcher"])
 
-st.subheader("Recent Jobs")
-st.json(state["jobs"])
+with st.expander("Pending PRs", expanded=True):
+    render_table(
+        "Open Pull Requests",
+        state["prs"].get("items", []),
+        empty_message=state["prs"].get("error", "No open kb-api PRs."),
+    )
 
-st.subheader("Recent Events")
-st.json(state["events"])
+with st.expander("Recent Jobs", expanded=True):
+    render_table("Job Activity", state["jobs"], empty_message="No jobs yet.")
 
-st.subheader("Publish Runs")
-st.json(state["publish_runs"])
+with st.expander("Recent Events", expanded=False):
+    render_table("Vault Events", state["events"], empty_message="No events yet.")
+
+with st.expander("Publish Runs", expanded=False):
+    render_table("Publish History", state["publish_runs"], empty_message="No publish runs yet.")
