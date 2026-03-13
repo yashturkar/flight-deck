@@ -1,0 +1,2 @@
+[console_scripts]
+flight-deck-mcp = mcp_server.server:main

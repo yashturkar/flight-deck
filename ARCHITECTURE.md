@@ -23,6 +23,7 @@ review_cycle_days: 21
 ## Monorepo Topology
 
 - `kb-server/`: authoritative API and worker processes.
+- `mcp-server/`: MCP adapter for agent-native note and context access.
 - `vault-sync/`: local daemon that mirrors and edits through API.
 - `docs/`: system-of-record documentation for humans and agents.
 - `scripts/`: repository-level automation for docs quality and generation.
@@ -45,6 +46,13 @@ review_cycle_days: 21
   - `source=api`: queued to PR branch workflow.
   - `source=human`: direct commit/push to base branch.
 - Implements `view=current` as composed, read-only view.
+
+### mcp-server
+
+- Connects MCP-capable agents to Flight Deck through stdio tools/resources.
+- Delegates note CRUD and retrieval requests to `kb-server` over HTTP.
+- Defaults reads to `view=current`.
+- Forces note mutations through `source=api` so review workflows stay intact.
 
 ### vault-sync
 
@@ -97,5 +105,6 @@ review_cycle_days: 21
 - `docs/design-docs/index.md`
 - `docs/product-specs/kb-server.md`
 - `docs/product-specs/vault-sync.md`
+- `docs/product-specs/mcp-server.md`
 - `docs/SECURITY.md`
 - `docs/RELIABILITY.md`
