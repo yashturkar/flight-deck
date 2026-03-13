@@ -134,6 +134,81 @@ python3 -m pytest tests/test_git_service.py tests/test_git_batcher.py
 2. Document in `.env.example`
 3. Update `README.md` environment variables table
 
+## Logged Proposals
+
+### Admin / Management Web UI
+
+Requested scope:
+- Initial setup flow for required configuration
+- UI for viewing and editing relevant configuration values
+- Vault and Git/repo configuration visibility
+- Status dashboard for API, worker, health, jobs, and recent failures
+- Visibility into pending PR workflow state and recent automation activity
+
+Intent:
+- This is an admin surface for setup, operations, and debugging
+- This is not a content editing UI for notes
+- Content-affecting actions must continue to respect the PR-based workflow where applicable
+
+Recommended rollout:
+1. Read-only admin dashboard
+   - Health/readiness
+   - Config validation results
+   - Vault/Git status summary
+   - Recent jobs, errors, publish runs, and worker activity
+2. Setup + config management
+   - Guided first-run setup for `VAULT_PATH`, `DATABASE_URL`, `GITHUB_REPO`, branch settings, and optional auth config
+   - Editable non-secret config with validation
+3. Workflow visibility
+   - Pending batched changes
+   - Open `kb-api/*` branches / PR state
+   - Recent sync/autosave/publish outcomes
+4. Secret management
+   - Prefer write-only secret updates
+   - Do not casually echo `KB_API_KEY` or `GITHUB_TOKEN` back to the browser
+   - Preserve support for process environment variables overriding `.env`
+
+Implementation constraints:
+- Treat the UI as an admin plane layered on top of existing API/worker behavior
+- Do not silently provision system services or host-level dependencies from the browser
+- Be explicit about which values are stored in `.env` versus provided by environment variables
+- Add strong admin authentication before exposing any state-changing operational actions
+- Update docs with the trust boundary and secret-handling model when implemented
+
+Current bootstrap behavior:
+- `/admin` is now available as an initial admin surface
+- it shows config, readiness, vault/db/git status, recent jobs/events, and PR summary
+- it can write `.env` updates for visible config fields
+- it exposes write-only inputs for `KB_API_KEY` and `GITHUB_TOKEN`
+- `app/streamlit_admin.py` provides a prettier operator dashboard over the same admin API
+- the Streamlit dashboard can derive tmux-based `kb-api` and `kb-worker` start/restart commands from `.env`
+
+Current operator flow:
+1. Start the Streamlit dashboard.
+2. If `kb-api` is offline, use the configured start command from the dashboard.
+3. Open `/admin` or use the Streamlit dashboard against the running backend.
+4. Enter non-secret instance config such as `VAULT_PATH`, `DATABASE_URL`, and `GITHUB_REPO`.
+5. Save config, which writes `kb-server/.env`.
+6. Restart `kb-api` and `kb-worker`.
+7. Reopen `/admin` or rerun Streamlit and verify readiness and integration state.
+
+Current limitations:
+- `/admin` does not provision PostgreSQL, create DB roles, or create databases
+- `/admin` does not create the notes repo or GitHub repo
+- `/admin` and Streamlit assume `tmux` is installed and only manage the API/worker processes for the configured workdir/session names
+- host-level setup still happens outside the browser
+
+Secret model:
+- Preferred: establish `KB_API_KEY` and `GITHUB_TOKEN` as process environment variables
+- Supported for local/dev use: save `KB_API_KEY` and `GITHUB_TOKEN` through the admin UI into `.env`
+- Do not treat `GITHUB_REPO` as a secret; it should normally live in `.env`
+- Process environment still overrides `.env`
+
+Admin auth model:
+- `KB_API_KEY` still protects the note and publish APIs
+- `/admin` and `/admin/api/*` are intentionally exempt from `X-API-Key` so the local dashboard can bootstrap and operate the instance
+- Treat the dashboard as a local operator surface, not an internet-facing control plane
+
 ## Dependencies
 
 - Python 3.10+

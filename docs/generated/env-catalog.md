@@ -1,7 +1,7 @@
 ---
 owner: platform
 status: generated
-last_verified: 2026-03-07
+last_verified: 2026-03-12
 source_of_truth:
   - ../../kb-server/.env.example
   - ../../kb-server/app/core/config.py
@@ -16,7 +16,7 @@ review_cycle_days: 7
 
 # Environment Catalog (Generated)
 
-Generated on `2026-03-07` from settings and env sources.
+Generated on `2026-03-12` from settings and env sources.
 
 ## kb-server `.env.example`
 
@@ -36,6 +36,9 @@ Generated on `2026-03-07` from settings and env sources.
 | `GITHUB_REPO` | `owner/repo` |
 | `QUARTZ_BUILD_COMMAND` | `` |
 | `QUARTZ_WEBHOOK_URL` | `` |
+| `ADMIN_TMUX_SESSION` | `kb-api` |
+| `ADMIN_TMUX_WORKER_SESSION` | `kb-worker` |
+| `ADMIN_TMUX_WORKDIR` | `/absolute/path/to/flight-deck/kb-server` |
 | `API_HOST` | `0.0.0.0` |
 | `API_PORT` | `8000` |
 
@@ -57,6 +60,9 @@ Generated on `2026-03-07` from settings and env sources.
 | `git_pull_interval_seconds` | `60` |
 | `quartz_build_command` | `""` |
 | `quartz_webhook_url` | `""` |
+| `admin_tmux_session` | `"kb-api"` |
+| `admin_tmux_worker_session` | `"kb-worker"` |
+| `admin_tmux_workdir` | `Path("/srv/flightdeck/kb-server")` |
 | `api_host` | `"0.0.0.0"` |
 | `api_port` | `8000` |
 
