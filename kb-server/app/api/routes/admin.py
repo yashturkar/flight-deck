@@ -365,3 +365,21 @@ async def admin_update_config(request: Request) -> JSONResponse:
             samesite="lax",
         )
     return response
+
+
+@router.post("/admin/api/start")
+def admin_start() -> JSONResponse:
+    if not settings.admin_start_command:
+        raise HTTPException(status_code=501, detail="ADMIN_START_COMMAND is not configured")
+
+    admin_service.launch_command(settings.admin_start_command)
+    return JSONResponse({"message": "Start command launched"})
+
+
+@router.post("/admin/api/restart")
+def admin_restart() -> JSONResponse:
+    if not settings.admin_restart_command:
+        raise HTTPException(status_code=501, detail="ADMIN_RESTART_COMMAND is not configured")
+
+    admin_service.launch_command(settings.admin_restart_command)
+    return JSONResponse({"message": "Restart command launched"})

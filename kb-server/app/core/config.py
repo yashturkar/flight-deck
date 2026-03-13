@@ -33,6 +33,8 @@ class Settings(BaseSettings):
 
     quartz_build_command: str = ""
     quartz_webhook_url: str = ""
+    admin_start_command: str = ""
+    admin_restart_command: str = ""
     api_host: str = "0.0.0.0"
     api_port: int = 8000
 

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import os
 import re
+import subprocess
 from pathlib import Path
 from typing import Any
 
@@ -29,6 +30,8 @@ VISIBLE_CONFIG_KEYS = (
     "GIT_PULL_INTERVAL_SECONDS",
     "QUARTZ_BUILD_COMMAND",
     "QUARTZ_WEBHOOK_URL",
+    "ADMIN_START_COMMAND",
+    "ADMIN_RESTART_COMMAND",
     "API_HOST",
     "API_PORT",
 )
@@ -153,6 +156,16 @@ def update_env_file(updates: dict[str, str]) -> dict[str, Any]:
         "env_file": str(ENV_FILE_PATH),
         "restart_required": True,
     }
+
+
+def launch_command(command: str) -> None:
+    subprocess.Popen(
+        command,
+        shell=True,
+        start_new_session=True,
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
+    )
 
 
 def system_state(session: Session) -> dict[str, Any]:

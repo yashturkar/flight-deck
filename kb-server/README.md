@@ -91,6 +91,8 @@ vault/
 | `GITHUB_REPO` | (empty) | GitHub repository in `owner/repo` format |
 | `QUARTZ_BUILD_COMMAND` | (empty) | Shell command to build Quartz site |
 | `QUARTZ_WEBHOOK_URL` | (empty) | URL to POST after push to trigger rebuild |
+| `ADMIN_START_COMMAND` | (empty) | Shell command launched by the Streamlit dashboard start button |
+| `ADMIN_RESTART_COMMAND` | (empty) | Shell command launched by the Streamlit dashboard restart button |
 | `API_HOST` | `0.0.0.0` | API bind address |
 | `API_PORT` | `8000` | API bind port |
 
@@ -153,6 +155,13 @@ FastAPI also exposes interactive docs:
 - OpenAPI JSON: `GET /openapi.json`
 - Admin UI: `GET /admin`
 
+Streamlit dashboard:
+
+```bash
+cd kb-server
+streamlit run app/streamlit_admin.py
+```
+
 ## Admin UI
 
 `/admin` is a lightweight management surface for setup and operations. The initial version includes:
@@ -162,13 +171,33 @@ FastAPI also exposes interactive docs:
 - write-only secret update fields for `KB_API_KEY` and `GITHUB_TOKEN`
 - readiness, vault, database, Git, and pending PR workflow status
 - recent jobs, vault events, and publish runs
+- backend start/restart support through `ADMIN_START_COMMAND` and `ADMIN_RESTART_COMMAND`
 
 Important behavior:
 
 - The admin UI is not a note editor.
-- When `KB_API_KEY` is configured, open `/admin/login` and authenticate with that key once. The admin UI stores it in an HTTP-only cookie for browser requests to `/admin`.
 - Process environment variables still override `.env`.
 - Saving config writes to `.env`, but you should restart `kb-api` and `kb-worker` after changing database or auth settings.
+
+### Streamlit Dashboard
+
+The repo also includes a Streamlit dashboard backed by the same admin API:
+
+```bash
+cd kb-server
+streamlit run app/streamlit_admin.py
+```
+
+The Streamlit dashboard can:
+
+- view readiness, Git, jobs, events, and publish status
+- update config values, including `GITHUB_TOKEN`
+- start the backend if `ADMIN_START_COMMAND` is configured
+- trigger a restart command if `ADMIN_RESTART_COMMAND` is configured
+
+The Streamlit start/restart buttons launch the configured shell commands locally and asynchronously. They do not infer how your runtime is managed, so `ADMIN_START_COMMAND` and `ADMIN_RESTART_COMMAND` must be set to the exact commands you want run on that machine.
+
+If the FastAPI backend is offline, the Streamlit dashboard shows that state instead of crashing. You can then use the sidebar start button to launch the server and rerun the page.
 
 ### Using Admin UI For First-Time Setup
 
@@ -200,7 +229,7 @@ What `/admin` does not do yet:
 - it does not create the Postgres server, role, or database
 - it does not create the notes repo for you
 - it does not create the GitHub repo or remote
-- it does not restart services automatically
+- it does not infer start or restart commands for you
 
 ### Secret Handling
 
