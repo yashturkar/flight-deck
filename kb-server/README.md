@@ -13,13 +13,13 @@ File-first knowledge base server. Watches a Markdown vault, auto-commits to Git,
 
 ```bash
 # Clone and enter the project
-cd kb-server 
+cd kb-server
 
-python -m venv .venv 
-source .venv/bin/activate 
-pip install -e ".[dev]" 
+python -m venv .venv
+source .venv/bin/activate
+pip install -e ".[dev]"
 
-cp .env.example .env # edit .env (VAULT_PATH and DATABASE_URL) 
+cp .env.example .env # edit .env
 
 # Optional secrets: prefer exporting these in your shell instead of storing them in .env
 # Non-secret repo config like GITHUB_REPO should stay in .env
@@ -31,21 +31,10 @@ CREATE ROLE kb WITH LOGIN PASSWORD 'kb';
 CREATE DATABASE kb OWNER kb; # or ALTER DATABASE kb OWNER TO kb; 
 \q # to quit
 
-python -m alembic upgrade head 
-python -m uvicorn app.main:app --reload 
-# in another terminal: 
+python -m alembic upgrade head
+python -m uvicorn app.main:app --reload
+# in another terminal:
 python -m app.workers.autosave
-```
-
-Optional: run them in separate `tmux` sessions instead of keeping two terminal tabs open:
-
-```bash
-tmux new -d -s kb-api 'cd /path/to/flight-deck/kb-server && source .venv/bin/activate && python -m uvicorn app.main:app --reload'
-tmux new -d -s kb-worker 'cd /path/to/flight-deck/kb-server && source .venv/bin/activate && python -m app.workers.autosave'
-
-# attach when needed
-tmux attach -t kb-api
-tmux attach -t kb-worker
 ```
 
 ## Vault setup
@@ -91,8 +80,9 @@ vault/
 | `GITHUB_REPO` | (empty) | GitHub repository in `owner/repo` format |
 | `QUARTZ_BUILD_COMMAND` | (empty) | Shell command to build Quartz site |
 | `QUARTZ_WEBHOOK_URL` | (empty) | URL to POST after push to trigger rebuild |
-| `ADMIN_START_COMMAND` | (empty) | Shell command launched by the Streamlit dashboard start button |
-| `ADMIN_RESTART_COMMAND` | (empty) | Shell command launched by the Streamlit dashboard restart button |
+| `ADMIN_TMUX_SESSION` | `kb-api` | tmux session name used by the Streamlit dashboard to manage the API |
+| `ADMIN_TMUX_WORKER_SESSION` | `kb-worker` | tmux session name used by the Streamlit dashboard to manage the autosave worker |
+| `ADMIN_TMUX_WORKDIR` | `/srv/flightdeck/kb-server` | Absolute `kb-server` path used to build the tmux start/restart commands |
 | `API_HOST` | `0.0.0.0` | API bind address |
 | `API_PORT` | `8000` | API bind port |
 
@@ -159,7 +149,7 @@ Streamlit dashboard:
 
 ```bash
 cd kb-server
-streamlit run app/streamlit_admin.py
+./.venv/bin/streamlit run app/streamlit_admin.py
 ```
 
 ## Admin UI
@@ -171,7 +161,7 @@ streamlit run app/streamlit_admin.py
 - write-only secret update fields for `KB_API_KEY` and `GITHUB_TOKEN`
 - readiness, vault, database, Git, and pending PR workflow status
 - recent jobs, vault events, and publish runs
-- backend start/restart support through `ADMIN_START_COMMAND` and `ADMIN_RESTART_COMMAND`
+- `kb-api` and `kb-worker` start/restart support through derived tmux commands based on `ADMIN_TMUX_SESSION`, `ADMIN_TMUX_WORKER_SESSION`, and `ADMIN_TMUX_WORKDIR`
 
 Important behavior:
 
@@ -186,19 +176,26 @@ The repo also includes a Streamlit dashboard backed by the same admin API:
 
 ```bash
 cd kb-server
-streamlit run app/streamlit_admin.py
+./.venv/bin/streamlit run app/streamlit_admin.py
 ```
 
 The Streamlit dashboard can:
 
-- view prettified readiness, vault, database, Git, batcher, jobs, events, publish, and PR status
+- view prettified readiness, vault, database, Git, batcher, autosave, jobs, events, publish, and PR status
 - update config values, including `GITHUB_TOKEN`
-- start the backend if `ADMIN_START_COMMAND` is configured
-- trigger a restart command if `ADMIN_RESTART_COMMAND` is configured
+- start and restart `kb-api` if `ADMIN_TMUX_WORKDIR` points at a valid `kb-server` checkout
+- start and restart `kb-worker` in its configured tmux session
 
-The Streamlit start/restart buttons launch the configured shell commands locally and asynchronously. They do not infer how your runtime is managed, so `ADMIN_START_COMMAND` and `ADMIN_RESTART_COMMAND` must be set to the exact commands you want run on that machine.
+The Streamlit start/restart buttons derive the tmux commands locally and asynchronously. Users only need to set `ADMIN_TMUX_SESSION`, `ADMIN_TMUX_WORKER_SESSION`, and `ADMIN_TMUX_WORKDIR`; the dashboard builds the standard `uvicorn` and autosave commands automatically from those values plus `API_HOST` and `API_PORT`.
 
 If the FastAPI backend is offline, the Streamlit dashboard shows that state instead of crashing. You can then use the sidebar start button to launch the server and rerun the page.
+
+The dashboard also exposes dedicated autosave feedback:
+
+- whether the configured worker tmux session is currently running
+- the latest autosave job status and timestamps
+- the latest autosave commit and push SHA
+- the files included in the latest autosave run
 
 ### Using Admin UI For First-Time Setup
 
@@ -213,29 +210,40 @@ Before using `/admin`, you still need to create or provide:
 
 First-time setup flow:
 
-1. Start the Streamlit dashboard:
+1. Fill in the minimum required `.env` values:
+   - `DATABASE_URL`
+   - `VAULT_PATH`
+   - `GITHUB_REPO` if you want PR workflows
+   - `ADMIN_TMUX_WORKDIR` pointing at this `kb-server` checkout
+   - optionally `ADMIN_TMUX_SESSION` if you do not want `kb-api`
+   - optionally `ADMIN_TMUX_WORKER_SESSION` if you do not want `kb-worker`
+2. Run migrations:
+   ```bash
+   ./.venv/bin/python -m alembic upgrade head
+   ```
+3. Start the Streamlit dashboard:
    ```bash
    cd kb-server
-   streamlit run app/streamlit_admin.py
+   ./.venv/bin/streamlit run app/streamlit_admin.py
    ```
-2. If `kb-api` is offline, use the dashboard sidebar start button after setting `ADMIN_START_COMMAND`.
-3. Open `GET /admin` or use the Streamlit dashboard against the running backend.
-4. Fill in the non-secret instance config:
+4. If `kb-api` or `kb-worker` is offline, use the dashboard sidebar start buttons.
+5. Open `GET /admin` or use the Streamlit dashboard against the running backend.
+6. Fill in the remaining non-secret instance config:
    - `VAULT_PATH`
    - `DATABASE_URL`
    - `GITHUB_REPO`
    - Git branch / remote settings
    - optional Quartz settings
-5. Save the form. This writes the values to `kb-server/.env`.
-6. Restart `kb-api` and `kb-worker`.
-7. Reopen `/admin` or rerun the Streamlit dashboard and verify readiness, vault, database, Git, and PR status.
+7. Save the form. This writes the values to `kb-server/.env`.
+8. Restart `kb-api` and `kb-worker` from the dashboard or your tmux session.
+9. Reopen `/admin` or rerun the Streamlit dashboard and verify readiness, vault, database, Git, runtime, and PR status.
 
 What `/admin` does not do yet:
 
 - it does not create the Postgres server, role, or database
 - it does not create the notes repo for you
 - it does not create the GitHub repo or remote
-- it does not infer start or restart commands for you
+- it assumes `tmux` is installed and derives the API and worker start/restart commands from your configured workdir/session names
 
 ### Secret Handling
 
@@ -266,12 +274,15 @@ python -m uvicorn app.main:app --reload
 
 ### Authentication
 
-When `KB_API_KEY` is set, **every** request (including `/health`, `/ready`,
-`/docs`, and `/openapi.json`) must include the key:
+When `KB_API_KEY` is set, non-admin API requests must include the key. That includes `/health`, `/ready`, `/docs`, `/openapi.json`, `/notes/*`, and `/publish`.
+
+Example:
 
 ```bash
 curl -H "X-API-Key: YOUR_KEY" http://localhost:8000/health
 ```
+
+`/admin` and `/admin/api/*` are intentionally exempt from `X-API-Key` so the local setup and Streamlit dashboard can bootstrap the instance.
 
 Requests without a valid key receive a `401` response.
 

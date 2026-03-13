@@ -37,7 +37,7 @@ review_cycle_days: 21
 - Only approved file types are writable.
 - Writes from `source=api` remain review-gated through PR workflow.
 - Admin config writes change local instance configuration only; they do not authorize content writes outside existing approval boundaries.
-- Admin start/restart actions only launch the configured local shell commands; they do not elevate privileges or infer a process manager.
+- Admin start/restart actions only launch derived tmux commands for the configured local checkout and sessions; they do not elevate privileges or infer a broader process manager.
 
 ## Security Review Triggers
 

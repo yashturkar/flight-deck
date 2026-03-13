@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import os
 import re
+import shlex
 import subprocess
 from pathlib import Path
 from typing import Any
@@ -30,8 +31,9 @@ VISIBLE_CONFIG_KEYS = (
     "GIT_PULL_INTERVAL_SECONDS",
     "QUARTZ_BUILD_COMMAND",
     "QUARTZ_WEBHOOK_URL",
-    "ADMIN_START_COMMAND",
-    "ADMIN_RESTART_COMMAND",
+    "ADMIN_TMUX_SESSION",
+    "ADMIN_TMUX_WORKER_SESSION",
+    "ADMIN_TMUX_WORKDIR",
     "API_HOST",
     "API_PORT",
 )
@@ -168,8 +170,81 @@ def launch_command(command: str) -> None:
     )
 
 
+def _tmux_session_exists(session_name: str) -> bool | None:
+    try:
+        result = subprocess.run(
+            ["tmux", "has-session", "-t", session_name],
+            check=False,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+        )
+    except FileNotFoundError:
+        return None
+    return result.returncode == 0
+
+
+def _tmux_api_command() -> str:
+    workdir = settings.admin_tmux_workdir
+    return (
+        f"cd {shlex.quote(str(workdir))} && "
+        "source .venv/bin/activate && "
+        f"python -m uvicorn app.main:app --host {settings.api_host} --port {settings.api_port}"
+    )
+
+
+def _tmux_worker_command() -> str:
+    workdir = settings.admin_tmux_workdir
+    return (
+        f"cd {shlex.quote(str(workdir))} && "
+        "source .venv/bin/activate && "
+        "python -m app.workers.autosave"
+    )
+
+
+def _tmux_process_state(session_name: str, command: str) -> dict[str, Any]:
+    workdir = settings.admin_tmux_workdir
+    venv_python = workdir / ".venv" / "bin" / "python"
+    return {
+        "tmux_session": session_name,
+        "session_running": _tmux_session_exists(session_name),
+        "workdir": str(workdir),
+        "workdir_exists": workdir.is_dir(),
+        "venv_python_exists": venv_python.exists(),
+        "start_command": (
+            f"tmux new-session -d -s {shlex.quote(session_name)} '{command}'"
+        ),
+        "restart_command": (
+            f"tmux respawn-pane -k -t {shlex.quote(session_name)}:0.0 '{command}'"
+        ),
+    }
+
+
+def runtime_control_state() -> dict[str, Any]:
+    return {
+        "api": _tmux_process_state(settings.admin_tmux_session, _tmux_api_command()),
+        "worker": _tmux_process_state(settings.admin_tmux_worker_session, _tmux_worker_command()),
+    }
+
+
+def backend_start_command() -> str:
+    return runtime_control_state()["api"]["start_command"]
+
+
+def backend_restart_command() -> str:
+    return runtime_control_state()["api"]["restart_command"]
+
+
+def worker_start_command() -> str:
+    return runtime_control_state()["worker"]["start_command"]
+
+
+def worker_restart_command() -> str:
+    return runtime_control_state()["worker"]["restart_command"]
+
+
 def system_state(session: Session) -> dict[str, Any]:
     ready_errors: list[str] = []
+    runtime = runtime_control_state()
 
     try:
         session.execute(text("SELECT 1"))
@@ -232,6 +307,24 @@ def system_state(session: Session) -> dict[str, Any]:
         .limit(10)
         .all()
     )
+    latest_autosave_job = (
+        session.query(Job)
+        .filter(Job.job_type == "autosave")
+        .order_by(Job.created_at.desc())
+        .first()
+    )
+    latest_autosave_commit = (
+        session.query(VaultEvent)
+        .filter(VaultEvent.event_type == "autosave_commit")
+        .order_by(VaultEvent.created_at.desc())
+        .first()
+    )
+    latest_autosave_push = (
+        session.query(VaultEvent)
+        .filter(VaultEvent.event_type == "autosave_push")
+        .order_by(VaultEvent.created_at.desc())
+        .first()
+    )
 
     return {
         "ready": not ready_errors,
@@ -247,6 +340,23 @@ def system_state(session: Session) -> dict[str, Any]:
         "batcher": {
             "pending_count": batcher.pending_count(),
             "pending_paths": batcher.pending_paths(),
+        },
+        "runtime": runtime,
+        "autosave": {
+            "worker_session_running": runtime["worker"]["session_running"],
+            "latest_job_status": latest_autosave_job.status if latest_autosave_job else None,
+            "latest_job_created_at": latest_autosave_job.created_at.isoformat() if latest_autosave_job and latest_autosave_job.created_at else None,
+            "latest_job_completed_at": latest_autosave_job.completed_at.isoformat() if latest_autosave_job and latest_autosave_job.completed_at else None,
+            "latest_job_error": latest_autosave_job.error if latest_autosave_job else None,
+            "latest_job_files": (
+                latest_autosave_job.meta.get("files", [])
+                if latest_autosave_job and isinstance(latest_autosave_job.meta, dict)
+                else []
+            ),
+            "latest_commit_sha": latest_autosave_commit.commit_sha if latest_autosave_commit else None,
+            "latest_commit_at": latest_autosave_commit.created_at.isoformat() if latest_autosave_commit and latest_autosave_commit.created_at else None,
+            "latest_push_sha": latest_autosave_push.commit_sha if latest_autosave_push else None,
+            "latest_push_at": latest_autosave_push.created_at.isoformat() if latest_autosave_push and latest_autosave_push.created_at else None,
         },
         "jobs": [
             {

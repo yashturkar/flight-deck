@@ -63,7 +63,13 @@ review_cycle_days: 21
 
 - Signal: Streamlit dashboard reports backend offline instead of crashing.
 - Cause: `kb-api` is down, misbound, or unreachable at the configured backend URL.
-- Recovery check: launch the configured `ADMIN_START_COMMAND`, rerun the dashboard, and confirm `/admin/api/state` responds again.
+- Recovery check: launch the derived tmux start command via the dashboard, rerun the dashboard, and confirm `/admin/api/state` responds again.
+
+### Autosave worker offline (`kb-server`)
+
+- Signal: Streamlit dashboard shows worker runtime config but autosave activity stops advancing.
+- Cause: `kb-worker` tmux session is down or was never started.
+- Recovery check: launch or restart the worker from the dashboard and confirm vault events resume.
 
 ### API outage (`vault-sync`)
 

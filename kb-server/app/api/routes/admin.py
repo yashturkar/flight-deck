@@ -6,7 +6,6 @@ from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import HTMLResponse, JSONResponse
 from sqlalchemy.orm import Session
 
-from app.core.config import settings
 from app.models.db import get_session
 from app.services import admin_service
 
@@ -270,17 +269,47 @@ async def admin_update_config(request: Request) -> JSONResponse:
 
 @router.post("/admin/api/start")
 def admin_start() -> JSONResponse:
-    if not settings.admin_start_command:
-        raise HTTPException(status_code=501, detail="ADMIN_START_COMMAND is not configured")
+    runtime = admin_service.runtime_control_state()["api"]
+    if not runtime["workdir_exists"]:
+        raise HTTPException(status_code=501, detail="ADMIN_TMUX_WORKDIR does not exist")
+    if not runtime["venv_python_exists"]:
+        raise HTTPException(status_code=501, detail="Configured workdir is missing .venv/bin/python")
 
-    admin_service.launch_command(settings.admin_start_command)
+    admin_service.launch_command(admin_service.backend_start_command())
     return JSONResponse({"message": "Start command launched"})
 
 
 @router.post("/admin/api/restart")
 def admin_restart() -> JSONResponse:
-    if not settings.admin_restart_command:
-        raise HTTPException(status_code=501, detail="ADMIN_RESTART_COMMAND is not configured")
+    runtime = admin_service.runtime_control_state()["api"]
+    if not runtime["workdir_exists"]:
+        raise HTTPException(status_code=501, detail="ADMIN_TMUX_WORKDIR does not exist")
+    if not runtime["venv_python_exists"]:
+        raise HTTPException(status_code=501, detail="Configured workdir is missing .venv/bin/python")
 
-    admin_service.launch_command(settings.admin_restart_command)
+    admin_service.launch_command(admin_service.backend_restart_command())
     return JSONResponse({"message": "Restart command launched"})
+
+
+@router.post("/admin/api/start-worker")
+def admin_start_worker() -> JSONResponse:
+    runtime = admin_service.runtime_control_state()["worker"]
+    if not runtime["workdir_exists"]:
+        raise HTTPException(status_code=501, detail="ADMIN_TMUX_WORKDIR does not exist")
+    if not runtime["venv_python_exists"]:
+        raise HTTPException(status_code=501, detail="Configured workdir is missing .venv/bin/python")
+
+    admin_service.launch_command(admin_service.worker_start_command())
+    return JSONResponse({"message": "Worker start command launched"})
+
+
+@router.post("/admin/api/restart-worker")
+def admin_restart_worker() -> JSONResponse:
+    runtime = admin_service.runtime_control_state()["worker"]
+    if not runtime["workdir_exists"]:
+        raise HTTPException(status_code=501, detail="ADMIN_TMUX_WORKDIR does not exist")
+    if not runtime["venv_python_exists"]:
+        raise HTTPException(status_code=501, detail="Configured workdir is missing .venv/bin/python")
+
+    admin_service.launch_command(admin_service.worker_restart_command())
+    return JSONResponse({"message": "Worker restart command launched"})

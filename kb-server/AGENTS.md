@@ -181,7 +181,7 @@ Current bootstrap behavior:
 - it can write `.env` updates for visible config fields
 - it exposes write-only inputs for `KB_API_KEY` and `GITHUB_TOKEN`
 - `app/streamlit_admin.py` provides a prettier operator dashboard over the same admin API
-- the Streamlit dashboard can launch configured backend start/restart commands
+- the Streamlit dashboard can derive tmux-based `kb-api` and `kb-worker` start/restart commands from `.env`
 
 Current operator flow:
 1. Start the Streamlit dashboard.
@@ -195,7 +195,7 @@ Current operator flow:
 Current limitations:
 - `/admin` does not provision PostgreSQL, create DB roles, or create databases
 - `/admin` does not create the notes repo or GitHub repo
-- `/admin` and Streamlit only run the explicit start/restart commands you configure
+- `/admin` and Streamlit assume `tmux` is installed and only manage the API/worker processes for the configured workdir/session names
 - host-level setup still happens outside the browser
 
 Secret model:

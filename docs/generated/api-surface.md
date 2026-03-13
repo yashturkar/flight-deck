@@ -32,5 +32,7 @@ Generated on `2026-03-12` from route handlers.
 | `POST` | `/admin/api/config` |
 | `POST` | `/admin/api/start` |
 | `POST` | `/admin/api/restart` |
+| `POST` | `/admin/api/start-worker` |
+| `POST` | `/admin/api/restart-worker` |
 
 Do not edit manually. Regenerate with `python3 scripts/generate_context_artifacts.py`.

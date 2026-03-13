@@ -3,7 +3,6 @@ from __future__ import annotations
 import httpx
 import streamlit as st
 
-from app.core.config import settings
 from app.services import admin_service
 
 
@@ -62,27 +61,60 @@ def render_table(title: str, rows: list[dict], *, empty_message: str) -> None:
     st.dataframe(formatted_rows, use_container_width=True, hide_index=True)
 
 
+def normalize_runtime_state(runtime: dict | None) -> tuple[dict, dict]:
+    if not runtime:
+        current = admin_service.runtime_control_state()
+        return current["api"], current["worker"]
+
+    if "api" in runtime and "worker" in runtime:
+        return runtime["api"], runtime["worker"]
+
+    fallback = admin_service.runtime_control_state()
+    return runtime, fallback["worker"]
+
+
 st.set_page_config(page_title="KB Server Dashboard", layout="wide")
 st.title("KB Server Dashboard")
 
 st.sidebar.text_input("Backend URL", value="http://localhost:8000", key="backend_url")
+runtime_state = admin_service.runtime_control_state()
+api_runtime = runtime_state["api"]
+worker_runtime = runtime_state["worker"]
 
 with st.sidebar:
-    st.subheader("Server Control")
-    if st.button("Start kb-server"):
+    st.subheader("API Control")
+    api_ready = api_runtime["workdir_exists"] and api_runtime["venv_python_exists"]
+    if st.button("Start kb-api", disabled=not api_ready):
         run_local_command(
-            settings.admin_start_command,
-            "ADMIN_START_COMMAND is not configured in .env",
+            admin_service.backend_start_command(),
+            "Set ADMIN_TMUX_WORKDIR and ADMIN_TMUX_SESSION in .env first",
         )
-    if st.button("Restart kb-server"):
+    if st.button("Restart kb-api", disabled=not api_ready):
         run_local_command(
-            settings.admin_restart_command,
-            "ADMIN_RESTART_COMMAND is not configured in .env",
+            admin_service.backend_restart_command(),
+            "Set ADMIN_TMUX_WORKDIR and ADMIN_TMUX_SESSION in .env first",
         )
-    if settings.admin_start_command:
-        st.caption(f"Start: `{settings.admin_start_command}`")
-    if settings.admin_restart_command:
-        st.caption(f"Restart: `{settings.admin_restart_command}`")
+    st.caption(f"session: `{api_runtime['tmux_session']}`")
+
+    st.subheader("Worker Control")
+    worker_ready = worker_runtime["workdir_exists"] and worker_runtime["venv_python_exists"]
+    if st.button("Start kb-worker", disabled=not worker_ready):
+        run_local_command(
+            admin_service.worker_start_command(),
+            "Set ADMIN_TMUX_WORKDIR and ADMIN_TMUX_WORKER_SESSION in .env first",
+        )
+    if st.button("Restart kb-worker", disabled=not worker_ready):
+        run_local_command(
+            admin_service.worker_restart_command(),
+            "Set ADMIN_TMUX_WORKDIR and ADMIN_TMUX_WORKER_SESSION in .env first",
+        )
+    st.caption(f"session: `{worker_runtime['tmux_session']}`")
+    st.caption(f"workdir: `{api_runtime['workdir']}`")
+
+    if not api_runtime["workdir_exists"]:
+        st.warning("Configured tmux workdir does not exist yet.")
+    elif not api_runtime["venv_python_exists"]:
+        st.warning("Configured workdir is missing `.venv/bin/python`.")
 
 state_response, state_error = try_api_request("GET", "/admin/api/state")
 if state_response is None:
@@ -97,12 +129,15 @@ if not state_response.is_success:
 payload = state_response.json()
 state = payload["state"]
 config_rows = payload["config"]
+runtime_state = state["runtime"]
+api_runtime, worker_runtime = normalize_runtime_state(runtime_state)
 
-col1, col2, col3, col4 = st.columns(4)
+col1, col2, col3, col4, col5 = st.columns(5)
 col1.metric("Ready", "yes" if state["ready"] else "no")
 col2.metric("DB", state["database"]["status"])
 col3.metric("Pending Batch", state["batcher"]["pending_count"])
 col4.metric("Open KB PRs", state["prs"]["count"])
+col5.metric("Autosave", format_value(state["autosave"]["latest_job_status"]))
 
 if state["ready_errors"]:
     st.warning("\n".join(state["ready_errors"]))
@@ -145,6 +180,14 @@ with ops_left:
     render_kv("Database", state["database"])
 with ops_right:
     render_kv("Batcher", state["batcher"])
+
+runtime_left, runtime_right = st.columns(2)
+with runtime_left:
+    render_kv("API Runtime", api_runtime)
+with runtime_right:
+    render_kv("Worker Runtime", worker_runtime)
+
+render_kv("Autosave Status", state["autosave"])
 
 with st.expander("Pending PRs", expanded=True):
     render_table(

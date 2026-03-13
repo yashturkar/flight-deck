@@ -33,8 +33,9 @@ class Settings(BaseSettings):
 
     quartz_build_command: str = ""
     quartz_webhook_url: str = ""
-    admin_start_command: str = ""
-    admin_restart_command: str = ""
+    admin_tmux_session: str = "kb-api"
+    admin_tmux_worker_session: str = "kb-worker"
+    admin_tmux_workdir: Path = Path("/srv/flightdeck/kb-server")
     api_host: str = "0.0.0.0"
     api_port: int = 8000
 

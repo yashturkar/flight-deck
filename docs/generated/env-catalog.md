@@ -36,8 +36,9 @@ Generated on `2026-03-12` from settings and env sources.
 | `GITHUB_REPO` | `owner/repo` |
 | `QUARTZ_BUILD_COMMAND` | `` |
 | `QUARTZ_WEBHOOK_URL` | `` |
-| `ADMIN_START_COMMAND` | `tmux new -d -s kb-api 'cd <kb-server root> && source .venv/bin/activate && python -m uvicorn app.main:app --host 0.0.0.0 --port 8000'` |
-| `ADMIN_RESTART_COMMAND` | `tmux respawn-pane -k -t kb-api:0.0 'cd <kb-server root> && source .venv/bin/activate && python -m uvicorn app.main:app --host 0.0.0.0 --port 8000'` |
+| `ADMIN_TMUX_SESSION` | `kb-api` |
+| `ADMIN_TMUX_WORKER_SESSION` | `kb-worker` |
+| `ADMIN_TMUX_WORKDIR` | `/absolute/path/to/flight-deck/kb-server` |
 | `API_HOST` | `0.0.0.0` |
 | `API_PORT` | `8000` |
 
@@ -59,8 +60,9 @@ Generated on `2026-03-12` from settings and env sources.
 | `git_pull_interval_seconds` | `60` |
 | `quartz_build_command` | `""` |
 | `quartz_webhook_url` | `""` |
-| `admin_start_command` | `""` |
-| `admin_restart_command` | `""` |
+| `admin_tmux_session` | `"kb-api"` |
+| `admin_tmux_worker_session` | `"kb-worker"` |
+| `admin_tmux_workdir` | `Path("/srv/flightdeck/kb-server")` |
 | `api_host` | `"0.0.0.0"` |
 | `api_port` | `8000` |
 
