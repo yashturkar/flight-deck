@@ -1,0 +1,28 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "flight-deck-mcp-server"
+version = "0.1.0"
+description = "MCP adapter for Flight Deck"
+requires-python = ">=3.10"
+dependencies = [
+    "httpx>=0.28",
+    "mcp>=1.2.0",
+    "pydantic-settings>=2.7",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+]
+
+[project.scripts]
+flight-deck-mcp = "mcp_server.server:main"
+
+[tool.setuptools.packages.find]
+include = ["mcp_server*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

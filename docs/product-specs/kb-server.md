@@ -26,6 +26,8 @@ Provide a file-first API over a Git-backed vault with explicit approval boundari
 - `GET /notes` and `GET /notes/{path}` support:
   - `view=main` (default approved state)
   - `view=current` (approved + pending composed state)
+- `POST /context/search` returns ranked note candidates for a query.
+- `POST /context/bundle` returns a token-bounded context bundle with excerpts, optional full content, and provenance.
 - `PUT /notes/{path}` and `DELETE /notes/{path}` support:
   - `source=api` for PR-based pending writes
   - `source=human` for direct approved writes
@@ -42,6 +44,7 @@ Provide a file-first API over a Git-backed vault with explicit approval boundari
 - Allowed file extensions: `.md`, `.markdown`, `.txt`.
 - No absolute paths and no traversal outside vault root.
 - API key auth enforced when configured.
+- Retrieval is read-only and respects the same view/provenance semantics as note reads.
 
 ## Related Operational Docs
 
@@ -49,4 +52,3 @@ Provide a file-first API over a Git-backed vault with explicit approval boundari
 - `../../kb-server/BRANCHING_AND_CURRENT_VIEW.md`
 - `../SECURITY.md`
 - `../RELIABILITY.md`
-

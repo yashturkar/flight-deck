@@ -1,9 +1,10 @@
 ---
 owner: platform
 status: generated
-last_verified: 2026-03-07
+last_verified: 2026-03-12
 source_of_truth:
   - ../../kb-server/app/api/routes/health.py
+  - ../../kb-server/app/api/routes/context.py
   - ../../kb-server/app/api/routes/notes.py
   - ../../kb-server/app/api/routes/publish.py
 related_code:
@@ -15,12 +16,14 @@ review_cycle_days: 7
 
 # API Surface (Generated)
 
-Generated on `2026-03-07` from route handlers.
+Generated on `2026-03-12` from route handlers.
 
 | Method | Path |
 | --- | --- |
 | `GET` | `/health` |
 | `GET` | `/ready` |
+| `POST` | `/search` |
+| `POST` | `/bundle` |
 | `GET` | `/` |
 | `GET` | `/{path:path}` |
 | `PUT` | `/{path:path}` |

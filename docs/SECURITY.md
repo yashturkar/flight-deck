@@ -27,6 +27,13 @@ review_cycle_days: 21
 - Secrets remain in local `.env` files or deployment secret stores.
 - Docs should only reference secret names, not values.
 - Generated docs must redact secrets by default.
+- `mcp-server` stores `KB_API_KEY` locally and must never echo it back through tool output or logs.
+
+## MCP Boundary
+
+- `mcp-server` is a local adapter over `kb-server`, not a second source of truth.
+- v1 transport is stdio only; no remote MCP transport is exposed by default.
+- MCP writes must use `source=api` and must not expose a path to `source=human`.
 
 ## Write Safety
 
@@ -40,5 +47,6 @@ Update this document when changing:
 
 - auth middleware/dependency behavior
 - request validation and path sanitization
+- MCP transport or upstream auth handling
 - external webhook/publish execution semantics
 - GitHub token scope or PR automation behavior

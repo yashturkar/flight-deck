@@ -5,6 +5,7 @@ A file-first knowledge base with Git-backed approval workflows. Edit notes local
 ## What it does
 
 - **kb-server**: API and workers that manage a Markdown vault, auto-commit to Git, and expose a `current` view (approved content + pending PRs).
+- **mcp-server**: MCP adapter that gives agents structured tools/resources over notes and server-built context bundles.
 - **vault-sync**: Daemon that mirrors the current view to a local folder and pushes your edits back as human-origin commits.
 
 ## Get started
@@ -22,6 +23,7 @@ A file-first knowledge base with Git-backed approval workflows. Edit notes local
 | Path          | Purpose                                      |
 | ------------- | -------------------------------------------- |
 | `kb-server/`  | API, Git workflows, current-view composition |
+| `mcp-server/` | MCP adapter over kb-server                    |
 | `vault-sync/` | Local sync daemon (pull + push)              |
 | `docs/`       | Architecture, runbooks, product specs        |
 

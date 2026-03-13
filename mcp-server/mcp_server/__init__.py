@@ -1,0 +1,1 @@
+"""Flight Deck MCP adapter."""

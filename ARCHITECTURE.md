@@ -23,6 +23,7 @@ review_cycle_days: 21
 ## Monorepo Topology
 
 - `kb-server/`: authoritative API and worker processes.
+- `mcp-server/`: MCP adapter for agent-native note and context access.
 - `vault-sync/`: local daemon that mirrors and edits through API.
 - `docs/`: system-of-record documentation for humans and agents.
 - `scripts/`: repository-level automation for docs quality and generation.
@@ -39,11 +40,19 @@ review_cycle_days: 21
 ### kb-server
 
 - Exposes health/readiness and notes/publish APIs.
+- Exposes retrieval/context APIs for server-side note discovery and bundling.
 - Enforces path + extension safety for note files.
 - Routes writes by source:
   - `source=api`: queued to PR branch workflow.
   - `source=human`: direct commit/push to base branch.
 - Implements `view=current` as composed, read-only view.
+
+### mcp-server
+
+- Connects MCP-capable agents to Flight Deck through stdio tools/resources.
+- Delegates note CRUD and retrieval requests to `kb-server` over HTTP.
+- Defaults reads to `view=current`.
+- Forces note mutations through `source=api` so review workflows stay intact.
 
 ### vault-sync
 
@@ -76,6 +85,13 @@ review_cycle_days: 21
 3. API returns composed content + source branches.
 4. Writes to `view=current` are rejected.
 
+### Retrieval Flow
+
+1. Client requests search or a context bundle.
+2. `kb-server` builds a deterministic note graph over the visible view.
+3. Results return ranked note candidates, excerpts, and provenance.
+4. Content remains read-only until a later explicit write operation.
+
 ## Invariants
 
 - `main` remains approved truth.
@@ -89,6 +105,6 @@ review_cycle_days: 21
 - `docs/design-docs/index.md`
 - `docs/product-specs/kb-server.md`
 - `docs/product-specs/vault-sync.md`
+- `docs/product-specs/mcp-server.md`
 - `docs/SECURITY.md`
 - `docs/RELIABILITY.md`
-

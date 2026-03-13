@@ -1,0 +1,13 @@
+pyproject.toml
+flight_deck_mcp_server.egg-info/PKG-INFO
+flight_deck_mcp_server.egg-info/SOURCES.txt
+flight_deck_mcp_server.egg-info/dependency_links.txt
+flight_deck_mcp_server.egg-info/entry_points.txt
+flight_deck_mcp_server.egg-info/requires.txt
+flight_deck_mcp_server.egg-info/top_level.txt
+mcp_server/__init__.py
+mcp_server/client.py
+mcp_server/config.py
+mcp_server/server.py
+tests/test_client.py
+tests/test_server.py
