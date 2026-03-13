@@ -180,19 +180,22 @@ Current bootstrap behavior:
 - it shows config, readiness, vault/db/git status, recent jobs/events, and PR summary
 - it can write `.env` updates for visible config fields
 - it exposes write-only inputs for `KB_API_KEY` and `GITHUB_TOKEN`
+- `app/streamlit_admin.py` provides a prettier operator dashboard over the same admin API
+- the Streamlit dashboard can launch configured backend start/restart commands
 
 Current operator flow:
-1. Boot `kb-server` with enough config to start.
-2. Open `/admin`.
-3. Enter non-secret instance config such as `VAULT_PATH`, `DATABASE_URL`, and `GITHUB_REPO`.
-4. Save config, which writes `kb-server/.env`.
-5. Restart `kb-api` and `kb-worker`.
-6. Reopen `/admin` and verify readiness and integration state.
+1. Start the Streamlit dashboard.
+2. If `kb-api` is offline, use the configured start command from the dashboard.
+3. Open `/admin` or use the Streamlit dashboard against the running backend.
+4. Enter non-secret instance config such as `VAULT_PATH`, `DATABASE_URL`, and `GITHUB_REPO`.
+5. Save config, which writes `kb-server/.env`.
+6. Restart `kb-api` and `kb-worker`.
+7. Reopen `/admin` or rerun Streamlit and verify readiness and integration state.
 
 Current limitations:
 - `/admin` does not provision PostgreSQL, create DB roles, or create databases
 - `/admin` does not create the notes repo or GitHub repo
-- `/admin` does not restart services automatically
+- `/admin` and Streamlit only run the explicit start/restart commands you configure
 - host-level setup still happens outside the browser
 
 Secret model:
@@ -202,8 +205,9 @@ Secret model:
 - Process environment still overrides `.env`
 
 Admin auth model:
-- When `KB_API_KEY` is set, `/admin/login` accepts that same API key and stores it in an HTTP-only cookie for browser access to `/admin`
-- The admin UI is therefore gated by the same shared secret as the API unless auth is disabled
+- `KB_API_KEY` still protects the note and publish APIs
+- `/admin` and `/admin/api/*` are intentionally exempt from `X-API-Key` so the local dashboard can bootstrap and operate the instance
+- Treat the dashboard as a local operator surface, not an internet-facing control plane
 
 ## Dependencies
 

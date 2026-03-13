@@ -18,8 +18,8 @@ review_cycle_days: 21
 ## Auth Boundary
 
 - API key auth is enforced by server middleware when configured (`KB_API_KEY` non-empty).
-- With auth enabled, all HTTP routes require `X-API-Key`, including `/health`, `/ready`, `/docs`, and `/openapi.json`.
-- With auth enabled, `/admin/login` and `/admin/session` are the browser entry points for the admin UI; successful login stores the same API key in an HTTP-only cookie for subsequent `/admin` requests.
+- With auth enabled, non-admin HTTP routes require `X-API-Key`, including `/health`, `/ready`, `/docs`, and `/openapi.json`.
+- `/admin` and `/admin/api/*` are intentionally exempt from `X-API-Key` so the local operator dashboard can bootstrap and operate the instance.
 - With auth disabled (`KB_API_KEY` empty), requests are accepted without API-key checks.
 - `KB_API_KEY` must never be committed in docs examples with live values.
 
@@ -37,13 +37,14 @@ review_cycle_days: 21
 - Only approved file types are writable.
 - Writes from `source=api` remain review-gated through PR workflow.
 - Admin config writes change local instance configuration only; they do not authorize content writes outside existing approval boundaries.
+- Admin start/restart actions only launch the configured local shell commands; they do not elevate privileges or infer a process manager.
 
 ## Security Review Triggers
 
 Update this document when changing:
 
 - auth middleware/dependency behavior
-- browser auth/session behavior for admin routes
+- admin route exposure or operator trust boundary
 - request validation and path sanitization
 - secret storage or secret presentation behavior in admin/config flows
 - external webhook/publish execution semantics

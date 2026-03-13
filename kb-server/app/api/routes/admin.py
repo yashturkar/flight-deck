@@ -1,10 +1,9 @@
 from __future__ import annotations
 
-import hmac
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, Request
-from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
+from fastapi.responses import HTMLResponse, JSONResponse
 from sqlalchemy.orm import Session
 
 from app.core.config import settings
@@ -59,7 +58,6 @@ ADMIN_HTML = """<!doctype html>
       </div>
       <div class="row">
         <button class="secondary" id="refresh">Refresh</button>
-        <button class="secondary" id="logout">Log Out</button>
       </div>
     </div>
 
@@ -150,10 +148,6 @@ ADMIN_HTML = """<!doctype html>
       fetch("/admin/api/state")
         .then(async (resp) => {
           const contentType = resp.headers.get("content-type") || "";
-          if (resp.redirected) {
-            window.location.href = resp.url;
-            throw new Error("redirected to login");
-          }
           if (!resp.ok || !contentType.includes("application/json")) {
             const body = await resp.text();
             throw new Error(body || `request failed (${resp.status})`);
@@ -210,10 +204,6 @@ ADMIN_HTML = """<!doctype html>
       })
         .then(async (resp) => {
           const contentType = resp.headers.get("content-type") || "";
-          if (resp.redirected) {
-            window.location.href = resp.url;
-            throw new Error("redirected to login");
-          }
           if (!contentType.includes("application/json")) {
             const body = await resp.text();
             throw new Error(body || `request failed (${resp.status})`);
@@ -233,54 +223,7 @@ ADMIN_HTML = """<!doctype html>
     });
 
     document.getElementById("refresh").addEventListener("click", loadState);
-    document.getElementById("logout").addEventListener("click", () => {
-      fetch("/admin/logout", { method: "POST" }).then(() => window.location.href = "/admin/login");
-    });
-
     loadState();
-  </script>
-</body>
-</html>"""
-
-LOGIN_HTML = """<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>KB Server Admin Login</title>
-  <style>
-    body { margin:0; min-height:100vh; display:grid; place-items:center; background:linear-gradient(180deg,#203a2f,#111c19); color:#f8f4ea; font-family:ui-sans-serif,system-ui,sans-serif; }
-    .card { width:min(420px,92vw); background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.12); border-radius:24px; padding:24px; backdrop-filter:blur(12px); }
-    input { width:100%; padding:12px; border-radius:12px; border:1px solid rgba(255,255,255,0.2); background:rgba(255,255,255,0.08); color:#fff; }
-    button { margin-top:12px; width:100%; padding:12px; border:none; border-radius:999px; background:#d6b676; color:#1a1a1a; font-weight:700; cursor:pointer; }
-    #status { min-height:20px; margin-top:10px; color:#ffccad; }
-  </style>
-</head>
-<body>
-  <div class="card">
-    <h1>Admin Login</h1>
-    <p>Use the configured KB API key to unlock the admin surface.</p>
-    <input id="api-key" type="password" placeholder="KB_API_KEY">
-    <button id="submit">Open Admin</button>
-    <div id="status"></div>
-  </div>
-  <script>
-    const status = document.getElementById("status");
-    document.getElementById("submit").addEventListener("click", () => {
-      fetch("/admin/session", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ api_key: document.getElementById("api-key").value })
-      })
-      .then(async (resp) => ({ ok: resp.ok, data: await resp.json() }))
-      .then(({ ok, data }) => {
-        if (!ok) throw new Error(data.detail || "login failed");
-        window.location.href = "/admin";
-      })
-      .catch((error) => {
-        status.textContent = error.message;
-      });
-    });
   </script>
 </body>
 </html>"""
@@ -289,42 +232,6 @@ LOGIN_HTML = """<!doctype html>
 @router.get("/admin", response_class=HTMLResponse)
 def admin_page() -> HTMLResponse:
     return HTMLResponse(ADMIN_HTML)
-
-
-@router.get("/admin/login", response_class=HTMLResponse)
-def admin_login() -> HTMLResponse:
-    if not settings.kb_api_key:
-        return HTMLResponse(
-            "<!doctype html><html><body><script>window.location='/admin';</script></body></html>"
-        )
-    return HTMLResponse(LOGIN_HTML)
-
-
-@router.post("/admin/session")
-async def admin_session(request: Request) -> JSONResponse:
-    if not settings.kb_api_key:
-        return JSONResponse({"ok": True})
-
-    payload = await request.json()
-    provided = payload.get("api_key", "")
-    if not provided or not hmac.compare_digest(provided, settings.kb_api_key):
-        raise HTTPException(status_code=401, detail="Invalid or missing API key")
-
-    response = JSONResponse({"ok": True})
-    response.set_cookie(
-        "kb_admin_api_key",
-        provided,
-        httponly=True,
-        samesite="lax",
-    )
-    return response
-
-
-@router.post("/admin/logout")
-def admin_logout() -> RedirectResponse:
-    response = RedirectResponse(url="/admin/login", status_code=303)
-    response.delete_cookie("kb_admin_api_key")
-    return response
 
 
 @router.get("/admin/api/state")
@@ -353,18 +260,12 @@ async def admin_update_config(request: Request) -> JSONResponse:
         updates[key] = str(value)
 
     result = admin_service.update_env_file(updates)
-    response = JSONResponse({
-        "message": "Saved to .env. Restart kb-api and kb-worker to apply auth/database changes reliably.",
-        **result,
-    })
-    if "KB_API_KEY" in updates:
-        response.set_cookie(
-            "kb_admin_api_key",
-            updates["KB_API_KEY"],
-            httponly=True,
-            samesite="lax",
-        )
-    return response
+    return JSONResponse(
+        {
+            "message": "Saved to .env. Restart kb-api and kb-worker to apply auth/database changes reliably.",
+            **result,
+        }
+    )
 
 
 @router.post("/admin/api/start")

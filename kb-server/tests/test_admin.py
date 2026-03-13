@@ -3,7 +3,10 @@ from pathlib import Path
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
+from starlette.requests import Request
+from starlette.responses import JSONResponse
 
+from app.core.auth import APIKeyMiddleware
 from app.core.config import settings
 from app.models.db import Base
 from app.services import admin_service
@@ -86,4 +89,34 @@ def test_admin_state_hides_secret_values(monkeypatch, tmp_vault: Path):
         assert state["vault"]["is_git_repo"] is True
     finally:
         settings.vault_path = previous_vault
+        settings.kb_api_key = previous_key
+
+
+async def test_admin_routes_bypass_api_key(monkeypatch, tmp_vault: Path):
+    previous_key = settings.kb_api_key
+    try:
+        settings.kb_api_key = "secret-key"
+        middleware = APIKeyMiddleware(app=lambda scope, receive, send: None)
+        request = Request(
+            {
+                "type": "http",
+                "method": "GET",
+                "path": "/admin/api/state",
+                "headers": [],
+                "query_string": b"",
+                "scheme": "http",
+                "server": ("testserver", 80),
+                "client": ("testclient", 123),
+                "root_path": "",
+                "http_version": "1.1",
+            }
+        )
+
+        async def call_next(_request: Request):
+            return JSONResponse({"ok": True})
+
+        response = await middleware.dispatch(request, call_next)
+
+        assert response.status_code == 200
+    finally:
         settings.kb_api_key = previous_key

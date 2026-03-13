@@ -36,7 +36,9 @@ Provide a file-first API over a Git-backed vault with explicit approval boundari
 - `GET /admin` exposes an operator-facing setup and status surface.
 - `GET /admin/api/state` returns admin config/status state for the local instance.
 - `POST /admin/api/config` writes local configuration updates to `kb-server/.env`.
-- `GET /admin/login`, `POST /admin/session`, and `POST /admin/logout` support browser access to the admin surface when API-key auth is enabled.
+- `POST /admin/api/start` launches the configured backend start command.
+- `POST /admin/api/restart` launches the configured backend restart command.
+- `app/streamlit_admin.py` provides an operator dashboard backed by the admin API.
 
 ## Approval Model
 
@@ -49,7 +51,8 @@ Provide a file-first API over a Git-backed vault with explicit approval boundari
 
 - Allowed file extensions: `.md`, `.markdown`, `.txt`.
 - No absolute paths and no traversal outside vault root.
-- API key auth enforced when configured.
+- API key auth is enforced on non-admin API routes when configured.
+- Admin routes are intentionally available without `X-API-Key` so the local dashboard can bootstrap and operate the instance.
 - Admin config writes are local instance management actions only; operators must still provision the DB, vault repo, and host runtime outside the browser.
 - Process environment variables override `.env`, including when `.env` is edited through `/admin`.
 

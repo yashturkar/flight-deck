@@ -20,6 +20,7 @@ review_cycle_days: 21
 
 - `kb-server` readiness requires database and Git-backed vault access.
 - `/admin` should surface the same readiness blockers and recent operational signals visible through logs and DB-backed job/event tables.
+- The Streamlit dashboard should degrade cleanly when the FastAPI backend is offline and still allow operators to launch configured start commands.
 - Autosave worker should tolerate transient Git/network failures.
 - `vault-sync` should converge after temporary API outages.
 
@@ -57,6 +58,12 @@ review_cycle_days: 21
 - Signal: `/admin` shows updated `.env` values, but runtime behavior still reflects old DB/auth/process settings.
 - Cause: some settings are effectively startup-bound because the API process and worker initialize long-lived config or connections at startup.
 - Recovery check: restart `kb-api` and `kb-worker`, then confirm `/admin` and `/ready` reflect the expected state.
+
+### API offline but local dashboard available (`kb-server`)
+
+- Signal: Streamlit dashboard reports backend offline instead of crashing.
+- Cause: `kb-api` is down, misbound, or unreachable at the configured backend URL.
+- Recovery check: launch the configured `ADMIN_START_COMMAND`, rerun the dashboard, and confirm `/admin/api/state` responds again.
 
 ### API outage (`vault-sync`)
 

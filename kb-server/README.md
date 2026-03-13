@@ -176,6 +176,7 @@ streamlit run app/streamlit_admin.py
 Important behavior:
 
 - The admin UI is not a note editor.
+- `/admin` and `/admin/api/*` are intentionally available without `X-API-Key` so the local dashboard can bootstrap and manage the instance.
 - Process environment variables still override `.env`.
 - Saving config writes to `.env`, but you should restart `kb-api` and `kb-worker` after changing database or auth settings.
 
@@ -190,7 +191,7 @@ streamlit run app/streamlit_admin.py
 
 The Streamlit dashboard can:
 
-- view readiness, Git, jobs, events, and publish status
+- view prettified readiness, vault, database, Git, batcher, jobs, events, publish, and PR status
 - update config values, including `GITHUB_TOKEN`
 - start the backend if `ADMIN_START_COMMAND` is configured
 - trigger a restart command if `ADMIN_RESTART_COMMAND` is configured
@@ -212,17 +213,22 @@ Before using `/admin`, you still need to create or provide:
 
 First-time setup flow:
 
-1. Start `kb-server` with a minimal working `.env` so the app can boot.
-2. Open `GET /admin`.
-3. Fill in the non-secret instance config:
+1. Start the Streamlit dashboard:
+   ```bash
+   cd kb-server
+   streamlit run app/streamlit_admin.py
+   ```
+2. If `kb-api` is offline, use the dashboard sidebar start button after setting `ADMIN_START_COMMAND`.
+3. Open `GET /admin` or use the Streamlit dashboard against the running backend.
+4. Fill in the non-secret instance config:
    - `VAULT_PATH`
    - `DATABASE_URL`
    - `GITHUB_REPO`
    - Git branch / remote settings
    - optional Quartz settings
-4. Save the form. This writes the values to `kb-server/.env`.
-5. Restart `kb-api` and `kb-worker`.
-6. Reopen `/admin` and verify readiness, vault, database, Git, and PR status.
+5. Save the form. This writes the values to `kb-server/.env`.
+6. Restart `kb-api` and `kb-worker`.
+7. Reopen `/admin` or rerun the Streamlit dashboard and verify readiness, vault, database, Git, and PR status.
 
 What `/admin` does not do yet:
 
