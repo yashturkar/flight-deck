@@ -1,7 +1,7 @@
 ---
 owner: platform
 status: draft
-last_verified: 2026-03-07
+last_verified: 2026-03-14
 source_of_truth:
   - exec-plans/completed/context-system-rollout.md
 related_code:
@@ -49,7 +49,7 @@ python3 scripts/docs_garden.py --output docs/generated/stale-docs-report.md
 
 ## Autonomous Feature Validation
 
-For autonomous agent work that must build, review, test, and bug-fix using a
-test vault and live services, use:
+For local validation of role-based API keys, `vault-sync`, and the tmux-based
+runtime, use:
 
-- `runbooks/autonomous-agent-e2e.md`
+- `runbooks/local-role-auth-e2e.md`

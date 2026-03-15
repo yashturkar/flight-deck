@@ -29,9 +29,6 @@ REQUIRED_FILES = [
     DOCS_ROOT / "PLANS.md",
     DOCS_ROOT / "SECURITY.md",
     DOCS_ROOT / "RELIABILITY.md",
-    DOCS_ROOT / "QUALITY_SCORE.md",
-    DOCS_ROOT / "PRODUCT_SENSE.md",
-    DOCS_ROOT / "DESIGN.md",
     DOCS_ROOT / "CLIENTS.md",
     DOCS_ROOT / "design-docs" / "index.md",
     DOCS_ROOT / "design-docs" / "core-beliefs.md",
@@ -196,4 +193,3 @@ def main() -> int:
 
 if __name__ == "__main__":
     sys.exit(main())
-

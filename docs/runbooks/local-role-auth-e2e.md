@@ -1,7 +1,7 @@
 ---
 owner: platform
 status: draft
-last_verified: 2026-03-12
+last_verified: 2026-03-14
 source_of_truth:
   - ../../kb-server/README.md
   - ../../kb-server/app/core/auth.py
@@ -250,6 +250,19 @@ Expected:
 tmux kill-session -t fd-auth-e2e
 rm -rf "$tmpdir"
 ```
+
+## Acceptance criteria
+
+- `readonly` read succeeds and write-capable routes return `403`
+- `agent` writes land on `kb-api/*` and appear in `view=current`, not `view=main`
+- `vault-sync` pulls `current` and a local edit commits directly to `main`
+- tmux panes show the expected API requests and commit activity
+
+## Reliability signals
+
+- `/health` stays reachable throughout the run
+- `vault-sync` continues polling `view=current` after the local push
+- agent batching either pushes the branch successfully or logs a PR-creation failure without dropping the branch commit
 
 ## Expected outcomes summary
 
