@@ -65,7 +65,7 @@ vault/
 | --- | --- | --- |
 | `VAULT_PATH` | `/srv/flightdeck/vault` | Absolute path to the vault Git repo |
 | `DATABASE_URL` | `postgresql://kb:kb@localhost:5432/kb` | Postgres connection string |
-| `KB_API_KEY` | (empty) | API key required in every request (`X-API-Key` header). Leave blank to disable auth (dev only) |
+| `KB_API_KEY` | (empty) | Deprecated fallback key used only when the `api_keys` table has no rows |
 | `GIT_REMOTE` | `origin` | Git remote name |
 | `GIT_BRANCH` | `main` | Base branch for PRs and autosave pushes |
 | `GIT_PUSH_ENABLED` | `true` | Set `false` to commit without pushing |
@@ -97,6 +97,9 @@ Both share the vault filesystem and the Postgres database.
 
 Current standard in this repo is to run `kb-api` and `kb-worker` in a
 dedicated `tmux` session.
+
+For a copy-paste local `tmux` validation of role-based API keys plus
+`vault-sync`, use `../docs/runbooks/local-role-auth-e2e.md`.
 
 Example:
 
@@ -139,23 +142,34 @@ FastAPI also exposes interactive docs:
 
 ### Authentication
 
-When `KB_API_KEY` is set, **every** request (including `/health`, `/ready`,
-`/docs`, and `/openapi.json`) must include the key:
+`/health` and `/ready` are open. Every other route requires `X-API-Key`.
+
+Preferred auth uses hashed API keys stored in the database. Create them with the
+CLI after configuring `DATABASE_URL` and running migrations:
 
 ```bash
-curl -H "X-API-Key: YOUR_KEY" http://localhost:8000/health
+python -m app.cli.keys create --name "yash-laptop" --role user
+python -m app.cli.keys create --name "claude-agent" --role agent
+python -m app.cli.keys list
 ```
 
-Requests without a valid key receive a `401` response.
+Roles map to server behavior:
 
-When `KB_API_KEY` is left blank (development mode), no authentication is
-required.
+- `readonly`: can read, cannot write or publish
+- `user`: writes commit directly to `GIT_BRANCH`
+- `agent`: writes batch to `kb-api/*` and create/update a PR
+- `admin`: same write behavior as `user` today, reserved for future admin APIs
+
+`KB_API_KEY` remains as a deprecated fallback. It is only used when the
+`api_keys` table has no rows.
+
+`/docs` and `/openapi.json` are protected like every other non-health route.
 
 ### Health and readiness
 
 ```bash
-curl -H "X-API-Key: $KB_API_KEY" http://localhost:8000/health
-curl -H "X-API-Key: $KB_API_KEY" http://localhost:8000/ready
+curl http://localhost:8000/health
+curl http://localhost:8000/ready
 ```
 
 `/ready` reports errors until:
@@ -167,7 +181,7 @@ curl -H "X-API-Key: $KB_API_KEY" http://localhost:8000/ready
 ### Read a note
 
 ```bash
-curl -H "X-API-Key: $KB_API_KEY" \
+curl -H "X-API-Key: <api-key>" \
   http://localhost:8000/notes/notes/hello.md
 ```
 
@@ -183,9 +197,13 @@ Response shape:
 
 ### Write a note
 
+Use a `user`, `agent`, or `admin` key for writes. `readonly` keys receive `403`.
+
+Agent-role writes stay review-gated through the PR workflow:
+
 ```bash
 curl -X PUT http://localhost:8000/notes/notes/hello.md \
-  -H "X-API-Key: $KB_API_KEY" \
+  -H "X-API-Key: <agent-key>" \
   -H "Content-Type: application/json" \
   -d '{"content":"# Hello\nCreated via API.\n"}'
 ```
@@ -198,7 +216,9 @@ API writes are batched in the background (configurable via
 3. Pushes the branch to the remote
 4. Creates or updates a PR targeting `GIT_BRANCH`
 
-This ensures API writes never push directly to main — they always go through a PR.
+This ensures `agent` writes never push directly to main — they always go through a PR.
+
+If you want an approved direct write, use a `user` or `admin` key instead.
 
 Notes:
 
@@ -210,7 +230,7 @@ Notes:
 List everything under a directory prefix:
 
 ```bash
-curl -H "X-API-Key: $KB_API_KEY" \
+curl -H "X-API-Key: <api-key>" \
   "http://localhost:8000/notes/?prefix=notes"
 ```
 
@@ -219,14 +239,15 @@ curl -H "X-API-Key: $KB_API_KEY" \
 Manual publish trigger:
 
 ```bash
-curl -X POST -H "X-API-Key: $KB_API_KEY" http://localhost:8000/publish
+curl -X POST -H "X-API-Key: <write-capable-key>" http://localhost:8000/publish
 ```
 
 If neither `QUARTZ_BUILD_COMMAND` nor `QUARTZ_WEBHOOK_URL` is set, `/publish` returns `501`.
 
 ### Common errors
 
-- **401**: missing or invalid `X-API-Key` header (or `KB_API_KEY` not configured on server)
+- **401**: missing or invalid `X-API-Key` header
+- **403**: authenticated key is read-only for the requested write/publish action
 - **400**: path not allowed (bad extension, absolute path, traversal attempt)
 - **404**: note not found
 - **500**: Git failure (e.g., repo misconfigured) or DB issues

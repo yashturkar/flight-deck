@@ -29,5 +29,4 @@ review_cycle_days: 30
 ## Verification
 
 - Sample read from `view=main` and `view=current`.
-- One `source=human` write and one `source=api` write path test.
-
+- One `user`-key write path test and one `agent`-key write path test.

@@ -21,11 +21,10 @@ review_cycle_days: 21
 ## Client Contract
 
 - Pull from `view=current`.
-- Push edits/deletes as `source=human`.
+- Push edits/deletes with a `user`-role API key so the server applies approved-write semantics.
 - Preserve path and extension constraints enforced by server.
 
 ## Planned Future Clients
 
-- Optional editor plugins should reuse the same view/source semantics.
+- Optional editor plugins should reuse the same view and role-based auth semantics.
 - Any new client must link to test coverage and failure-mode runbooks.
-

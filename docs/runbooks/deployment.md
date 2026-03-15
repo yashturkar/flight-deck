@@ -1,7 +1,7 @@
 ---
 owner: sre
 status: draft
-last_verified: 2026-03-07
+last_verified: 2026-03-14
 source_of_truth:
   - ../../kb-server/README.md
   - ../../vault-sync/README.md
@@ -68,5 +68,4 @@ sudo systemctl enable --now kb-api kb-worker
 - `GET /health` and `GET /ready`.
 - verify push/pull behavior with one test note.
 - verify `view=current` returns composed content.
-- run `docs/runbooks/autonomous-agent-e2e.md` for full end-to-end validation.
-
+- run `docs/runbooks/local-role-auth-e2e.md` for a full local end-to-end validation.

@@ -1,7 +1,7 @@
 ---
 owner: platform
 status: verified
-last_verified: 2026-03-07
+last_verified: 2026-03-14
 source_of_truth:
   - ARCHITECTURE.md
   - docs/design-docs/index.md
@@ -30,7 +30,6 @@ This file is the entry point for agents. It is intentionally short.
 4. Read topical constraints before implementation:
   - `docs/SECURITY.md`
   - `docs/RELIABILITY.md`
-  - `docs/QUALITY_SCORE.md`
 5. Use execution plans for non-trivial work:
   - `docs/exec-plans/active/`
   - `docs/exec-plans/completed/`
@@ -53,7 +52,8 @@ This file is the entry point for agents. It is intentionally short.
 - `main` is approved content.
 - `kb-api/*` branches carry pending API/agent changes via PRs.
 - `view=current` is read-only composed state.
-- Human-origin writes (`source=human`) commit directly to base branch.
+- `user` and `admin` keys commit directly to base branch.
+- `agent` keys write through the PR workflow.
 
 See:
 
@@ -85,5 +85,4 @@ Update docs in the same PR when changing:
 - Plans index: `docs/PLANS.md`
 - Security: `docs/SECURITY.md`
 - Reliability: `docs/RELIABILITY.md`
-- Autonomous E2E workflow: `docs/runbooks/autonomous-agent-e2e.md`
-
+- Local role-auth E2E workflow: `docs/runbooks/local-role-auth-e2e.md`

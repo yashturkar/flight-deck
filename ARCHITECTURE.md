@@ -1,7 +1,7 @@
 ---
 owner: architecture
 status: verified
-last_verified: 2026-03-07
+last_verified: 2026-03-14
 source_of_truth:
   - kb-server/app/main.py
   - kb-server/app/api/routes/notes.py
@@ -31,8 +31,8 @@ review_cycle_days: 21
 
 - Current operations standard runs `kb-api` + `kb-worker` in `tmux`.
 - Planned operations target is `systemctl`-managed services.
-- Full autonomous integration workflow is documented in:
-  - `docs/runbooks/autonomous-agent-e2e.md`
+- Local tmux validation workflow is documented in:
+  - `docs/runbooks/local-role-auth-e2e.md`
 
 ## Domain Boundaries
 
@@ -40,23 +40,24 @@ review_cycle_days: 21
 
 - Exposes health/readiness and notes/publish APIs.
 - Enforces path + extension safety for note files.
-- Routes writes by source:
-  - `source=api`: queued to PR branch workflow.
-  - `source=human`: direct commit/push to base branch.
+- Routes writes by authenticated caller role:
+  - `agent`: queued to PR branch workflow
+  - `user`/`admin`: direct commit/push to base branch
+  - `readonly`: read-only access
 - Implements `view=current` as composed, read-only view.
 
 ### vault-sync
 
 - Pulls notes from `view=current`.
 - Watches local filesystem for edits/deletes.
-- Pushes local changes as `source=human`.
+- Pushes local changes with a `user`-role API key.
 - Periodically repulls to converge and absorb pending+approved state.
 
 ## Core Flows
 
 ### API/Agent Write Flow
 
-1. Client writes note (`source=api`, `view=main`).
+1. Client writes note with an `agent` key (`view=main`).
 2. Server writes file and enqueues path in batcher.
 3. Batcher commits to `kb-api/YYYY-MM-DD`.
 4. Branch is pushed and PR is created/updated.
@@ -65,7 +66,7 @@ review_cycle_days: 21
 ### Human Write Flow
 
 1. Human edit is observed locally or via sync client.
-2. Server receives `source=human`.
+2. Server receives a write from a `user` or `admin` key.
 3. File change is committed directly to configured base branch.
 4. Optional publish actions run from worker flow.
 
@@ -91,4 +92,3 @@ review_cycle_days: 21
 - `docs/product-specs/vault-sync.md`
 - `docs/SECURITY.md`
 - `docs/RELIABILITY.md`
-

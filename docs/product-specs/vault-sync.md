@@ -23,7 +23,7 @@ Provide a local filesystem editing experience while syncing with kb-server's `cu
 ## User-Visible Behavior
 
 - On startup, daemon pulls full `view=current` into `SYNC_DIR`.
-- Local edits and deletes are observed and pushed as `source=human`.
+- Local edits and deletes are observed and pushed with a `user`-role API key.
 - Daemon periodically repulls to absorb remote updates and pending content.
 - Supported local file extensions match server constraints.
 
@@ -38,10 +38,10 @@ Provide a local filesystem editing experience while syncing with kb-server's `cu
 - `SYNC_PULL_INTERVAL_SECONDS` controls refresh cadence.
 - `SYNC_DEBOUNCE_SECONDS` controls write burst handling.
 - `KB_SERVER_URL` and `KB_API_KEY` define server auth target.
+- The configured key must map to a write-capable role, typically `user`.
 
 ## Related Docs
 
 - `../../vault-sync/README.md`
 - `../CLIENTS.md`
 - `../RELIABILITY.md`
-

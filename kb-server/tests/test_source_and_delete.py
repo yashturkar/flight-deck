@@ -1,4 +1,4 @@
-"""Tests for source=human direct-to-main writes and DELETE endpoint."""
+"""Tests for direct-to-main user writes, agent batching, and deletes."""
 
 import subprocess
 from datetime import datetime, timezone
@@ -8,6 +8,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from app.api.routes import notes
+from app.core.identity import CallerIdentity
 from app.schemas.notes import NoteWrite
 from app.services import git_service, vault_service
 
@@ -101,10 +102,10 @@ class TestCommitFilesDeletion:
 
 
 # ===================================================================
-# source=human write (direct to main)
+# user write (direct to main)
 # ===================================================================
 
-class TestSourceHumanWrite:
+class TestUserWrite:
     def test_commits_directly_to_main(self, tmp_vault: Path):
         (tmp_vault / "notes").mkdir(exist_ok=True)
         (tmp_vault / "notes" / "existing.md").write_text("old\n")
@@ -133,7 +134,7 @@ class TestSourceHumanWrite:
         assert sha is not None
         assert (tmp_vault / "notes" / "brand-new.md").read_text() == "# Fresh\n"
 
-    def test_default_source_does_not_commit(self, tmp_vault: Path):
+    def test_plain_write_does_not_commit_without_route_logic(self, tmp_vault: Path):
         old_sha = git_service.current_sha()
         vault_service.write_note("notes/api-note.md", "api content\n")
         new_sha = git_service.current_sha()
@@ -161,6 +162,19 @@ class TestDeleteFlow:
 
 
 class TestNotesRouteActorMapping:
+    user_caller = CallerIdentity(
+        key_id=1,
+        name="yash-laptop",
+        role="user",
+        prefix="kbk_user",
+    )
+    agent_caller = CallerIdentity(
+        key_id=2,
+        name="claude-agent",
+        role="agent",
+        prefix="kbk_agent",
+    )
+
     def test_human_write_uses_user_actor(self):
         session = MagicMock()
         modified_at = datetime.now(timezone.utc)
@@ -173,18 +187,18 @@ class TestNotesRouteActorMapping:
                 "notes/test.md",
                 NoteWrite(content="hello"),
                 view=notes.ViewType.main,
-                source=notes.SourceType.human,
+                caller=self.user_caller,
                 session=session,
             )
 
             gs.commit_files.assert_called_once_with(
                 ["notes/test.md"],
-                "human: update notes/test.md",
+                "yash-laptop: update notes/test.md",
                 actor=gs.USER_ACTOR,
             )
             gs.push.assert_called_once_with(actor=gs.USER_ACTOR)
 
-    def test_api_write_enqueues_without_direct_commit(self):
+    def test_agent_write_enqueues_without_direct_commit(self):
         session = MagicMock()
         modified_at = datetime.now(timezone.utc)
         with patch("app.api.routes.notes.vault_service.write_note", return_value=modified_at), \
@@ -194,7 +208,7 @@ class TestNotesRouteActorMapping:
                 "notes/test.md",
                 NoteWrite(content="hello"),
                 view=notes.ViewType.main,
-                source=notes.SourceType.api,
+                caller=self.agent_caller,
                 session=session,
             )
 
@@ -211,13 +225,13 @@ class TestNotesRouteActorMapping:
 
             notes.delete_note(
                 "notes/test.md",
-                source=notes.SourceType.human,
+                caller=self.user_caller,
                 session=session,
             )
 
             gs.commit_files.assert_called_once_with(
                 ["notes/test.md"],
-                "human: delete notes/test.md",
+                "yash-laptop: delete notes/test.md",
                 actor=gs.USER_ACTOR,
             )
             gs.push.assert_called_once_with(actor=gs.USER_ACTOR)

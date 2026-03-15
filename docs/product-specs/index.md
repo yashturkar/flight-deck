@@ -1,7 +1,7 @@
 ---
 owner: product
 status: draft
-last_verified: 2026-03-07
+last_verified: 2026-03-14
 source_of_truth:
   - ../../kb-server/README.md
   - ../../vault-sync/README.md
@@ -28,7 +28,5 @@ Implementation details belong in design docs or code comments.
 
 ## Related Docs
 
-- `../DESIGN.md`
-- `../PRODUCT_SENSE.md`
+- `../design-docs/core-beliefs.md`
 - `../RELIABILITY.md`
-

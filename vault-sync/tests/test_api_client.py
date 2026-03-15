@@ -67,15 +67,15 @@ class TestReadNote:
 
 class TestWriteNote:
     @respx.mock
-    def test_sends_put_with_source(self, client: KBClient):
+    def test_sends_put(self, client: KBClient):
         route = respx.put(f"{BASE}/notes/notes/new.md").mock(
             return_value=Response(200, json={
                 "path": "notes/new.md", "content": "body\n", "modified_at": "2026-03-06T00:00:00Z",
             })
         )
-        result = client.write_note("notes/new.md", "body\n", source="human")
+        result = client.write_note("notes/new.md", "body\n")
         assert route.called
-        assert "source=human" in str(route.calls.last.request.url)
+        assert str(route.calls.last.request.url.params) == ""
         assert result["content"] == "body\n"
 
     @respx.mock
@@ -95,6 +95,6 @@ class TestDeleteNote:
         route = respx.delete(f"{BASE}/notes/notes/bye.md").mock(
             return_value=Response(204)
         )
-        client.delete_note("notes/bye.md", source="human")
+        client.delete_note("notes/bye.md")
         assert route.called
-        assert "source=human" in str(route.calls.last.request.url)
+        assert str(route.calls.last.request.url.params) == ""
