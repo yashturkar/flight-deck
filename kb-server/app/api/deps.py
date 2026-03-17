@@ -1,21 +1,34 @@
-import secrets
+"""FastAPI dependencies for authentication and authorization."""
 
-from fastapi import Header, HTTPException
+from __future__ import annotations
 
-from app.core.config import settings
+from fastapi import HTTPException, Request
+
+from app.core.identity import CallerIdentity
 
 
-def require_api_key(x_api_key: str = Header(alias="X-API-Key")) -> None:
-    """Reject the request unless X-API-Key matches KB_API_KEY.
+def get_caller(request: Request) -> CallerIdentity:
+    """Return the authenticated caller identity set by the auth middleware.
 
-    When KB_API_KEY is blank the server is considered misconfigured for
-    production use and all gated endpoints return 401.
+    Raises 401 if the middleware did not attach an identity (should not
+    happen for authenticated routes, but acts as a safety net).
     """
-    configured = settings.kb_api_key
-    if not configured:
+    identity: CallerIdentity | None = getattr(request.state, "identity", None)
+    if identity is None:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+    return identity
+
+
+def require_write(request: Request) -> CallerIdentity:
+    """Like ``get_caller`` but also enforces write permission (403 for readonly)."""
+    caller = get_caller(request)
+    if not caller.can_write:
         raise HTTPException(
-            status_code=401,
-            detail="API key not configured on server",
+            status_code=403,
+            detail="This API key does not have write permission",
         )
-    if not secrets.compare_digest(x_api_key, configured):
-        raise HTTPException(status_code=401, detail="Invalid API key")
+    return caller
+
+
+# Deprecated alias — kept for any transient references
+require_api_key = get_caller

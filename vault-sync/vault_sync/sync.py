@@ -94,14 +94,14 @@ def push_changes(
             continue
         content = local_file.read_text(encoding="utf-8")
         try:
-            client.write_note(rel_path, content, source="human")
+            client.write_note(rel_path, content)
             log.info("pushed %s", rel_path)
         except Exception:
             log.exception("failed to push %s", rel_path)
 
     for rel_path in sorted(deleted_files):
         try:
-            client.delete_note(rel_path, source="human")
+            client.delete_note(rel_path)
             log.info("pushed delete %s", rel_path)
         except Exception:
             log.exception("failed to push delete %s", rel_path)

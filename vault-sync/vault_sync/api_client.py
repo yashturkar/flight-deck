@@ -53,24 +53,20 @@ class KBClient:
         resp.raise_for_status()
         return resp.json()
 
-    def write_note(
-        self, path: str, content: str, *, source: str = "human"
-    ) -> dict[str, Any]:
+    def write_note(self, path: str, content: str) -> dict[str, Any]:
         with httpx.Client(timeout=self._timeout) as c:
             resp = c.put(
                 self._url(path),
                 headers=self._headers,
-                params={"source": source},
                 json={"content": content},
             )
         resp.raise_for_status()
         return resp.json()
 
-    def delete_note(self, path: str, *, source: str = "human") -> None:
+    def delete_note(self, path: str) -> None:
         with httpx.Client(timeout=self._timeout) as c:
             resp = c.delete(
                 self._url(path),
                 headers=self._headers,
-                params={"source": source},
             )
         resp.raise_for_status()

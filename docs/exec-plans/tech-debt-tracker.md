@@ -18,12 +18,13 @@ review_cycle_days: 14
 
 | Item | Area | Severity | Owner | Next Action |
 | --- | --- | --- | --- | --- |
-| Actor identity is caller-declared via `source` query param instead of derived from auth | security | high | backend | Implement per-actor API keys or tokens so the server enforces USER vs AGENT identity. See `docs/SECURITY.md` and `docs/product-specs/kb-server.md` TODOs. |
+| None currently. | - | - | - | Keep auth and role documentation aligned with `kb-server/app/core/auth.py`. |
 
 ## Recently Closed
 
 | Item | Closed On | Notes |
 | --- | --- | --- |
+| Derive actor identity from hashed API keys | 2026-03-12 | Replaced caller-declared `source` routing with DB-backed API keys, role-based authorization, and a deprecated legacy fallback for `KB_API_KEY`. |
 | Normalize auth docs vs runtime behavior | 2026-03-07 | Aligned auth behavior in `kb-server/README.md` and `docs/SECURITY.md` with middleware in `kb-server/app/core/auth.py`. |
 | Improve stale-doc auto-fix coverage | 2026-03-07 | Added `--autofix-last-verified` mode in `scripts/docs_garden.py` for stale metadata refresh before report generation. |
 | Add docs checks to local pre-commit workflow | 2026-03-07 | Added `.pre-commit-config.yaml` with docs lint and generated-artifact hooks, documented in root README. |

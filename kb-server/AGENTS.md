@@ -84,7 +84,7 @@ Key environment variables (see `.env.example`):
 |----------|---------|
 | `VAULT_PATH` | Path to the Git-initialized vault directory |
 | `DATABASE_URL` | PostgreSQL connection string |
-| `KB_API_KEY` | API authentication key |
+| `KB_API_KEY` | Deprecated fallback auth key; prefer DB-backed keys created with `python -m app.cli.keys` |
 | `GIT_REMOTE` / `GIT_BRANCH` | Git remote and base branch |
 | `GITHUB_TOKEN` | GitHub PAT for PR creation (needs `repo` scope) |
 | `GITHUB_REPO` | Repository in `owner/repo` format |
@@ -151,18 +151,18 @@ python3 -m pytest tests/test_git_service.py tests/test_git_batcher.py
 
 ```bash
 # List notes
-curl -H "X-API-Key: $KB_API_KEY" "http://localhost:8000/notes/"
+curl -H "X-API-Key: <api-key>" "http://localhost:8000/notes/"
 
 # Read a note
-curl -H "X-API-Key: $KB_API_KEY" "http://localhost:8000/notes/notes/hello.md"
+curl -H "X-API-Key: <api-key>" "http://localhost:8000/notes/notes/hello.md"
 
-# Write a note
+# Write a note with an agent-role key
 curl -X PUT \
-  -H "X-API-Key: $KB_API_KEY" \
+  -H "X-API-Key: <agent-key>" \
   -H "Content-Type: application/json" \
   -d '{"content":"# Hello\nContent here.\n"}' \
   "http://localhost:8000/notes/notes/hello.md"
 
-# Trigger publish
-curl -X POST -H "X-API-Key: $KB_API_KEY" "http://localhost:8000/publish"
+# Trigger publish with a write-capable key
+curl -X POST -H "X-API-Key: <write-key>" "http://localhost:8000/publish"
 ```

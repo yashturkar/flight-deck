@@ -3,18 +3,15 @@ from enum import Enum
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 
-from app.api.deps import require_api_key
+from app.api.deps import get_caller, require_write
 from app.core.config import settings
+from app.core.identity import CallerIdentity
 from app.models.db import VaultEvent, get_session
 from app.schemas.notes import NoteContent, NoteListItem, NoteWrite
 from app.services import current_view_service, git_service, vault_service
 from app.services.git_batcher import batcher
 
-router = APIRouter(
-    prefix="/notes",
-    tags=["notes"],
-    dependencies=[Depends(require_api_key)],
-)
+router = APIRouter(prefix="/notes", tags=["notes"])
 
 
 class ViewType(str, Enum):
@@ -22,13 +19,12 @@ class ViewType(str, Enum):
     current = "current"
 
 
-class SourceType(str, Enum):
-    api = "api"
-    human = "human"
-
-
 @router.get("/", response_model=list[NoteListItem])
-def list_notes(prefix: str = "", view: ViewType = Query(ViewType.main)):
+def list_notes(
+    prefix: str = "",
+    view: ViewType = Query(ViewType.main),
+    caller: CallerIdentity = Depends(get_caller),
+):
     if view == ViewType.current:
         items = current_view_service.list_notes_current(prefix)
         return [
@@ -44,6 +40,7 @@ def list_notes(prefix: str = "", view: ViewType = Query(ViewType.main)):
 def read_note(
     path: str,
     view: ViewType = Query(ViewType.main),
+    caller: CallerIdentity = Depends(get_caller),
     session: Session = Depends(get_session),
 ):
     if view == ViewType.current:
@@ -83,7 +80,7 @@ def write_note(
     path: str,
     body: NoteWrite,
     view: ViewType = Query(ViewType.main),
-    source: SourceType = Query(SourceType.api),
+    caller: CallerIdentity = Depends(require_write),
     session: Session = Depends(get_session),
 ):
     if view == ViewType.current:
@@ -101,14 +98,19 @@ def write_note(
         VaultEvent(
             event_type="write",
             file_path=path,
-            details={"bytes": len(body.content), "source": source.value},
+            details={
+                "bytes": len(body.content),
+                "actor_name": caller.name,
+                "actor_role": caller.role,
+                "key_prefix": caller.prefix,
+            },
         )
     )
     session.commit()
 
-    if source == SourceType.human:
+    if caller.actor == "user":
         git_service.commit_files(
-            [path], f"human: update {path}", actor=git_service.USER_ACTOR
+            [path], f"{caller.name}: update {path}", actor=git_service.USER_ACTOR
         )
         if settings.git_push_enabled:
             git_service.push(actor=git_service.USER_ACTOR)
@@ -121,7 +123,7 @@ def write_note(
 @router.delete("/{path:path}", status_code=204)
 def delete_note(
     path: str,
-    source: SourceType = Query(SourceType.api),
+    caller: CallerIdentity = Depends(require_write),
     session: Session = Depends(get_session),
 ):
     try:
@@ -135,14 +137,18 @@ def delete_note(
         VaultEvent(
             event_type="delete",
             file_path=path,
-            details={"source": source.value},
+            details={
+                "actor_name": caller.name,
+                "actor_role": caller.role,
+                "key_prefix": caller.prefix,
+            },
         )
     )
     session.commit()
 
-    if source == SourceType.human:
+    if caller.actor == "user":
         git_service.commit_files(
-            [path], f"human: delete {path}", actor=git_service.USER_ACTOR
+            [path], f"{caller.name}: delete {path}", actor=git_service.USER_ACTOR
         )
         if settings.git_push_enabled:
             git_service.push(actor=git_service.USER_ACTOR)

@@ -1,7 +1,7 @@
 ---
 owner: platform
 status: generated
-last_verified: 2026-03-12
+last_verified: 2026-03-17
 source_of_truth:
   - ../../kb-server/.env.example
   - ../../kb-server/app/core/config.py
@@ -16,7 +16,7 @@ review_cycle_days: 7
 
 # Environment Catalog (Generated)
 
-Generated on `2026-03-12` from settings and env sources.
+Generated on `2026-03-17` from settings and env sources.
 
 ## kb-server `.env.example`
 
@@ -57,7 +57,7 @@ Generated on `2026-03-12` from settings and env sources.
 | --- | --- |
 | `vault_path` | `Path("/srv/flightdeck/vault")` |
 | `database_url` | `"postgresql://kb:kb@localhost:5432/kb"` |
-| `kb_api_key` | `""` |
+| `kb_api_key` | `""  # Deprecated fallback; prefer DB-backed keys via app.cli.keys` |
 | `git_remote` | `"origin"` |
 | `git_branch` | `"main"` |
 | `git_push_enabled` | `True` |

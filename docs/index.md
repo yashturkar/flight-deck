@@ -1,7 +1,7 @@
 ---
 owner: platform
 status: draft
-last_verified: 2026-03-07
+last_verified: 2026-03-14
 source_of_truth:
   - ../AGENTS.md
   - ../ARCHITECTURE.md
@@ -29,10 +29,7 @@ review_cycle_days: 14
 
 - `SECURITY.md`
 - `RELIABILITY.md`
-- `QUALITY_SCORE.md`
-- `PRODUCT_SENSE.md`
 - `CLIENTS.md`
-- `DESIGN.md`
 - `PLANS.md`
 
 ## Plans and References
@@ -48,5 +45,4 @@ review_cycle_days: 14
 - `runbooks/deployment.md`
 - `runbooks/incident-response.md`
 - `runbooks/backup-restore.md`
-- `runbooks/autonomous-agent-e2e.md`
-
+- `runbooks/local-role-auth-e2e.md`

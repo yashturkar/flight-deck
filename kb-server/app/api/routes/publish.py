@@ -1,6 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
+from app.api.deps import require_write
+from app.core.identity import CallerIdentity
 from app.models.db import get_session
 from app.schemas.notes import PublishResponse
 from app.services import git_service, publish_service
@@ -9,7 +11,10 @@ router = APIRouter(tags=["publish"])
 
 
 @router.post("/publish", response_model=PublishResponse)
-def publish(session: Session = Depends(get_session)):
+def publish(
+    caller: CallerIdentity = Depends(require_write),
+    session: Session = Depends(get_session),
+):
     try:
         sha = git_service.current_sha()
     except git_service.GitError as exc:
