@@ -49,4 +49,5 @@ review_cycle_days: 14
 - `runbooks/incident-response.md`
 - `runbooks/backup-restore.md`
 - `runbooks/autonomous-agent-e2e.md`
-
+- `runbooks/local-role-auth-e2e.md`
+- `runbooks/pr-eval-harness.md`
