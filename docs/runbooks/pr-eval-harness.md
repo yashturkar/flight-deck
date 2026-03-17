@@ -38,15 +38,15 @@ temp SQLite database, and a tmux-backed local stack.
 
 ```bash
 cd /path/to/flight-deck
-python scripts/eval_pr.py <target-ref>
+python3 scripts/eval_pr.py <target-ref>
 ```
 
 Example refs:
 
 ```bash
-python scripts/eval_pr.py origin/some-branch
-python scripts/eval_pr.py my-local-branch
-python scripts/eval_pr.py HEAD
+python3 scripts/eval_pr.py origin/some-branch
+python3 scripts/eval_pr.py my-local-branch
+python3 scripts/eval_pr.py HEAD
 ```
 
 By default the harness:
@@ -70,12 +70,33 @@ harness's own HTTP smoke checks instead.
 ## Useful flags
 
 ```bash
-python scripts/eval_pr.py <target-ref> --keep-temp
-python scripts/eval_pr.py <target-ref> --tests-only
-python scripts/eval_pr.py <target-ref> --e2e-only
-python scripts/eval_pr.py <target-ref> --no-sync
-python scripts/eval_pr.py <target-ref> --port 8021
-python scripts/eval_pr.py <target-ref> --tmux-session-name fd-review
+python3 scripts/eval_pr.py <target-ref> --keep-temp
+python3 scripts/eval_pr.py <target-ref> --tests-only
+python3 scripts/eval_pr.py <target-ref> --e2e-only
+python3 scripts/eval_pr.py <target-ref> --no-sync
+python3 scripts/eval_pr.py <target-ref> --port 8021
+python3 scripts/eval_pr.py <target-ref> --tmux-session-name fd-review
+```
+
+## Recommended review flow
+
+For a normal review pass:
+
+```bash
+git fetch origin
+python3 scripts/eval_pr.py origin/<branch-name>
+```
+
+For a quicker check when you only want test feedback:
+
+```bash
+python3 scripts/eval_pr.py origin/<branch-name> --tests-only
+```
+
+For debugging a runtime issue and keeping the temp environment around:
+
+```bash
+python3 scripts/eval_pr.py origin/<branch-name> --keep-temp
 ```
 
 ## Artifacts and inspection

@@ -31,6 +31,34 @@ A file-first knowledge base with Git-backed approval workflows. Edit notes local
 - [ARCHITECTURE.md](ARCHITECTURE.md) — Domain boundaries and flows
 - [AGENTS.md](AGENTS.md) — Entry point for AI agents
 - [docs/](docs/) — Design docs, runbooks, security, reliability
+- [docs/runbooks/pr-eval-harness.md](docs/runbooks/pr-eval-harness.md) — Review another branch from an isolated `main`-based worktree
+
+## Review Another PR Locally
+
+Use the local harness when you want to evaluate someone else's branch without
+switching your active checkout:
+
+```bash
+python3 scripts/eval_pr.py <target-ref>
+```
+
+Common examples:
+
+```bash
+python3 scripts/eval_pr.py origin/some-branch
+python3 scripts/eval_pr.py my-local-branch --keep-temp
+python3 scripts/eval_pr.py HEAD --tests-only
+```
+
+The harness:
+
+- creates a temp worktree rooted from local `main`
+- runs stable targeted tests for changed areas
+- can launch `kb-server` and `vault-sync` in `tmux`
+- exercises the current mainline write/sync workflow end to end
+
+See [docs/runbooks/pr-eval-harness.md](docs/runbooks/pr-eval-harness.md) for
+prerequisites, flags, and failure inspection.
 
 ## Docs Checks Before PR
 
