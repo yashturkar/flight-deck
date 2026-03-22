@@ -86,4 +86,4 @@ Update docs in the same PR when changing:
 - Security: `docs/SECURITY.md`
 - Reliability: `docs/RELIABILITY.md`
 - Autonomous E2E workflow: `docs/runbooks/autonomous-agent-e2e.md`
-
+- PR evaluation harness: `docs/runbooks/pr-eval-harness.md`

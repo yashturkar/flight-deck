@@ -15,6 +15,10 @@ def _read(path: Path) -> str:
     return path.read_text(encoding="utf-8")
 
 
+def _utc_today_iso() -> str:
+    return dt.datetime.now(dt.timezone.utc).date().isoformat()
+
+
 def _parse_env_example(path: Path) -> list[tuple[str, str]]:
     items: list[tuple[str, str]] = []
     for line in _read(path).splitlines():
@@ -58,7 +62,7 @@ def _write_api_surface() -> None:
     notes_routes = _parse_routes(REPO_ROOT / "kb-server" / "app" / "api" / "routes" / "notes.py")
     publish_routes = _parse_routes(REPO_ROOT / "kb-server" / "app" / "api" / "routes" / "publish.py")
     all_routes = health_routes + notes_routes + publish_routes
-    date = dt.date.today().isoformat()
+    date = _utc_today_iso()
 
     content = [
         "---",
@@ -91,7 +95,7 @@ def _write_api_surface() -> None:
 
 
 def _write_env_catalog() -> None:
-    date = dt.date.today().isoformat()
+    date = _utc_today_iso()
     kb_env = _parse_env_example(REPO_ROOT / "kb-server" / ".env.example")
     kb_defaults = _parse_settings_defaults(REPO_ROOT / "kb-server" / "app" / "core" / "config.py")
     vs_defaults = _parse_settings_defaults(REPO_ROOT / "vault-sync" / "vault_sync" / "config.py")
@@ -165,4 +169,3 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-
