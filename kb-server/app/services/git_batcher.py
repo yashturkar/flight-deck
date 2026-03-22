@@ -57,6 +57,14 @@ class GitBatcher:
         with self._lock:
             return path in self._api_owned
 
+    def pending_count(self) -> int:
+        with self._lock:
+            return len(self._pending)
+
+    def pending_paths(self) -> list[str]:
+        with self._lock:
+            return sorted(self._pending)
+
     def _reset_timer(self) -> None:
         if self._timer is not None:
             self._timer.cancel()

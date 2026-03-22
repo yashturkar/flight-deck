@@ -8,37 +8,40 @@ File-first knowledge base server. Watches a Markdown vault, auto-commits to Git,
 - Git 2.34+
 - PostgreSQL 15+
 
+
 ## Quick start (development)
 
 ```bash
 # Clone and enter the project
 cd kb-server
 
-# Create virtualenv and install
 python -m venv .venv
 source .venv/bin/activate
 pip install -e ".[dev]"
 
-# Copy and edit environment
-cp .env.example .env
-# Edit .env: set VAULT_PATH, DATABASE_URL, etc.
+cp .env.example .env # edit .env
 
-# Create the database
-createdb kb
+# Optional secrets: prefer exporting these in your shell instead of storing them in .env
+# Non-secret repo config like GITHUB_REPO should stay in .env
+export KB_API_KEY=dev-key
+export GITHUB_TOKEN=ghp_your_token
 
-# Run migrations
-alembic upgrade head
+psql postgres 
+CREATE ROLE kb WITH LOGIN PASSWORD 'kb'; 
+CREATE DATABASE kb OWNER kb; # or ALTER DATABASE kb OWNER TO kb; 
+\q # to quit
 
-# Start the API
+python -m alembic upgrade head
 python -m uvicorn app.main:app --reload
-
-# In another terminal, start the autosave worker
+# in another terminal:
 python -m app.workers.autosave
 ```
 
 ## Vault setup
 
-The vault must be an existing Git repository:
+`kb-server` does not create your notes repository for you. Create the notes repo manually first, then set `VAULT_PATH` in `.env` to that existing local Git repository.
+
+Example:
 
 ```bash
 mkdir -p /srv/flightdeck/vault
@@ -47,7 +50,7 @@ git init
 git remote add origin git@github.com:you/your-vault.git
 ```
 
-Create the directory structure you want (these are conventions, not enforced):
+After that, point `VAULT_PATH` at this repo. The directory structure inside the repo is up to you. These folders are common conventions, but not required by the server:
 
 ```text
 vault/
@@ -77,10 +80,14 @@ vault/
 | `GITHUB_REPO` | (empty) | GitHub repository in `owner/repo` format |
 | `QUARTZ_BUILD_COMMAND` | (empty) | Shell command to build Quartz site |
 | `QUARTZ_WEBHOOK_URL` | (empty) | URL to POST after push to trigger rebuild |
+| `ADMIN_TMUX_SESSION` | `kb-api` | tmux session name used by the Streamlit dashboard to manage the API |
+| `ADMIN_TMUX_WORKER_SESSION` | `kb-worker` | tmux session name used by the Streamlit dashboard to manage the autosave worker |
+| `ADMIN_TMUX_WORKDIR` | `/srv/flightdeck/kb-server` | Absolute `kb-server` path used to build the tmux start/restart commands |
 | `API_HOST` | `0.0.0.0` | API bind address |
 | `API_PORT` | `8000` | API bind port |
 
 > **Note:** Unknown env keys in `.env` are silently ignored, so extra variables won't break startup.
+> **Note:** Process environment variables override values from `.env`. Keep long-lived machine config in `.env`, including non-secret values like `GITHUB_REPO`, and prefer exporting secrets like `KB_API_KEY` and `GITHUB_TOKEN` from your shell, `tmux`, or service manager.
 > **Note:** `GITHUB_TOKEN` is used for GitHub API PR calls, not for `git push/pull` auth.
 > Git CLI operations run non-interactively and require preconfigured credentials (SSH key or PAT-backed credential helper).
 
@@ -136,15 +143,146 @@ FastAPI also exposes interactive docs:
 
 - Swagger UI: `GET /docs`
 - OpenAPI JSON: `GET /openapi.json`
+- Admin UI: `GET /admin`
+
+Streamlit dashboard:
+
+```bash
+cd kb-server
+./.venv/bin/streamlit run app/streamlit_admin.py
+```
+
+## Admin UI
+
+`/admin` is a lightweight management surface for setup and operations. The initial version includes:
+
+- current config visibility for the main `.env` fields
+- write support for updating `.env` from the browser
+- write-only secret update fields for `KB_API_KEY` and `GITHUB_TOKEN`
+- readiness, vault, database, Git, and pending PR workflow status
+- recent jobs, vault events, and publish runs
+- `kb-api` and `kb-worker` start/restart support through derived tmux commands based on `ADMIN_TMUX_SESSION`, `ADMIN_TMUX_WORKER_SESSION`, and `ADMIN_TMUX_WORKDIR`
+
+Important behavior:
+
+- The admin UI is not a note editor.
+- `/admin` and `/admin/api/*` are intentionally available without `X-API-Key` so the local dashboard can bootstrap and manage the instance.
+- Process environment variables still override `.env`.
+- Saving config writes to `.env`, but you should restart `kb-api` and `kb-worker` after changing database or auth settings.
+
+### Streamlit Dashboard
+
+The repo also includes a Streamlit dashboard backed by the same admin API:
+
+```bash
+cd kb-server
+./.venv/bin/streamlit run app/streamlit_admin.py
+```
+
+The Streamlit dashboard can:
+
+- view prettified readiness, vault, database, Git, batcher, autosave, jobs, events, publish, and PR status
+- update config values, including `GITHUB_TOKEN`
+- start and restart `kb-api` if `ADMIN_TMUX_WORKDIR` points at a valid `kb-server` checkout
+- start and restart `kb-worker` in its configured tmux session
+
+The Streamlit start/restart buttons derive the tmux commands locally and asynchronously. Users only need to set `ADMIN_TMUX_SESSION`, `ADMIN_TMUX_WORKER_SESSION`, and `ADMIN_TMUX_WORKDIR`; the dashboard builds the standard `uvicorn` and autosave commands automatically from those values plus `API_HOST` and `API_PORT`.
+
+If the FastAPI backend is offline, the Streamlit dashboard shows that state instead of crashing. You can then use the sidebar start button to launch the server and rerun the page.
+
+The dashboard also exposes dedicated autosave feedback:
+
+- whether the configured worker tmux session is currently running
+- the latest autosave job status and timestamps
+- the latest autosave commit and push SHA
+- the files included in the latest autosave run
+
+### Using Admin UI For First-Time Setup
+
+The current admin UI helps configure and validate an instance, but it does not provision host dependencies for you.
+
+Before using `/admin`, you still need to create or provide:
+
+- a running PostgreSQL instance
+- a database and DB credentials referenced by `DATABASE_URL`
+- an existing local notes repository for `VAULT_PATH`
+- a configured Git remote if you want push/PR workflows
+
+First-time setup flow:
+
+1. Fill in the minimum required `.env` values:
+   - `DATABASE_URL`
+   - `VAULT_PATH`
+   - `GITHUB_REPO` if you want PR workflows
+   - `ADMIN_TMUX_WORKDIR` pointing at this `kb-server` checkout
+   - optionally `ADMIN_TMUX_SESSION` if you do not want `kb-api`
+   - optionally `ADMIN_TMUX_WORKER_SESSION` if you do not want `kb-worker`
+2. Run migrations:
+   ```bash
+   ./.venv/bin/python -m alembic upgrade head
+   ```
+3. Start the Streamlit dashboard:
+   ```bash
+   cd kb-server
+   ./.venv/bin/streamlit run app/streamlit_admin.py
+   ```
+4. If `kb-api` or `kb-worker` is offline, use the dashboard sidebar start buttons.
+5. Open `GET /admin` or use the Streamlit dashboard against the running backend.
+6. Fill in the remaining non-secret instance config:
+   - `VAULT_PATH`
+   - `DATABASE_URL`
+   - `GITHUB_REPO`
+   - Git branch / remote settings
+   - optional Quartz settings
+7. Save the form. This writes the values to `kb-server/.env`.
+8. Restart `kb-api` and `kb-worker` from the dashboard or your tmux session.
+9. Reopen `/admin` or rerun the Streamlit dashboard and verify readiness, vault, database, Git, runtime, and PR status.
+
+What `/admin` does not do yet:
+
+- it does not create the Postgres server, role, or database
+- it does not create the notes repo for you
+- it does not create the GitHub repo or remote
+- it assumes `tmux` is installed and derives the API and worker start/restart commands from your configured workdir/session names
+
+### Secret Handling
+
+There are two supported ways to establish secrets:
+
+1. Preferred: process environment variables
+   - set `KB_API_KEY` and `GITHUB_TOKEN` outside `.env`
+   - use shell exports, `tmux` startup commands, or service-manager environment config
+   - process environment values override `.env`
+
+2. Optional: save through `/admin`
+   - the admin UI provides write-only fields for `KB_API_KEY` and `GITHUB_TOKEN`
+   - saving writes them into `kb-server/.env`
+   - the UI does not read them back after save
+
+Recommended split:
+
+- Keep in `.env`: `VAULT_PATH`, `DATABASE_URL`, `GITHUB_REPO`, and other non-secret machine config
+- Keep in process env when possible: `KB_API_KEY`, `GITHUB_TOKEN`
+
+Example:
+
+```bash
+export KB_API_KEY=your_api_key
+export GITHUB_TOKEN=your_github_token
+python -m uvicorn app.main:app --reload
+```
 
 ### Authentication
 
-When `KB_API_KEY` is set, **every** request (including `/health`, `/ready`,
-`/docs`, and `/openapi.json`) must include the key:
+When `KB_API_KEY` is set, non-admin API requests must include the key. That includes `/health`, `/ready`, `/docs`, `/openapi.json`, `/notes/*`, and `/publish`.
+
+Example:
 
 ```bash
 curl -H "X-API-Key: YOUR_KEY" http://localhost:8000/health
 ```
+
+`/admin` and `/admin/api/*` are intentionally exempt from `X-API-Key` so the local setup and Streamlit dashboard can bootstrap the instance.
 
 Requests without a valid key receive a `401` response.
 

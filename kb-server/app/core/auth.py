@@ -28,7 +28,11 @@ class APIKeyMiddleware(BaseHTTPMiddleware):
         if not expected:
             return await call_next(request)
 
+        if request.url.path.startswith("/admin"):
+            return await call_next(request)
+
         provided = request.headers.get("X-API-Key", "")
+
         if not provided or not hmac.compare_digest(provided, expected):
             log.warning(
                 "rejected request %s %s — invalid or missing API key",

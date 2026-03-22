@@ -3,8 +3,8 @@
 
 from __future__ import annotations
 
-import datetime as dt
 import re
+import subprocess
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
@@ -53,12 +53,29 @@ def _parse_routes(path: Path) -> list[tuple[str, str]]:
     return routes
 
 
+def _last_commit_date(paths: list[Path]) -> str:
+    rel_paths = [str(path.relative_to(REPO_ROOT)) for path in paths]
+    result = subprocess.run(
+        ["git", "log", "-1", "--format=%cs", "--", *rel_paths],
+        cwd=REPO_ROOT,
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+    return result.stdout.strip()
+
+
 def _write_api_surface() -> None:
-    health_routes = _parse_routes(REPO_ROOT / "kb-server" / "app" / "api" / "routes" / "health.py")
-    notes_routes = _parse_routes(REPO_ROOT / "kb-server" / "app" / "api" / "routes" / "notes.py")
-    publish_routes = _parse_routes(REPO_ROOT / "kb-server" / "app" / "api" / "routes" / "publish.py")
-    all_routes = health_routes + notes_routes + publish_routes
-    date = dt.date.today().isoformat()
+    route_paths = [
+        REPO_ROOT / "kb-server" / "app" / "api" / "routes" / "health.py",
+        REPO_ROOT / "kb-server" / "app" / "api" / "routes" / "notes.py",
+        REPO_ROOT / "kb-server" / "app" / "api" / "routes" / "publish.py",
+        REPO_ROOT / "kb-server" / "app" / "api" / "routes" / "admin.py",
+    ]
+    all_routes: list[tuple[str, str]] = []
+    for route_path in route_paths:
+        all_routes.extend(_parse_routes(route_path))
+    date = _last_commit_date(route_paths)
 
     content = [
         "---",
@@ -69,6 +86,7 @@ def _write_api_surface() -> None:
         "  - ../../kb-server/app/api/routes/health.py",
         "  - ../../kb-server/app/api/routes/notes.py",
         "  - ../../kb-server/app/api/routes/publish.py",
+        "  - ../../kb-server/app/api/routes/admin.py",
         "related_code:",
         "  - ../../scripts/generate_context_artifacts.py",
         "related_tests:",
@@ -91,10 +109,13 @@ def _write_api_surface() -> None:
 
 
 def _write_env_catalog() -> None:
-    date = dt.date.today().isoformat()
-    kb_env = _parse_env_example(REPO_ROOT / "kb-server" / ".env.example")
-    kb_defaults = _parse_settings_defaults(REPO_ROOT / "kb-server" / "app" / "core" / "config.py")
-    vs_defaults = _parse_settings_defaults(REPO_ROOT / "vault-sync" / "vault_sync" / "config.py")
+    kb_env_path = REPO_ROOT / "kb-server" / ".env.example"
+    kb_settings_path = REPO_ROOT / "kb-server" / "app" / "core" / "config.py"
+    vs_settings_path = REPO_ROOT / "vault-sync" / "vault_sync" / "config.py"
+    date = _last_commit_date([kb_env_path, kb_settings_path, vs_settings_path])
+    kb_env = _parse_env_example(kb_env_path)
+    kb_defaults = _parse_settings_defaults(kb_settings_path)
+    vs_defaults = _parse_settings_defaults(vs_settings_path)
 
     content = [
         "---",
@@ -165,4 +186,3 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-
