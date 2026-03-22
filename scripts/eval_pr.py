@@ -49,9 +49,12 @@ class EvalContext:
     paths: EvalPaths
     kb_python: Path
     vault_python: Path
-    target_ref: str
+    requested_target_ref: str
+    resolved_target_ref: str
     base_ref: str
     changed_files: list[str]
+    created_worktree: bool = False
+    created_tmux_session: bool = False
 
 
 def log(message: str) -> None:
@@ -141,6 +144,13 @@ def ensure_ref_exists(repo_root: Path, ref: str) -> None:
         raise HarnessError(f"git ref not found: {ref}") from exc
 
 
+def resolve_ref_to_commit(repo_root: Path, ref: str) -> str:
+    try:
+        return run_git(repo_root, "rev-parse", "--verify", f"{ref}^{{commit}}")
+    except subprocess.CalledProcessError as exc:
+        raise HarnessError(f"git ref not found: {ref}") from exc
+
+
 def create_paths() -> EvalPaths:
     temp_root = Path(tempfile.mkdtemp(prefix="fd-pr-eval-"))
     return EvalPaths(
@@ -163,8 +173,9 @@ def add_worktree(ctx: EvalContext) -> None:
         cwd=ctx.repo_root,
         log_path=ctx.paths.logs_root / "git-worktree-add.log",
     )
+    ctx.created_worktree = True
     run_command(
-        ["git", "checkout", "--detach", ctx.target_ref],
+        ["git", "checkout", "--detach", ctx.resolved_target_ref],
         cwd=ctx.paths.worktree_root,
         log_path=ctx.paths.logs_root / "git-checkout-target.log",
     )
@@ -384,6 +395,7 @@ def start_server_tmux(ctx: EvalContext) -> None:
         [str(ctx.kb_python), "-m", "uvicorn", "app.main:app", "--host", "127.0.0.1", "--port", str(ctx.args.port)],
     )
     run_command(["tmux", "new-session", "-d", "-s", session_name, server_cmd], log_path=ctx.paths.logs_root / "tmux-server.log")
+    ctx.created_tmux_session = True
     run_command(
         [
             "tmux",
@@ -564,11 +576,17 @@ def run_e2e(ctx: EvalContext, kb_env: dict[str, str]) -> None:
 
 def cleanup(ctx: EvalContext, success: bool) -> None:
     keep_temp = ctx.args.keep_temp or not success
-    kill_tmux_session(ctx.args.tmux_session_name)
-    remove_worktree(ctx.repo_root, ctx.paths.worktree_root)
     if keep_temp:
         log(f"Preserved temp root: {ctx.paths.temp_root}")
+        if ctx.created_worktree:
+            log(f"Preserved worktree: {ctx.paths.worktree_root}")
+        if ctx.created_tmux_session:
+            log(f"Preserved tmux session: {ctx.args.tmux_session_name}")
         return
+    if ctx.created_tmux_session:
+        kill_tmux_session(ctx.args.tmux_session_name)
+    if ctx.created_worktree:
+        remove_worktree(ctx.repo_root, ctx.paths.worktree_root)
     shutil.rmtree(ctx.paths.temp_root, ignore_errors=True)
     log("Removed temp worktree and runtime state")
 
@@ -609,7 +627,8 @@ def print_summary(ctx: EvalContext) -> None:
         f"""\
         Evaluation summary
           base_ref:     {ctx.base_ref}
-          target_ref:   {ctx.target_ref}
+          target_ref:   {ctx.requested_target_ref}
+          target_sha:   {ctx.resolved_target_ref}
           worktree:     {ctx.paths.worktree_root}
           temp_root:    {ctx.paths.temp_root}
           kb_python:    {ctx.kb_python}
@@ -630,7 +649,7 @@ def main() -> int:
 
     kb_python, vault_python = ensure_binaries(REPO_ROOT)
     ensure_ref_exists(REPO_ROOT, args.base_ref)
-    ensure_ref_exists(REPO_ROOT, args.target_ref)
+    resolved_target_ref = resolve_ref_to_commit(REPO_ROOT, args.target_ref)
 
     ctx = EvalContext(
         args=args,
@@ -638,7 +657,8 @@ def main() -> int:
         paths=create_paths(),
         kb_python=kb_python,
         vault_python=vault_python,
-        target_ref=args.target_ref,
+        requested_target_ref=args.target_ref,
+        resolved_target_ref=resolved_target_ref,
         base_ref=args.base_ref,
         changed_files=[],
     )

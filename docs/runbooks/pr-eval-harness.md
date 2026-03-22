@@ -49,10 +49,14 @@ python3 scripts/eval_pr.py my-local-branch
 python3 scripts/eval_pr.py HEAD
 ```
 
+Symbolic refs such as `HEAD` are resolved in your current checkout before the temp
+worktree is created, so the harness evaluates the commit you asked for rather than
+the temp worktree's initial `main` HEAD.
+
 By default the harness:
 
 - creates a temp git worktree from `main`
-- checks out `<target-ref>` inside that worktree
+- resolves `<target-ref>` to a commit in your current checkout, then checks out that commit inside the temp worktree
 - runs targeted `kb-server` and `vault-sync` tests when those areas changed
 - starts `kb-server` in `tmux`
 - starts `vault-sync` in `tmux`
@@ -110,12 +114,16 @@ The script prints:
 - logs directory
 - tmux session name
 
-On failure it keeps the temp root so you can inspect:
+On failure it keeps the temp root and any harness-created worktree/tmux session so
+you can inspect:
 
 - env files
 - runtime logs
 - worktree contents
 - tmux panes
+
+If the requested tmux session name already exists, the harness stops before
+starting services and leaves that pre-existing session untouched.
 
 Useful commands after a failed run:
 
@@ -125,4 +133,5 @@ tmux capture-pane -pt <session-name>:0.0
 tmux capture-pane -pt <session-name>:0.1
 ```
 
-If you used `--keep-temp`, remove the temp directory yourself after inspection.
+`--keep-temp` uses the same preservation behavior after a successful run. Remove the
+temp directory and any preserved worktree/tmux session yourself after inspection.

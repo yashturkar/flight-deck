@@ -53,6 +53,7 @@ python3 scripts/eval_pr.py HEAD --tests-only
 The harness:
 
 - creates a temp worktree rooted from local `main`
+- resolves symbolic refs like `HEAD` in your current checkout before populating that worktree
 - runs stable targeted tests for changed areas
 - can launch `kb-server` and `vault-sync` in `tmux`
 - exercises the current mainline write/sync workflow end to end
