@@ -1,0 +1,100 @@
+{
+  "sessions": {
+    "019d12f0-f222-7f41-803c-88d6fdf96afd": {
+      "session_id": "019d12f0-f222-7f41-803c-88d6fdf96afd",
+      "timestamp": "2026-03-22T00:27:53.764Z",
+      "source_path": "/Users/yashturkar/.codex/sessions/2026/03/21/rollout-2026-03-21T17-27-53-019d12f0-f222-7f41-803c-88d6fdf96afd.jsonl",
+      "cached_copy": "/Users/yashturkar/Workspace/flight-deck/.control-tower/memory/l2/sessions/019d12f0-f222-7f41-803c-88d6fdf96afd.jsonl",
+      "transcript_path": "/Users/yashturkar/Workspace/flight-deck/.control-tower/memory/l2/transcripts/019d12f0-f222-7f41-803c-88d6fdf96afd.md",
+      "cwd": "/Users/yashturkar/Workspace/flight-deck",
+      "originator": "codex_cli_rs",
+      "source": "cli",
+      "user_message_count": 1,
+      "agent_message_count": 6
+    },
+    "019d12f1-7f20-79c2-9390-cb691526d5a6": {
+      "session_id": "019d12f1-7f20-79c2-9390-cb691526d5a6",
+      "timestamp": "2026-03-22T00:28:29.859Z",
+      "source_path": "/Users/yashturkar/.codex/sessions/2026/03/21/rollout-2026-03-21T17-28-29-019d12f1-7f20-79c2-9390-cb691526d5a6.jsonl",
+      "cached_copy": "/Users/yashturkar/Workspace/flight-deck/.control-tower/memory/l2/sessions/019d12f1-7f20-79c2-9390-cb691526d5a6.jsonl",
+      "transcript_path": "/Users/yashturkar/Workspace/flight-deck/.control-tower/memory/l2/transcripts/019d12f1-7f20-79c2-9390-cb691526d5a6.md",
+      "cwd": "/Users/yashturkar/Workspace/flight-deck",
+      "originator": "codex_exec",
+      "source": "exec",
+      "user_message_count": 1,
+      "agent_message_count": 0
+    },
+    "019d12f8-d138-79f0-b22b-8cfd6b0f85da": {
+      "session_id": "019d12f8-d138-79f0-b22b-8cfd6b0f85da",
+      "timestamp": "2026-03-22T00:36:29.625Z",
+      "source_path": "/Users/yashturkar/.codex/sessions/2026/03/21/rollout-2026-03-21T17-36-29-019d12f8-d138-79f0-b22b-8cfd6b0f85da.jsonl",
+      "cached_copy": "/Users/yashturkar/Workspace/flight-deck/.control-tower/memory/l2/sessions/019d12f8-d138-79f0-b22b-8cfd6b0f85da.jsonl",
+      "transcript_path": "/Users/yashturkar/Workspace/flight-deck/.control-tower/memory/l2/transcripts/019d12f8-d138-79f0-b22b-8cfd6b0f85da.md",
+      "cwd": "/Users/yashturkar/Workspace/flight-deck",
+      "originator": "codex_exec",
+      "source": "exec",
+      "user_message_count": 1,
+      "agent_message_count": 0
+    },
+    "019d12fa-d209-7c62-b3dd-79c54fe19479": {
+      "session_id": "019d12fa-d209-7c62-b3dd-79c54fe19479",
+      "timestamp": "2026-03-22T00:38:40.906Z",
+      "source_path": "/Users/yashturkar/.codex/sessions/2026/03/21/rollout-2026-03-21T17-38-40-019d12fa-d209-7c62-b3dd-79c54fe19479.jsonl",
+      "cached_copy": "/Users/yashturkar/Workspace/flight-deck/.control-tower/memory/l2/sessions/019d12fa-d209-7c62-b3dd-79c54fe19479.jsonl",
+      "transcript_path": "/Users/yashturkar/Workspace/flight-deck/.control-tower/memory/l2/transcripts/019d12fa-d209-7c62-b3dd-79c54fe19479.md",
+      "cwd": "/Users/yashturkar/Workspace/flight-deck",
+      "originator": "codex_exec",
+      "source": "exec",
+      "user_message_count": 1,
+      "agent_message_count": 0
+    },
+    "019d1308-c03a-78f1-bad2-a9f734555a74": {
+      "session_id": "019d1308-c03a-78f1-bad2-a9f734555a74",
+      "timestamp": "2026-03-22T00:53:53.851Z",
+      "source_path": "/Users/yashturkar/.codex/sessions/2026/03/21/rollout-2026-03-21T17-53-53-019d1308-c03a-78f1-bad2-a9f734555a74.jsonl",
+      "cached_copy": "/Users/yashturkar/Workspace/flight-deck/.control-tower/memory/l2/sessions/019d1308-c03a-78f1-bad2-a9f734555a74.jsonl",
+      "transcript_path": "/Users/yashturkar/Workspace/flight-deck/.control-tower/memory/l2/transcripts/019d1308-c03a-78f1-bad2-a9f734555a74.md",
+      "cwd": "/Users/yashturkar/Workspace/flight-deck",
+      "originator": "codex_exec",
+      "source": "exec",
+      "user_message_count": 1,
+      "agent_message_count": 1
+    },
+    "019d130a-5f8b-7c41-be77-c7f43a35a49b": {
+      "session_id": "019d130a-5f8b-7c41-be77-c7f43a35a49b",
+      "timestamp": "2026-03-22T00:55:40.172Z",
+      "source_path": "/Users/yashturkar/.codex/sessions/2026/03/21/rollout-2026-03-21T17-55-40-019d130a-5f8b-7c41-be77-c7f43a35a49b.jsonl",
+      "cached_copy": "/Users/yashturkar/Workspace/flight-deck/.control-tower/memory/l2/sessions/019d130a-5f8b-7c41-be77-c7f43a35a49b.jsonl",
+      "transcript_path": "/Users/yashturkar/Workspace/flight-deck/.control-tower/memory/l2/transcripts/019d130a-5f8b-7c41-be77-c7f43a35a49b.md",
+      "cwd": "/Users/yashturkar/Workspace/flight-deck",
+      "originator": "codex_exec",
+      "source": "exec",
+      "user_message_count": 1,
+      "agent_message_count": 0
+    },
+    "019d130b-1752-7233-80d4-0494735048f5": {
+      "session_id": "019d130b-1752-7233-80d4-0494735048f5",
+      "timestamp": "2026-03-22T00:56:27.219Z",
+      "source_path": "/Users/yashturkar/.codex/sessions/2026/03/21/rollout-2026-03-21T17-56-27-019d130b-1752-7233-80d4-0494735048f5.jsonl",
+      "cached_copy": "/Users/yashturkar/Workspace/flight-deck/.control-tower/memory/l2/sessions/019d130b-1752-7233-80d4-0494735048f5.jsonl",
+      "transcript_path": "/Users/yashturkar/Workspace/flight-deck/.control-tower/memory/l2/transcripts/019d130b-1752-7233-80d4-0494735048f5.md",
+      "cwd": "/Users/yashturkar/Workspace/flight-deck",
+      "originator": "codex_exec",
+      "source": "exec",
+      "user_message_count": 1,
+      "agent_message_count": 1
+    },
+    "019d130c-054c-76b1-be19-574030436e61": {
+      "session_id": "019d130c-054c-76b1-be19-574030436e61",
+      "timestamp": "2026-03-22T00:57:28.141Z",
+      "source_path": "/Users/yashturkar/.codex/sessions/2026/03/21/rollout-2026-03-21T17-57-28-019d130c-054c-76b1-be19-574030436e61.jsonl",
+      "cached_copy": "/Users/yashturkar/Workspace/flight-deck/.control-tower/memory/l2/sessions/019d130c-054c-76b1-be19-574030436e61.jsonl",
+      "transcript_path": "/Users/yashturkar/Workspace/flight-deck/.control-tower/memory/l2/transcripts/019d130c-054c-76b1-be19-574030436e61.md",
+      "cwd": "/Users/yashturkar/Workspace/flight-deck",
+      "originator": "codex_exec",
+      "source": "exec",
+      "user_message_count": 1,
+      "agent_message_count": 0
+    }
+  }
+}
