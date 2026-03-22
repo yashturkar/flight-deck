@@ -1,0 +1,68 @@
+{
+  "active_decisions": [],
+  "inferred_decisions": [
+    "dec_inferred_e9d6b6d4-1099-44dc-9c39-b78bf7f4b8db_0_active-branch-context-is-best-modeled-as-three-open-pr-lines-auth-feat-actor-aware-git-identities-feat-hashed-api-key-auth-retrieval-mcp-retrieval-layer-mcp-adapter-and-standalone-feat-pr-eval-harness",
+    "dec_inferred_e9d6b6d4-1099-44dc-9c39-b78bf7f4b8db_1_pr-12-is-an-open-main-main-anomaly-and-should-be-treated-as-review-state-noise-until-clarified",
+    "dec_inferred_e9d6b6d4-1099-44dc-9c39-b78bf7f4b8db_2_the-earlier-docs-plans-md-drift-was-resolved-by-restoring-docs-exec-plans-active-on-main-so-this-is-no-longer-an-active-docs-mismatch",
+    "dec_inferred_9b320567-7acd-4e50-9d91-3b311a921a08_0_commit-5e810a2-is-safe-to-isolate-because-it-adds-only-docs-exec-plans-active-gitkeep",
+    "dec_inferred_dbc5b3f6-cc56-4605-a9c9-91e7bad534fd_0_as-of-2026-03-22-the-documented-active-execution-plan-path-is-restored-at-docs-exec-plans-active-readme-md-so-agent-navigation-in-agents-md-docs-plans-md-and-docs-index-md-is-aligned-again",
+    "dec_inferred_dbc5b3f6-cc56-4605-a9c9-91e7bad534fd_1_tower-task-state-docs-were-updated-to-mark-the-exec-plans-active-path-drift-resolved",
+    "dec_inferred_2d4cb429-929d-4fb7-9449-ba186b7dfdd0_0_remote-branches-ahead-of-main-now-classify-into-active-auth-stack-feat-actor-aware-git-identities-feat-hashed-api-key-auth-active-infra-feat-pr-eval-harness-active-candidate-retrieval-line-yashom7-revup-main-retrieval-layer-and-parked-dependent-exploration-yashom7-revup-main-mcp-adapter",
+    "dec_inferred_2d4cb429-929d-4fb7-9449-ba186b7dfdd0_1_feat-hashed-api-key-auth-is-stacked-on-feat-actor-aware-git-identities-via-pr-8-so-tower-should-treat-them-as-one-branch-line-rather-than-competing-directions",
+    "dec_inferred_2d4cb429-929d-4fb7-9449-ba186b7dfdd0_2_feat-pr-eval-harness-has-a-direct-pr-to-main-13-and-is-the-cleanest-active-line-for-tower-facing-automation-improvements",
+    "dec_inferred_2d4cb429-929d-4fb7-9449-ba186b7dfdd0_3_yashom7-revup-main-mcp-adapter-is-stacked-on-retrieval-via-pr-10-and-should-stay-parked-until-retrieval-is-accepted-and-a-new-mcp-server-domain-is-approved",
+    "dec_inferred_2d4cb429-929d-4fb7-9449-ba186b7dfdd0_4_docs-plans-md-drift-should-be-fixed-by-restoring-docs-exec-plans-active-changing-references-would-create-broader-docs-churn-without-solving-the-structural-expectation-shared-by-agents-md-and-docs-index-md",
+    "dec_inferred_2d4cb429-929d-4fb7-9449-ba186b7dfdd0_5_the-minimal-doc-fix-already-exists-remotely-as-commit-5e810a2-on-feat-actor-aware-git-identities-making-git-master-the-best-immediate-delegate",
+    "dec_inferred_a69db1da-ae79-4ccb-9acf-75aa907b4717_0_repo-conventions-are-now-grounded-from-agents-md-code-behavior-is-canonical-tests-break-doc-ties-durable-docs-live-under-docs-main-is-approved-kb-api-is-pending-view-current-is-read-only-and-source-human-writes-go-directly-to-the-base-branch",
+    "dec_inferred_a69db1da-ae79-4ccb-9acf-75aa907b4717_1_at-scout-import-time-main-matched-origin-main-and-control-tower-was-the-only-untracked-area",
+    "dec_inferred_a69db1da-ae79-4ccb-9acf-75aa907b4717_2_a-concrete-docs-drift-exists-docs-plans-md-references-a-missing-docs-exec-plans-active-directory-after-the-context-rollout-plan-moved-to-completed",
+    "dec_inferred_a69db1da-ae79-4ccb-9acf-75aa907b4717_3_remote-branches-ahead-of-main-require-tower-triage-hashed-api-auth-actor-aware-git-identities-pr-eval-harness-retrieval-apis-and-mcp-integration",
+    "dec_inferred_c4468836-8b47-4cde-9985-2e6ac4f9679a_0_as-of-2026-03-22-local-branch-is-main-aligned-with-origin-main-at-7c47d50-the-only-local-worktree-delta-is-untracked-control-tower",
+    "dec_inferred_c4468836-8b47-4cde-9985-2e6ac4f9679a_1_repo-runtime-is-centered-on-two-domains-kb-server-and-vault-sync-with-main-approved-kb-api-pending-via-prs-and-view-current-read-only-composed-state",
+    "dec_inferred_c4468836-8b47-4cde-9985-2e6ac4f9679a_2_recent-mainline-work-on-2026-03-07-focused-on-docs-context-system-closure-docs-automation-and-git-auth-hardening-tower-memory-had-not-yet-curated-those-commits",
+    "dec_inferred_c4468836-8b47-4cde-9985-2e6ac4f9679a_3_there-is-a-live-code-doc-mismatch-around-ready-semantics-code-returns-200-with-error-payloads-while-docs-runbooks-expect-non-200-on-dependency-failures",
+    "dec_inferred_c4468836-8b47-4cde-9985-2e6ac4f9679a_4_likely-upcoming-branches-to-watch-hashed-role-based-auth-actor-aware-git-identities-pr-eval-harness-retrieval-api-and-mcp-adapter",
+    "dec_inferred_c4468836-8b47-4cde-9985-2e6ac4f9679a_5_test-execution-from-this-session-was-blocked-by-a-broken-global-pytest-installation-so-repo-health-could-not-be-validated-by-running-tests"
+  ],
+  "superseded_decisions": [],
+  "open_questions": [
+    "question:should-docs-plans-md-point-only-at-completed-plans-until-a-new-active-plan-exists-or-should-an-empty-docs-exec-plans-active-directory-be-restored",
+    "question:should-pr-12-be-closed-or-recreated-from-a-non-main-head-branch-so-the-admin-ui-work-can-be-reviewed-as-a-normal-branch-line",
+    "question:what-git-workflow-should-git-master-assume-for-this-project",
+    "question:which-files-or-paths-should-builder-avoid-by-default",
+    "question:which-of-the-remote-branches-ahead-of-main-should-tower-treat-as-active-project-direction-versus-parked-exploration",
+    "question:which-repo-conventions-should-scribe-treat-as-canonical"
+  ],
+  "known_risks": [
+    "risk:memory-drift-if-imported-sessions-are-not-curated-into-docs-and-working-summaries",
+    "risk:session-ambiguity-if-tower-sessions-are-not-resumed-through-tower-resume",
+    "risk:tower-role-leakage-into-direct-implementation-if-delegation-discipline-is-not-maintained"
+  ],
+  "current_tasks": [],
+  "recent_commits": [
+    "commit:7c47d50b2fac1783242ac9c4c3e9ae30e5ca812b",
+    "commit:a9fec46ecea6357063ddcdbea2c5e5814fe1f79a",
+    "commit:3848563e637b5a8ddcef8472566863bed570a482"
+  ],
+  "unexplained_commits": [
+    "commit:7c47d50b2fac1783242ac9c4c3e9ae30e5ca812b",
+    "commit:a9fec46ecea6357063ddcdbea2c5e5814fe1f79a",
+    "commit:3848563e637b5a8ddcef8472566863bed570a482"
+  ],
+  "session_links": {
+    "session:tower-session": [
+      "packet:737c97a8-4ecb-49ae-b8c5-da844d5d1915"
+    ],
+    "session:019d12f0-f222-7f41-803c-88d6fdf96afd": [
+      "packet:47a18593-0d24-4792-80d0-bc55b44cb2cb",
+      "packet:330c870d-0a7e-40e2-b445-566158fca0f0",
+      "packet:edaad0db-e426-489b-b0aa-c2d7be3e8e42",
+      "packet:c4c4980f-42ea-42f4-8922-dbe4a5e7c083",
+      "packet:4ce07a4a-2a87-463e-bc12-41becbe433fd",
+      "packet:bb7fce5e-f7db-4928-a283-fb6cf4451e54",
+      "packet:d00a82d2-29b0-4e2c-ae70-dd8c4a9b4c01"
+    ]
+  },
+  "last_graph_sync": "2026-03-22T01:01:11Z",
+  "current_branch": "main"
+}

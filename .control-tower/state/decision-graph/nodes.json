@@ -1,0 +1,977 @@
+{
+  "nodes": {
+    "event:black-box:0": {
+      "id": "event:black-box:0",
+      "type": "event",
+      "event_type": "bootstrap_initialized",
+      "timestamp": null,
+      "payload": {
+        "event_type": "bootstrap_initialized"
+      }
+    },
+    "question:which-repo-conventions-should-scribe-treat-as-canonical": {
+      "id": "question:which-repo-conventions-should-scribe-treat-as-canonical",
+      "type": "question",
+      "title": "Which repo conventions should Scribe treat as canonical?",
+      "status": "open",
+      "source_ref": ".control-tower/docs/state/open-questions.md"
+    },
+    "question:which-files-or-paths-should-builder-avoid-by-default": {
+      "id": "question:which-files-or-paths-should-builder-avoid-by-default",
+      "type": "question",
+      "title": "Which files or paths should Builder avoid by default?",
+      "status": "open",
+      "source_ref": ".control-tower/docs/state/open-questions.md"
+    },
+    "question:what-git-workflow-should-git-master-assume-for-this-project": {
+      "id": "question:what-git-workflow-should-git-master-assume-for-this-project",
+      "type": "question",
+      "title": "What Git workflow should Git-master assume for this project?",
+      "status": "open",
+      "source_ref": ".control-tower/docs/state/open-questions.md"
+    },
+    "risk:tower-role-leakage-into-direct-implementation-if-delegation-discipline-is-not-maintained": {
+      "id": "risk:tower-role-leakage-into-direct-implementation-if-delegation-discipline-is-not-maintained",
+      "type": "risk",
+      "title": "Tower role leakage into direct implementation if delegation discipline is not maintained.",
+      "status": "open",
+      "source_ref": ".control-tower/docs/state/known-risks.md"
+    },
+    "risk:memory-drift-if-imported-sessions-are-not-curated-into-docs-and-working-summaries": {
+      "id": "risk:memory-drift-if-imported-sessions-are-not-curated-into-docs-and-working-summaries",
+      "type": "risk",
+      "title": "Memory drift if imported sessions are not curated into docs and working summaries.",
+      "status": "open",
+      "source_ref": ".control-tower/docs/state/known-risks.md"
+    },
+    "risk:session-ambiguity-if-tower-sessions-are-not-resumed-through-tower-resume": {
+      "id": "risk:session-ambiguity-if-tower-sessions-are-not-resumed-through-tower-resume",
+      "type": "risk",
+      "title": "Session ambiguity if Tower sessions are not resumed through `tower resume`.",
+      "status": "open",
+      "source_ref": ".control-tower/docs/state/known-risks.md"
+    },
+    "commit:7c47d50b2fac1783242ac9c4c3e9ae30e5ca812b": {
+      "id": "commit:7c47d50b2fac1783242ac9c4c3e9ae30e5ca812b",
+      "type": "commit",
+      "sha": "7c47d50b2fac1783242ac9c4c3e9ae30e5ca812b",
+      "parents": [
+        "258552c140a2723a24b033781c93d3aad41b9d2b"
+      ],
+      "authored_at": "2026-03-07T19:41:54+00:00",
+      "subject": "docs: add local pre-commit checks and stale-doc autofix",
+      "files": []
+    },
+    "commit:a9fec46ecea6357063ddcdbea2c5e5814fe1f79a": {
+      "id": "commit:a9fec46ecea6357063ddcdbea2c5e5814fe1f79a",
+      "type": "commit",
+      "sha": "a9fec46ecea6357063ddcdbea2c5e5814fe1f79a",
+      "parents": [
+        "441a9d253715e02a11e71fcedde722d125665b20"
+      ],
+      "authored_at": "2026-03-07T09:30:53+00:00",
+      "subject": "readme update",
+      "files": []
+    },
+    "commit:3848563e637b5a8ddcef8472566863bed570a482": {
+      "id": "commit:3848563e637b5a8ddcef8472566863bed570a482",
+      "type": "commit",
+      "sha": "3848563e637b5a8ddcef8472566863bed570a482",
+      "parents": [
+        "0a1ec4f116c75cf5489ebbfd326b79bf1afbc028"
+      ],
+      "authored_at": "2026-03-05T06:50:29+00:00",
+      "subject": "Add API key authentication for /notes endpoints and update configuration",
+      "files": []
+    },
+    "session:019d12f0-f222-7f41-803c-88d6fdf96afd": {
+      "id": "session:019d12f0-f222-7f41-803c-88d6fdf96afd",
+      "type": "session",
+      "session_id": "019d12f0-f222-7f41-803c-88d6fdf96afd",
+      "timestamp": "2026-03-22T00:27:53.764Z",
+      "source": "cli",
+      "originator": "codex_cli_rs",
+      "transcript_path": ".control-tower/memory/l2/transcripts/019d12f0-f222-7f41-803c-88d6fdf96afd.md",
+      "session_path": ".control-tower/memory/l2/sessions/019d12f0-f222-7f41-803c-88d6fdf96afd.jsonl"
+    },
+    "session:019d12f1-7f20-79c2-9390-cb691526d5a6": {
+      "id": "session:019d12f1-7f20-79c2-9390-cb691526d5a6",
+      "type": "session",
+      "session_id": "019d12f1-7f20-79c2-9390-cb691526d5a6",
+      "timestamp": "2026-03-22T00:28:29.859Z",
+      "source": "exec",
+      "originator": "codex_exec",
+      "transcript_path": ".control-tower/memory/l2/transcripts/019d12f1-7f20-79c2-9390-cb691526d5a6.md",
+      "session_path": ".control-tower/memory/l2/sessions/019d12f1-7f20-79c2-9390-cb691526d5a6.jsonl"
+    },
+    "packet:737c97a8-4ecb-49ae-b8c5-da844d5d1915": {
+      "id": "packet:737c97a8-4ecb-49ae-b8c5-da844d5d1915",
+      "type": "packet",
+      "packet_id": "737c97a8-4ecb-49ae-b8c5-da844d5d1915",
+      "packet_type": "task",
+      "title": "Assess repo state and next action",
+      "status": null,
+      "trace_id": "d6ed5923-7c0d-403b-b8a5-cc09300c0e64",
+      "from_agent": "tower",
+      "to_agent": "scout",
+      "path": ".control-tower/packets/outbox/scout-assess-state.json",
+      "created_at": "2026-03-22T00:28:26Z"
+    },
+    "artifact:.control-tower/packets/outbox/scout-assess-state.json": {
+      "id": "artifact:.control-tower/packets/outbox/scout-assess-state.json",
+      "type": "artifact",
+      "ref": ".control-tower/packets/outbox/scout-assess-state.json",
+      "title": ".control-tower/packets/outbox/scout-assess-state.json",
+      "created_at": "2026-03-22T00:28:26Z"
+    },
+    "event:black-box:1": {
+      "id": "event:black-box:1",
+      "type": "event",
+      "event_type": "codex_session_imported",
+      "timestamp": "2026-03-22T00:27:53.764Z",
+      "payload": {
+        "event_type": "codex_session_imported",
+        "session_id": "019d12f0-f222-7f41-803c-88d6fdf96afd",
+        "timestamp": "2026-03-22T00:27:53.764Z",
+        "source": "cli",
+        "originator": "codex_cli_rs",
+        "transcript_path": ".control-tower/memory/l2/transcripts/019d12f0-f222-7f41-803c-88d6fdf96afd.md"
+      }
+    },
+    "event:black-box:2": {
+      "id": "event:black-box:2",
+      "type": "event",
+      "event_type": "codex_session_imported",
+      "timestamp": "2026-03-22T00:28:29.859Z",
+      "payload": {
+        "event_type": "codex_session_imported",
+        "session_id": "019d12f1-7f20-79c2-9390-cb691526d5a6",
+        "timestamp": "2026-03-22T00:28:29.859Z",
+        "source": "exec",
+        "originator": "codex_exec",
+        "transcript_path": ".control-tower/memory/l2/transcripts/019d12f1-7f20-79c2-9390-cb691526d5a6.md"
+      }
+    },
+    "session:019d12f8-d138-79f0-b22b-8cfd6b0f85da": {
+      "id": "session:019d12f8-d138-79f0-b22b-8cfd6b0f85da",
+      "type": "session",
+      "session_id": "019d12f8-d138-79f0-b22b-8cfd6b0f85da",
+      "timestamp": "2026-03-22T00:36:29.625Z",
+      "source": "exec",
+      "originator": "codex_exec",
+      "transcript_path": ".control-tower/memory/l2/transcripts/019d12f8-d138-79f0-b22b-8cfd6b0f85da.md",
+      "session_path": ".control-tower/memory/l2/sessions/019d12f8-d138-79f0-b22b-8cfd6b0f85da.jsonl"
+    },
+    "packet:47a18593-0d24-4792-80d0-bc55b44cb2cb": {
+      "id": "packet:47a18593-0d24-4792-80d0-bc55b44cb2cb",
+      "type": "packet",
+      "packet_id": "47a18593-0d24-4792-80d0-bc55b44cb2cb",
+      "packet_type": "task",
+      "title": "Build Tower repo context",
+      "status": null,
+      "trace_id": "0a6ad52b-a387-4f0c-a58f-646431cb4166",
+      "from_agent": "tower",
+      "to_agent": "scout",
+      "path": ".control-tower/packets/outbox/scout-build-tower-context.json",
+      "created_at": "2026-03-22T00:36:27Z"
+    },
+    "artifact:.control-tower/packets/outbox/scout-build-tower-context.json": {
+      "id": "artifact:.control-tower/packets/outbox/scout-build-tower-context.json",
+      "type": "artifact",
+      "ref": ".control-tower/packets/outbox/scout-build-tower-context.json",
+      "title": ".control-tower/packets/outbox/scout-build-tower-context.json",
+      "created_at": "2026-03-22T00:36:27Z"
+    },
+    "event:black-box:3": {
+      "id": "event:black-box:3",
+      "type": "event",
+      "event_type": "codex_session_imported",
+      "timestamp": "2026-03-22T00:36:29.625Z",
+      "payload": {
+        "event_type": "codex_session_imported",
+        "session_id": "019d12f8-d138-79f0-b22b-8cfd6b0f85da",
+        "timestamp": "2026-03-22T00:36:29.625Z",
+        "source": "exec",
+        "originator": "codex_exec",
+        "transcript_path": ".control-tower/memory/l2/transcripts/019d12f8-d138-79f0-b22b-8cfd6b0f85da.md"
+      }
+    },
+    "session:019d12fa-d209-7c62-b3dd-79c54fe19479": {
+      "id": "session:019d12fa-d209-7c62-b3dd-79c54fe19479",
+      "type": "session",
+      "session_id": "019d12fa-d209-7c62-b3dd-79c54fe19479",
+      "timestamp": "2026-03-22T00:38:40.906Z",
+      "source": "exec",
+      "originator": "codex_exec",
+      "transcript_path": ".control-tower/memory/l2/transcripts/019d12fa-d209-7c62-b3dd-79c54fe19479.md",
+      "session_path": ".control-tower/memory/l2/sessions/019d12fa-d209-7c62-b3dd-79c54fe19479.jsonl"
+    },
+    "packet:c4468836-8b47-4cde-9985-2e6ac4f9679a": {
+      "id": "packet:c4468836-8b47-4cde-9985-2e6ac4f9679a",
+      "type": "packet",
+      "packet_id": "c4468836-8b47-4cde-9985-2e6ac4f9679a",
+      "packet_type": "result",
+      "title": "Flight Deck is a docs-heavy monorepo with two stable runtime domains: `kb-server` (FastAPI + Git/PR workflow + autosave worker) and `vault-sync` (local mirror that reads `view=current` and pushes human edits as direct-to-main writes). `main` is aligned with `origin/main` at `7c47d50` (`docs: add local pre-commit checks and stale-doc autofix`); the only local worktree difference is an untracked `.control-tower/` bootstrap tree. Recent mainline evolution on March 7, 2026 concentrated on documentation/context-system rollout closure, local docs automation, and non-interactive git auth hardening. Remote branches indicate likely next workstreams beyond `main`: role-based/hashed API auth, actor-aware git identities, a PR evaluation harness, deterministic retrieval APIs, and an MCP adapter. Main risks for Tower: code/doc drift around readiness semantics, stale control-tower memory that has not curated recent repo changes, and a broken local test runner environment that prevented runtime validation.",
+      "status": "success",
+      "trace_id": "0a6ad52b-a387-4f0c-a58f-646431cb4166",
+      "from_agent": "scout",
+      "to_agent": "tower",
+      "path": ".control-tower/packets/inbox/scout-build-tower-context-result.json",
+      "created_at": "2026-03-22T00:39:14Z"
+    },
+    "artifact:.control-tower/packets/inbox/scout-build-tower-context-result.json": {
+      "id": "artifact:.control-tower/packets/inbox/scout-build-tower-context-result.json",
+      "type": "artifact",
+      "ref": ".control-tower/packets/inbox/scout-build-tower-context-result.json",
+      "title": ".control-tower/packets/inbox/scout-build-tower-context-result.json",
+      "created_at": "2026-03-22T00:39:14Z"
+    },
+    "dec_inferred_c4468836-8b47-4cde-9985-2e6ac4f9679a_0_as-of-2026-03-22-local-branch-is-main-aligned-with-origin-main-at-7c47d50-the-only-local-worktree-delta-is-untracked-control-tower": {
+      "id": "dec_inferred_c4468836-8b47-4cde-9985-2e6ac4f9679a_0_as-of-2026-03-22-local-branch-is-main-aligned-with-origin-main-at-7c47d50-the-only-local-worktree-delta-is-untracked-control-tower",
+      "type": "decision",
+      "topic": "as-of-2026-03-22-local-branch-is-main-aligned-with-origin-main-at-7c47d50-the-only-local-worktree-delta-is-untracked-control-tower",
+      "title": "As of 2026-03-22, local branch is `main`, aligned with `origin/main` at `7c47d50`; the only local worktree delta is untracked `.control-tower/`.",
+      "status": "proposed",
+      "importance": "normal",
+      "summary": "Inferred from ResultPacket memory_worthy entry: As of 2026-03-22, local branch is `main`, aligned with `origin/main` at `7c47d50`; the only local worktree delta is untracked `.control-tower/`.",
+      "rationale": [
+        "Captured from a ResultPacket memory_worthy entry pending curation."
+      ],
+      "source_refs": [
+        ".control-tower/packets/inbox/scout-build-tower-context-result.json"
+      ],
+      "inferred": true,
+      "created_at": "2026-03-22T00:39:56Z",
+      "created_by": "scout"
+    },
+    "dec_inferred_c4468836-8b47-4cde-9985-2e6ac4f9679a_1_repo-runtime-is-centered-on-two-domains-kb-server-and-vault-sync-with-main-approved-kb-api-pending-via-prs-and-view-current-read-only-composed-state": {
+      "id": "dec_inferred_c4468836-8b47-4cde-9985-2e6ac4f9679a_1_repo-runtime-is-centered-on-two-domains-kb-server-and-vault-sync-with-main-approved-kb-api-pending-via-prs-and-view-current-read-only-composed-state",
+      "type": "decision",
+      "topic": "repo-runtime-is-centered-on-two-domains-kb-server-and-vault-sync-with-main-approved-kb-api-pending-via-prs-and-view-current-read-only-composed-state",
+      "title": "Repo runtime is centered on two domains: `kb-server` and `vault-sync`, with `main` approved, `kb-api/*` pending via PRs, and `view=current` read-only composed state.",
+      "status": "proposed",
+      "importance": "normal",
+      "summary": "Inferred from ResultPacket memory_worthy entry: Repo runtime is centered on two domains: `kb-server` and `vault-sync`, with `main` approved, `kb-api/*` pending via PRs, and `view=current` read-only composed state.",
+      "rationale": [
+        "Captured from a ResultPacket memory_worthy entry pending curation."
+      ],
+      "source_refs": [
+        ".control-tower/packets/inbox/scout-build-tower-context-result.json"
+      ],
+      "inferred": true,
+      "created_at": "2026-03-22T00:39:56Z",
+      "created_by": "scout"
+    },
+    "dec_inferred_c4468836-8b47-4cde-9985-2e6ac4f9679a_2_recent-mainline-work-on-2026-03-07-focused-on-docs-context-system-closure-docs-automation-and-git-auth-hardening-tower-memory-had-not-yet-curated-those-commits": {
+      "id": "dec_inferred_c4468836-8b47-4cde-9985-2e6ac4f9679a_2_recent-mainline-work-on-2026-03-07-focused-on-docs-context-system-closure-docs-automation-and-git-auth-hardening-tower-memory-had-not-yet-curated-those-commits",
+      "type": "decision",
+      "topic": "recent-mainline-work-on-2026-03-07-focused-on-docs-context-system-closure-docs-automation-and-git-auth-hardening-tower-memory-had-not-yet-curated-those-commits",
+      "title": "Recent mainline work on 2026-03-07 focused on docs/context-system closure, docs automation, and git auth hardening; Tower memory had not yet curated those commits.",
+      "status": "proposed",
+      "importance": "normal",
+      "summary": "Inferred from ResultPacket memory_worthy entry: Recent mainline work on 2026-03-07 focused on docs/context-system closure, docs automation, and git auth hardening; Tower memory had not yet curated those commits.",
+      "rationale": [
+        "Captured from a ResultPacket memory_worthy entry pending curation."
+      ],
+      "source_refs": [
+        ".control-tower/packets/inbox/scout-build-tower-context-result.json"
+      ],
+      "inferred": true,
+      "created_at": "2026-03-22T00:39:56Z",
+      "created_by": "scout"
+    },
+    "dec_inferred_c4468836-8b47-4cde-9985-2e6ac4f9679a_3_there-is-a-live-code-doc-mismatch-around-ready-semantics-code-returns-200-with-error-payloads-while-docs-runbooks-expect-non-200-on-dependency-failures": {
+      "id": "dec_inferred_c4468836-8b47-4cde-9985-2e6ac4f9679a_3_there-is-a-live-code-doc-mismatch-around-ready-semantics-code-returns-200-with-error-payloads-while-docs-runbooks-expect-non-200-on-dependency-failures",
+      "type": "decision",
+      "topic": "there-is-a-live-code-doc-mismatch-around-ready-semantics-code-returns-200-with-error-payloads-while-docs-runbooks-expect-non-200-on-dependency-failures",
+      "title": "There is a live code/doc mismatch around `/ready` semantics: code returns 200 with error payloads, while docs/runbooks expect non-200 on dependency failures.",
+      "status": "proposed",
+      "importance": "normal",
+      "summary": "Inferred from ResultPacket memory_worthy entry: There is a live code/doc mismatch around `/ready` semantics: code returns 200 with error payloads, while docs/runbooks expect non-200 on dependency failures.",
+      "rationale": [
+        "Captured from a ResultPacket memory_worthy entry pending curation."
+      ],
+      "source_refs": [
+        ".control-tower/packets/inbox/scout-build-tower-context-result.json"
+      ],
+      "inferred": true,
+      "created_at": "2026-03-22T00:39:56Z",
+      "created_by": "scout"
+    },
+    "dec_inferred_c4468836-8b47-4cde-9985-2e6ac4f9679a_4_likely-upcoming-branches-to-watch-hashed-role-based-auth-actor-aware-git-identities-pr-eval-harness-retrieval-api-and-mcp-adapter": {
+      "id": "dec_inferred_c4468836-8b47-4cde-9985-2e6ac4f9679a_4_likely-upcoming-branches-to-watch-hashed-role-based-auth-actor-aware-git-identities-pr-eval-harness-retrieval-api-and-mcp-adapter",
+      "type": "decision",
+      "topic": "likely-upcoming-branches-to-watch-hashed-role-based-auth-actor-aware-git-identities-pr-eval-harness-retrieval-api-and-mcp-adapter",
+      "title": "Likely upcoming branches to watch: hashed/role-based auth, actor-aware git identities, PR eval harness, retrieval API, and MCP adapter.",
+      "status": "proposed",
+      "importance": "normal",
+      "summary": "Inferred from ResultPacket memory_worthy entry: Likely upcoming branches to watch: hashed/role-based auth, actor-aware git identities, PR eval harness, retrieval API, and MCP adapter.",
+      "rationale": [
+        "Captured from a ResultPacket memory_worthy entry pending curation."
+      ],
+      "source_refs": [
+        ".control-tower/packets/inbox/scout-build-tower-context-result.json"
+      ],
+      "inferred": true,
+      "created_at": "2026-03-22T00:39:56Z",
+      "created_by": "scout"
+    },
+    "dec_inferred_c4468836-8b47-4cde-9985-2e6ac4f9679a_5_test-execution-from-this-session-was-blocked-by-a-broken-global-pytest-installation-so-repo-health-could-not-be-validated-by-running-tests": {
+      "id": "dec_inferred_c4468836-8b47-4cde-9985-2e6ac4f9679a_5_test-execution-from-this-session-was-blocked-by-a-broken-global-pytest-installation-so-repo-health-could-not-be-validated-by-running-tests",
+      "type": "decision",
+      "topic": "test-execution-from-this-session-was-blocked-by-a-broken-global-pytest-installation-so-repo-health-could-not-be-validated-by-running-tests",
+      "title": "Test execution from this session was blocked by a broken global pytest installation, so repo health could not be validated by running tests.",
+      "status": "proposed",
+      "importance": "normal",
+      "summary": "Inferred from ResultPacket memory_worthy entry: Test execution from this session was blocked by a broken global pytest installation, so repo health could not be validated by running tests.",
+      "rationale": [
+        "Captured from a ResultPacket memory_worthy entry pending curation."
+      ],
+      "source_refs": [
+        ".control-tower/packets/inbox/scout-build-tower-context-result.json"
+      ],
+      "inferred": true,
+      "created_at": "2026-03-22T00:39:56Z",
+      "created_by": "scout"
+    },
+    "packet:330c870d-0a7e-40e2-b445-566158fca0f0": {
+      "id": "packet:330c870d-0a7e-40e2-b445-566158fca0f0",
+      "type": "packet",
+      "packet_id": "330c870d-0a7e-40e2-b445-566158fca0f0",
+      "packet_type": "task",
+      "title": "Curate imported Tower memory",
+      "status": null,
+      "trace_id": "2a8e8b70-7c86-4566-9299-3185f31e4dd9",
+      "from_agent": "tower",
+      "to_agent": "scribe",
+      "path": ".control-tower/packets/outbox/scribe-memory-sync-20260322T003835Z.json",
+      "created_at": "2026-03-22T00:38:35Z"
+    },
+    "artifact:.control-tower/packets/outbox/scribe-memory-sync-20260322T003835Z.json": {
+      "id": "artifact:.control-tower/packets/outbox/scribe-memory-sync-20260322T003835Z.json",
+      "type": "artifact",
+      "ref": ".control-tower/packets/outbox/scribe-memory-sync-20260322T003835Z.json",
+      "title": ".control-tower/packets/outbox/scribe-memory-sync-20260322T003835Z.json",
+      "created_at": "2026-03-22T00:38:35Z"
+    },
+    "event:black-box:4": {
+      "id": "event:black-box:4",
+      "type": "event",
+      "event_type": "codex_session_imported",
+      "timestamp": "2026-03-22T00:38:40.906Z",
+      "payload": {
+        "event_type": "codex_session_imported",
+        "session_id": "019d12fa-d209-7c62-b3dd-79c54fe19479",
+        "timestamp": "2026-03-22T00:38:40.906Z",
+        "source": "exec",
+        "originator": "codex_exec",
+        "transcript_path": ".control-tower/memory/l2/transcripts/019d12fa-d209-7c62-b3dd-79c54fe19479.md"
+      }
+    },
+    "packet:a69db1da-ae79-4ccb-9acf-75aa907b4717": {
+      "id": "packet:a69db1da-ae79-4ccb-9acf-75aa907b4717",
+      "type": "packet",
+      "packet_id": "a69db1da-ae79-4ccb-9acf-75aa907b4717",
+      "packet_type": "result",
+      "title": "Curated the imported Scout session into L0/L1 memory and Control Tower state. Durable repo conventions, current drift in `docs/PLANS.md`, and uncurated remote workstreams are now reflected in working memory, status, open questions, and active tasks.",
+      "status": "success",
+      "trace_id": "2a8e8b70-7c86-4566-9299-3185f31e4dd9",
+      "from_agent": "scribe",
+      "to_agent": "tower",
+      "path": ".control-tower/packets/inbox/scribe-memory-sync-20260322T003835Z-result.json",
+      "created_at": "2026-03-22T00:42:13Z"
+    },
+    "artifact:.control-tower/packets/inbox/scribe-memory-sync-20260322T003835Z-result.json": {
+      "id": "artifact:.control-tower/packets/inbox/scribe-memory-sync-20260322T003835Z-result.json",
+      "type": "artifact",
+      "ref": ".control-tower/packets/inbox/scribe-memory-sync-20260322T003835Z-result.json",
+      "title": ".control-tower/packets/inbox/scribe-memory-sync-20260322T003835Z-result.json",
+      "created_at": "2026-03-22T00:42:13Z"
+    },
+    "dec_inferred_a69db1da-ae79-4ccb-9acf-75aa907b4717_0_repo-conventions-are-now-grounded-from-agents-md-code-behavior-is-canonical-tests-break-doc-ties-durable-docs-live-under-docs-main-is-approved-kb-api-is-pending-view-current-is-read-only-and-source-human-writes-go-directly-to-the-base-branch": {
+      "id": "dec_inferred_a69db1da-ae79-4ccb-9acf-75aa907b4717_0_repo-conventions-are-now-grounded-from-agents-md-code-behavior-is-canonical-tests-break-doc-ties-durable-docs-live-under-docs-main-is-approved-kb-api-is-pending-view-current-is-read-only-and-source-human-writes-go-directly-to-the-base-branch",
+      "type": "decision",
+      "topic": "repo-conventions-are-now-grounded-from-agents-md-code-behavior-is-canonical-tests-break-doc-ties-durable-docs-live-under-docs-main-is-approved-kb-api-is-pending-view-current-is-read-only-and-source-human-writes-go-directly-to-the-base-branch",
+      "title": "Repo conventions are now grounded from `AGENTS.md`: code behavior is canonical, tests break doc ties, durable docs live under `docs/`, `main` is approved, `kb-api/*` is pending, `view=current` is read-only, and `source=human` writes go directly to the base branch.",
+      "status": "proposed",
+      "importance": "normal",
+      "summary": "Inferred from ResultPacket memory_worthy entry: Repo conventions are now grounded from `AGENTS.md`: code behavior is canonical, tests break doc ties, durable docs live under `docs/`, `main` is approved, `kb-api/*` is pending, `view=current` is read-only, and `source=human` writes go directly to the base branch.",
+      "rationale": [
+        "Captured from a ResultPacket memory_worthy entry pending curation."
+      ],
+      "source_refs": [
+        ".control-tower/packets/inbox/scribe-memory-sync-20260322T003835Z-result.json"
+      ],
+      "inferred": true,
+      "created_at": "2026-03-22T00:42:31Z",
+      "created_by": "scribe"
+    },
+    "dec_inferred_a69db1da-ae79-4ccb-9acf-75aa907b4717_1_at-scout-import-time-main-matched-origin-main-and-control-tower-was-the-only-untracked-area": {
+      "id": "dec_inferred_a69db1da-ae79-4ccb-9acf-75aa907b4717_1_at-scout-import-time-main-matched-origin-main-and-control-tower-was-the-only-untracked-area",
+      "type": "decision",
+      "topic": "at-scout-import-time-main-matched-origin-main-and-control-tower-was-the-only-untracked-area",
+      "title": "At Scout import time, `main` matched `origin/main` and `.control-tower/` was the only untracked area.",
+      "status": "proposed",
+      "importance": "normal",
+      "summary": "Inferred from ResultPacket memory_worthy entry: At Scout import time, `main` matched `origin/main` and `.control-tower/` was the only untracked area.",
+      "rationale": [
+        "Captured from a ResultPacket memory_worthy entry pending curation."
+      ],
+      "source_refs": [
+        ".control-tower/packets/inbox/scribe-memory-sync-20260322T003835Z-result.json"
+      ],
+      "inferred": true,
+      "created_at": "2026-03-22T00:42:31Z",
+      "created_by": "scribe"
+    },
+    "dec_inferred_a69db1da-ae79-4ccb-9acf-75aa907b4717_2_a-concrete-docs-drift-exists-docs-plans-md-references-a-missing-docs-exec-plans-active-directory-after-the-context-rollout-plan-moved-to-completed": {
+      "id": "dec_inferred_a69db1da-ae79-4ccb-9acf-75aa907b4717_2_a-concrete-docs-drift-exists-docs-plans-md-references-a-missing-docs-exec-plans-active-directory-after-the-context-rollout-plan-moved-to-completed",
+      "type": "decision",
+      "topic": "a-concrete-docs-drift-exists-docs-plans-md-references-a-missing-docs-exec-plans-active-directory-after-the-context-rollout-plan-moved-to-completed",
+      "title": "A concrete docs drift exists: `docs/PLANS.md` references a missing `docs/exec-plans/active/` directory after the context rollout plan moved to completed.",
+      "status": "proposed",
+      "importance": "normal",
+      "summary": "Inferred from ResultPacket memory_worthy entry: A concrete docs drift exists: `docs/PLANS.md` references a missing `docs/exec-plans/active/` directory after the context rollout plan moved to completed.",
+      "rationale": [
+        "Captured from a ResultPacket memory_worthy entry pending curation."
+      ],
+      "source_refs": [
+        ".control-tower/packets/inbox/scribe-memory-sync-20260322T003835Z-result.json"
+      ],
+      "inferred": true,
+      "created_at": "2026-03-22T00:42:31Z",
+      "created_by": "scribe"
+    },
+    "dec_inferred_a69db1da-ae79-4ccb-9acf-75aa907b4717_3_remote-branches-ahead-of-main-require-tower-triage-hashed-api-auth-actor-aware-git-identities-pr-eval-harness-retrieval-apis-and-mcp-integration": {
+      "id": "dec_inferred_a69db1da-ae79-4ccb-9acf-75aa907b4717_3_remote-branches-ahead-of-main-require-tower-triage-hashed-api-auth-actor-aware-git-identities-pr-eval-harness-retrieval-apis-and-mcp-integration",
+      "type": "decision",
+      "topic": "remote-branches-ahead-of-main-require-tower-triage-hashed-api-auth-actor-aware-git-identities-pr-eval-harness-retrieval-apis-and-mcp-integration",
+      "title": "Remote branches ahead of `main` require Tower triage: hashed API auth, actor-aware git identities, PR eval harness, retrieval APIs, and MCP integration.",
+      "status": "proposed",
+      "importance": "normal",
+      "summary": "Inferred from ResultPacket memory_worthy entry: Remote branches ahead of `main` require Tower triage: hashed API auth, actor-aware git identities, PR eval harness, retrieval APIs, and MCP integration.",
+      "rationale": [
+        "Captured from a ResultPacket memory_worthy entry pending curation."
+      ],
+      "source_refs": [
+        ".control-tower/packets/inbox/scribe-memory-sync-20260322T003835Z-result.json"
+      ],
+      "inferred": true,
+      "created_at": "2026-03-22T00:42:31Z",
+      "created_by": "scribe"
+    },
+    "question:should-docs-plans-md-point-only-at-completed-plans-until-a-new-active-plan-exists-or-should-an-empty-docs-exec-plans-active-directory-be-restored": {
+      "id": "question:should-docs-plans-md-point-only-at-completed-plans-until-a-new-active-plan-exists-or-should-an-empty-docs-exec-plans-active-directory-be-restored",
+      "type": "question",
+      "title": "Should `docs/PLANS.md` point only at completed plans until a new active plan exists, or should an empty `docs/exec-plans/active/` directory be restored?",
+      "status": "open",
+      "source_ref": ".control-tower/docs/state/open-questions.md"
+    },
+    "question:which-of-the-remote-branches-ahead-of-main-should-tower-treat-as-active-project-direction-versus-parked-exploration": {
+      "id": "question:which-of-the-remote-branches-ahead-of-main-should-tower-treat-as-active-project-direction-versus-parked-exploration",
+      "type": "question",
+      "title": "Which of the remote branches ahead of `main` should Tower treat as active project direction versus parked exploration?",
+      "status": "open",
+      "source_ref": ".control-tower/docs/state/open-questions.md"
+    },
+    "session:019d1308-c03a-78f1-bad2-a9f734555a74": {
+      "id": "session:019d1308-c03a-78f1-bad2-a9f734555a74",
+      "type": "session",
+      "session_id": "019d1308-c03a-78f1-bad2-a9f734555a74",
+      "timestamp": "2026-03-22T00:53:53.851Z",
+      "source": "exec",
+      "originator": "codex_exec",
+      "transcript_path": ".control-tower/memory/l2/transcripts/019d1308-c03a-78f1-bad2-a9f734555a74.md",
+      "session_path": ".control-tower/memory/l2/sessions/019d1308-c03a-78f1-bad2-a9f734555a74.jsonl"
+    },
+    "session:019d130a-5f8b-7c41-be77-c7f43a35a49b": {
+      "id": "session:019d130a-5f8b-7c41-be77-c7f43a35a49b",
+      "type": "session",
+      "session_id": "019d130a-5f8b-7c41-be77-c7f43a35a49b",
+      "timestamp": "2026-03-22T00:55:40.172Z",
+      "source": "exec",
+      "originator": "codex_exec",
+      "transcript_path": ".control-tower/memory/l2/transcripts/019d130a-5f8b-7c41-be77-c7f43a35a49b.md",
+      "session_path": ".control-tower/memory/l2/sessions/019d130a-5f8b-7c41-be77-c7f43a35a49b.jsonl"
+    },
+    "packet:2d4cb429-929d-4fb7-9449-ba186b7dfdd0": {
+      "id": "packet:2d4cb429-929d-4fb7-9449-ba186b7dfdd0",
+      "type": "packet",
+      "packet_id": "2d4cb429-929d-4fb7-9449-ba186b7dfdd0",
+      "packet_type": "result",
+      "title": "Remote work ahead of `main` breaks into three active lines and one parked exploratory stack. Active lines are: auth hardening (`feat/actor-aware-git-identities` -> `feat/hashed-api-key-auth`), Tower/automation infrastructure (`feat/pr-eval-harness`), and retrieval (`yashom7/revup/main/retrieval-layer`). The MCP adapter branch is still exploratory because it depends on retrieval, introduces a new top-level `mcp-server/` domain, and is only open as a stacked PR against the retrieval branch. `docs/PLANS.md` drift is real and the smallest corrective action is to restore `docs/exec-plans/active/` as an empty tracked directory or placeholder README rather than rewriting multiple docs references. Recommended immediate Tower action: route Git-master to land only the missing `docs/exec-plans/active/` restoration from the existing auth branch commit, then continue curation from a clean doc state.",
+      "status": "success",
+      "trace_id": "803faf25-936b-4931-9ceb-7e5b343a9fb2",
+      "from_agent": "scout",
+      "to_agent": "tower",
+      "path": ".control-tower/packets/inbox/scout-triage-branches-and-docs-result.json",
+      "created_at": "2026-03-22T00:55:27Z"
+    },
+    "artifact:.control-tower/packets/inbox/scout-triage-branches-and-docs-result.json": {
+      "id": "artifact:.control-tower/packets/inbox/scout-triage-branches-and-docs-result.json",
+      "type": "artifact",
+      "ref": ".control-tower/packets/inbox/scout-triage-branches-and-docs-result.json",
+      "title": ".control-tower/packets/inbox/scout-triage-branches-and-docs-result.json",
+      "created_at": "2026-03-22T00:55:27Z"
+    },
+    "dec_inferred_2d4cb429-929d-4fb7-9449-ba186b7dfdd0_0_remote-branches-ahead-of-main-now-classify-into-active-auth-stack-feat-actor-aware-git-identities-feat-hashed-api-key-auth-active-infra-feat-pr-eval-harness-active-candidate-retrieval-line-yashom7-revup-main-retrieval-layer-and-parked-dependent-exploration-yashom7-revup-main-mcp-adapter": {
+      "id": "dec_inferred_2d4cb429-929d-4fb7-9449-ba186b7dfdd0_0_remote-branches-ahead-of-main-now-classify-into-active-auth-stack-feat-actor-aware-git-identities-feat-hashed-api-key-auth-active-infra-feat-pr-eval-harness-active-candidate-retrieval-line-yashom7-revup-main-retrieval-layer-and-parked-dependent-exploration-yashom7-revup-main-mcp-adapter",
+      "type": "decision",
+      "topic": "remote-branches-ahead-of-main-now-classify-into-active-auth-stack-feat-actor-aware-git-identities-feat-hashed-api-key-auth-active-infra-feat-pr-eval-harness-active-candidate-retrieval-line-yashom7-revup-main-retrieval-layer-and-parked-dependent-exploration-yashom7-revup-main-mcp-adapter",
+      "title": "Remote branches ahead of `main` now classify into active auth stack (`feat/actor-aware-git-identities` -> `feat/hashed-api-key-auth`), active infra (`feat/pr-eval-harness`), active candidate retrieval line (`yashom7/revup/main/retrieval-layer`), and parked dependent exploration (`yashom7/revup/main/mcp-adapter`).",
+      "status": "proposed",
+      "importance": "normal",
+      "summary": "Inferred from ResultPacket memory_worthy entry: Remote branches ahead of `main` now classify into active auth stack (`feat/actor-aware-git-identities` -> `feat/hashed-api-key-auth`), active infra (`feat/pr-eval-harness`), active candidate retrieval line (`yashom7/revup/main/retrieval-layer`), and parked dependent exploration (`yashom7/revup/main/mcp-adapter`).",
+      "rationale": [
+        "Captured from a ResultPacket memory_worthy entry pending curation."
+      ],
+      "source_refs": [
+        ".control-tower/packets/inbox/scout-triage-branches-and-docs-result.json"
+      ],
+      "inferred": true,
+      "created_at": "2026-03-22T00:56:07Z",
+      "created_by": "scout"
+    },
+    "dec_inferred_2d4cb429-929d-4fb7-9449-ba186b7dfdd0_1_feat-hashed-api-key-auth-is-stacked-on-feat-actor-aware-git-identities-via-pr-8-so-tower-should-treat-them-as-one-branch-line-rather-than-competing-directions": {
+      "id": "dec_inferred_2d4cb429-929d-4fb7-9449-ba186b7dfdd0_1_feat-hashed-api-key-auth-is-stacked-on-feat-actor-aware-git-identities-via-pr-8-so-tower-should-treat-them-as-one-branch-line-rather-than-competing-directions",
+      "type": "decision",
+      "topic": "feat-hashed-api-key-auth-is-stacked-on-feat-actor-aware-git-identities-via-pr-8-so-tower-should-treat-them-as-one-branch-line-rather-than-competing-directions",
+      "title": "`feat/hashed-api-key-auth` is stacked on `feat/actor-aware-git-identities` via PR #8, so Tower should treat them as one branch line rather than competing directions.",
+      "status": "proposed",
+      "importance": "normal",
+      "summary": "Inferred from ResultPacket memory_worthy entry: `feat/hashed-api-key-auth` is stacked on `feat/actor-aware-git-identities` via PR #8, so Tower should treat them as one branch line rather than competing directions.",
+      "rationale": [
+        "Captured from a ResultPacket memory_worthy entry pending curation."
+      ],
+      "source_refs": [
+        ".control-tower/packets/inbox/scout-triage-branches-and-docs-result.json"
+      ],
+      "inferred": true,
+      "created_at": "2026-03-22T00:56:07Z",
+      "created_by": "scout"
+    },
+    "dec_inferred_2d4cb429-929d-4fb7-9449-ba186b7dfdd0_2_feat-pr-eval-harness-has-a-direct-pr-to-main-13-and-is-the-cleanest-active-line-for-tower-facing-automation-improvements": {
+      "id": "dec_inferred_2d4cb429-929d-4fb7-9449-ba186b7dfdd0_2_feat-pr-eval-harness-has-a-direct-pr-to-main-13-and-is-the-cleanest-active-line-for-tower-facing-automation-improvements",
+      "type": "decision",
+      "topic": "feat-pr-eval-harness-has-a-direct-pr-to-main-13-and-is-the-cleanest-active-line-for-tower-facing-automation-improvements",
+      "title": "`feat/pr-eval-harness` has a direct PR to `main` (#13) and is the cleanest active line for Tower-facing automation improvements.",
+      "status": "proposed",
+      "importance": "normal",
+      "summary": "Inferred from ResultPacket memory_worthy entry: `feat/pr-eval-harness` has a direct PR to `main` (#13) and is the cleanest active line for Tower-facing automation improvements.",
+      "rationale": [
+        "Captured from a ResultPacket memory_worthy entry pending curation."
+      ],
+      "source_refs": [
+        ".control-tower/packets/inbox/scout-triage-branches-and-docs-result.json"
+      ],
+      "inferred": true,
+      "created_at": "2026-03-22T00:56:07Z",
+      "created_by": "scout"
+    },
+    "dec_inferred_2d4cb429-929d-4fb7-9449-ba186b7dfdd0_3_yashom7-revup-main-mcp-adapter-is-stacked-on-retrieval-via-pr-10-and-should-stay-parked-until-retrieval-is-accepted-and-a-new-mcp-server-domain-is-approved": {
+      "id": "dec_inferred_2d4cb429-929d-4fb7-9449-ba186b7dfdd0_3_yashom7-revup-main-mcp-adapter-is-stacked-on-retrieval-via-pr-10-and-should-stay-parked-until-retrieval-is-accepted-and-a-new-mcp-server-domain-is-approved",
+      "type": "decision",
+      "topic": "yashom7-revup-main-mcp-adapter-is-stacked-on-retrieval-via-pr-10-and-should-stay-parked-until-retrieval-is-accepted-and-a-new-mcp-server-domain-is-approved",
+      "title": "`yashom7/revup/main/mcp-adapter` is stacked on retrieval via PR #10 and should stay parked until retrieval is accepted and a new `mcp-server/` domain is approved.",
+      "status": "proposed",
+      "importance": "normal",
+      "summary": "Inferred from ResultPacket memory_worthy entry: `yashom7/revup/main/mcp-adapter` is stacked on retrieval via PR #10 and should stay parked until retrieval is accepted and a new `mcp-server/` domain is approved.",
+      "rationale": [
+        "Captured from a ResultPacket memory_worthy entry pending curation."
+      ],
+      "source_refs": [
+        ".control-tower/packets/inbox/scout-triage-branches-and-docs-result.json"
+      ],
+      "inferred": true,
+      "created_at": "2026-03-22T00:56:07Z",
+      "created_by": "scout"
+    },
+    "dec_inferred_2d4cb429-929d-4fb7-9449-ba186b7dfdd0_4_docs-plans-md-drift-should-be-fixed-by-restoring-docs-exec-plans-active-changing-references-would-create-broader-docs-churn-without-solving-the-structural-expectation-shared-by-agents-md-and-docs-index-md": {
+      "id": "dec_inferred_2d4cb429-929d-4fb7-9449-ba186b7dfdd0_4_docs-plans-md-drift-should-be-fixed-by-restoring-docs-exec-plans-active-changing-references-would-create-broader-docs-churn-without-solving-the-structural-expectation-shared-by-agents-md-and-docs-index-md",
+      "type": "decision",
+      "topic": "docs-plans-md-drift-should-be-fixed-by-restoring-docs-exec-plans-active-changing-references-would-create-broader-docs-churn-without-solving-the-structural-expectation-shared-by-agents-md-and-docs-index-md",
+      "title": "`docs/PLANS.md` drift should be fixed by restoring `docs/exec-plans/active/`; changing references would create broader docs churn without solving the structural expectation shared by `AGENTS.md` and `docs/index.md`.",
+      "status": "proposed",
+      "importance": "normal",
+      "summary": "Inferred from ResultPacket memory_worthy entry: `docs/PLANS.md` drift should be fixed by restoring `docs/exec-plans/active/`; changing references would create broader docs churn without solving the structural expectation shared by `AGENTS.md` and `docs/index.md`.",
+      "rationale": [
+        "Captured from a ResultPacket memory_worthy entry pending curation."
+      ],
+      "source_refs": [
+        ".control-tower/packets/inbox/scout-triage-branches-and-docs-result.json"
+      ],
+      "inferred": true,
+      "created_at": "2026-03-22T00:56:07Z",
+      "created_by": "scout"
+    },
+    "dec_inferred_2d4cb429-929d-4fb7-9449-ba186b7dfdd0_5_the-minimal-doc-fix-already-exists-remotely-as-commit-5e810a2-on-feat-actor-aware-git-identities-making-git-master-the-best-immediate-delegate": {
+      "id": "dec_inferred_2d4cb429-929d-4fb7-9449-ba186b7dfdd0_5_the-minimal-doc-fix-already-exists-remotely-as-commit-5e810a2-on-feat-actor-aware-git-identities-making-git-master-the-best-immediate-delegate",
+      "type": "decision",
+      "topic": "the-minimal-doc-fix-already-exists-remotely-as-commit-5e810a2-on-feat-actor-aware-git-identities-making-git-master-the-best-immediate-delegate",
+      "title": "The minimal doc fix already exists remotely as commit `5e810a2` on `feat/actor-aware-git-identities`, making Git-master the best immediate delegate.",
+      "status": "proposed",
+      "importance": "normal",
+      "summary": "Inferred from ResultPacket memory_worthy entry: The minimal doc fix already exists remotely as commit `5e810a2` on `feat/actor-aware-git-identities`, making Git-master the best immediate delegate.",
+      "rationale": [
+        "Captured from a ResultPacket memory_worthy entry pending curation."
+      ],
+      "source_refs": [
+        ".control-tower/packets/inbox/scout-triage-branches-and-docs-result.json"
+      ],
+      "inferred": true,
+      "created_at": "2026-03-22T00:56:07Z",
+      "created_by": "scout"
+    },
+    "packet:edaad0db-e426-489b-b0aa-c2d7be3e8e42": {
+      "id": "packet:edaad0db-e426-489b-b0aa-c2d7be3e8e42",
+      "type": "packet",
+      "packet_id": "edaad0db-e426-489b-b0aa-c2d7be3e8e42",
+      "packet_type": "task",
+      "title": "Triage remote branches and docs drift",
+      "status": null,
+      "trace_id": "803faf25-936b-4931-9ceb-7e5b343a9fb2",
+      "from_agent": "tower",
+      "to_agent": "scout",
+      "path": ".control-tower/packets/outbox/scout-triage-branches-and-docs.json",
+      "created_at": "2026-03-22T00:53:51Z"
+    },
+    "artifact:.control-tower/packets/outbox/scout-triage-branches-and-docs.json": {
+      "id": "artifact:.control-tower/packets/outbox/scout-triage-branches-and-docs.json",
+      "type": "artifact",
+      "ref": ".control-tower/packets/outbox/scout-triage-branches-and-docs.json",
+      "title": ".control-tower/packets/outbox/scout-triage-branches-and-docs.json",
+      "created_at": "2026-03-22T00:53:51Z"
+    },
+    "packet:c4c4980f-42ea-42f4-8922-dbe4a5e7c083": {
+      "id": "packet:c4c4980f-42ea-42f4-8922-dbe4a5e7c083",
+      "type": "packet",
+      "packet_id": "c4c4980f-42ea-42f4-8922-dbe4a5e7c083",
+      "packet_type": "task",
+      "title": "Curate branch stack and active PR context",
+      "status": null,
+      "trace_id": "f67baf5b-473f-4b37-94d0-1b9140554ad4",
+      "from_agent": "tower",
+      "to_agent": "scribe",
+      "path": ".control-tower/packets/outbox/scribe-curate-branch-stack.json",
+      "created_at": "2026-03-22T00:55:37Z"
+    },
+    "artifact:.control-tower/packets/outbox/scribe-curate-branch-stack.json": {
+      "id": "artifact:.control-tower/packets/outbox/scribe-curate-branch-stack.json",
+      "type": "artifact",
+      "ref": ".control-tower/packets/outbox/scribe-curate-branch-stack.json",
+      "title": ".control-tower/packets/outbox/scribe-curate-branch-stack.json",
+      "created_at": "2026-03-22T00:55:37Z"
+    },
+    "event:black-box:5": {
+      "id": "event:black-box:5",
+      "type": "event",
+      "event_type": "codex_session_imported",
+      "timestamp": "2026-03-22T00:53:53.851Z",
+      "payload": {
+        "event_type": "codex_session_imported",
+        "session_id": "019d1308-c03a-78f1-bad2-a9f734555a74",
+        "timestamp": "2026-03-22T00:53:53.851Z",
+        "source": "exec",
+        "originator": "codex_exec",
+        "transcript_path": ".control-tower/memory/l2/transcripts/019d1308-c03a-78f1-bad2-a9f734555a74.md"
+      }
+    },
+    "event:black-box:6": {
+      "id": "event:black-box:6",
+      "type": "event",
+      "event_type": "codex_session_imported",
+      "timestamp": "2026-03-22T00:55:40.172Z",
+      "payload": {
+        "event_type": "codex_session_imported",
+        "session_id": "019d130a-5f8b-7c41-be77-c7f43a35a49b",
+        "timestamp": "2026-03-22T00:55:40.172Z",
+        "source": "exec",
+        "originator": "codex_exec",
+        "transcript_path": ".control-tower/memory/l2/transcripts/019d130a-5f8b-7c41-be77-c7f43a35a49b.md"
+      }
+    },
+    "session:019d130b-1752-7233-80d4-0494735048f5": {
+      "id": "session:019d130b-1752-7233-80d4-0494735048f5",
+      "type": "session",
+      "session_id": "019d130b-1752-7233-80d4-0494735048f5",
+      "timestamp": "2026-03-22T00:56:27.219Z",
+      "source": "exec",
+      "originator": "codex_exec",
+      "transcript_path": ".control-tower/memory/l2/transcripts/019d130b-1752-7233-80d4-0494735048f5.md",
+      "session_path": ".control-tower/memory/l2/sessions/019d130b-1752-7233-80d4-0494735048f5.jsonl"
+    },
+    "session:019d130c-054c-76b1-be19-574030436e61": {
+      "id": "session:019d130c-054c-76b1-be19-574030436e61",
+      "type": "session",
+      "session_id": "019d130c-054c-76b1-be19-574030436e61",
+      "timestamp": "2026-03-22T00:57:28.141Z",
+      "source": "exec",
+      "originator": "codex_exec",
+      "transcript_path": ".control-tower/memory/l2/transcripts/019d130c-054c-76b1-be19-574030436e61.md",
+      "session_path": ".control-tower/memory/l2/sessions/019d130c-054c-76b1-be19-574030436e61.jsonl"
+    },
+    "packet:dbc5b3f6-cc56-4605-a9c9-91e7bad534fd": {
+      "id": "packet:dbc5b3f6-cc56-4605-a9c9-91e7bad534fd",
+      "type": "packet",
+      "packet_id": "dbc5b3f6-cc56-4605-a9c9-91e7bad534fd",
+      "packet_type": "result",
+      "title": "Restored the documented `docs/exec-plans/active/` navigation path with a minimal docs-only fix by adding `docs/exec-plans/active/README.md`. Updated Tower task/state docs to mark the drift resolved and verified the docs tree with `python3 scripts/docs_lint.py`.",
+      "status": "success",
+      "trace_id": "edd08bcb-700c-456a-a9c6-a96747983d38",
+      "from_agent": "scribe",
+      "to_agent": "tower",
+      "path": ".control-tower/packets/inbox/scribe-fix-exec-plans-active-path-result.json",
+      "created_at": "2026-03-22T00:57:29Z"
+    },
+    "artifact:.control-tower/packets/inbox/scribe-fix-exec-plans-active-path-result.json": {
+      "id": "artifact:.control-tower/packets/inbox/scribe-fix-exec-plans-active-path-result.json",
+      "type": "artifact",
+      "ref": ".control-tower/packets/inbox/scribe-fix-exec-plans-active-path-result.json",
+      "title": ".control-tower/packets/inbox/scribe-fix-exec-plans-active-path-result.json",
+      "created_at": "2026-03-22T00:57:29Z"
+    },
+    "dec_inferred_dbc5b3f6-cc56-4605-a9c9-91e7bad534fd_0_as-of-2026-03-22-the-documented-active-execution-plan-path-is-restored-at-docs-exec-plans-active-readme-md-so-agent-navigation-in-agents-md-docs-plans-md-and-docs-index-md-is-aligned-again": {
+      "id": "dec_inferred_dbc5b3f6-cc56-4605-a9c9-91e7bad534fd_0_as-of-2026-03-22-the-documented-active-execution-plan-path-is-restored-at-docs-exec-plans-active-readme-md-so-agent-navigation-in-agents-md-docs-plans-md-and-docs-index-md-is-aligned-again",
+      "type": "decision",
+      "topic": "as-of-2026-03-22-the-documented-active-execution-plan-path-is-restored-at-docs-exec-plans-active-readme-md-so-agent-navigation-in-agents-md-docs-plans-md-and-docs-index-md-is-aligned-again",
+      "title": "As of 2026-03-22, the documented active execution-plan path is restored at `docs/exec-plans/active/README.md`, so agent navigation in `AGENTS.md`, `docs/PLANS.md`, and `docs/index.md` is aligned again.",
+      "status": "proposed",
+      "importance": "normal",
+      "summary": "Inferred from ResultPacket memory_worthy entry: As of 2026-03-22, the documented active execution-plan path is restored at `docs/exec-plans/active/README.md`, so agent navigation in `AGENTS.md`, `docs/PLANS.md`, and `docs/index.md` is aligned again.",
+      "rationale": [
+        "Captured from a ResultPacket memory_worthy entry pending curation."
+      ],
+      "source_refs": [
+        ".control-tower/packets/inbox/scribe-fix-exec-plans-active-path-result.json"
+      ],
+      "inferred": true,
+      "created_at": "2026-03-22T00:57:45Z",
+      "created_by": "scribe"
+    },
+    "dec_inferred_dbc5b3f6-cc56-4605-a9c9-91e7bad534fd_1_tower-task-state-docs-were-updated-to-mark-the-exec-plans-active-path-drift-resolved": {
+      "id": "dec_inferred_dbc5b3f6-cc56-4605-a9c9-91e7bad534fd_1_tower-task-state-docs-were-updated-to-mark-the-exec-plans-active-path-drift-resolved",
+      "type": "decision",
+      "topic": "tower-task-state-docs-were-updated-to-mark-the-exec-plans-active-path-drift-resolved",
+      "title": "Tower task/state docs were updated to mark the exec-plans active-path drift resolved.",
+      "status": "proposed",
+      "importance": "normal",
+      "summary": "Inferred from ResultPacket memory_worthy entry: Tower task/state docs were updated to mark the exec-plans active-path drift resolved.",
+      "rationale": [
+        "Captured from a ResultPacket memory_worthy entry pending curation."
+      ],
+      "source_refs": [
+        ".control-tower/packets/inbox/scribe-fix-exec-plans-active-path-result.json"
+      ],
+      "inferred": true,
+      "created_at": "2026-03-22T00:57:45Z",
+      "created_by": "scribe"
+    },
+    "packet:4ce07a4a-2a87-463e-bc12-41becbe433fd": {
+      "id": "packet:4ce07a4a-2a87-463e-bc12-41becbe433fd",
+      "type": "packet",
+      "packet_id": "4ce07a4a-2a87-463e-bc12-41becbe433fd",
+      "packet_type": "task",
+      "title": "Land exec-plans active-path restoration only",
+      "status": null,
+      "trace_id": "c1584ba0-a79b-4baa-9d5c-776fa3a9a64b",
+      "from_agent": "tower",
+      "to_agent": "git-master",
+      "path": ".control-tower/packets/outbox/git-master-land-exec-plans-active-path.json",
+      "created_at": "2026-03-22T00:57:25Z"
+    },
+    "artifact:.control-tower/packets/outbox/git-master-land-exec-plans-active-path.json": {
+      "id": "artifact:.control-tower/packets/outbox/git-master-land-exec-plans-active-path.json",
+      "type": "artifact",
+      "ref": ".control-tower/packets/outbox/git-master-land-exec-plans-active-path.json",
+      "title": ".control-tower/packets/outbox/git-master-land-exec-plans-active-path.json",
+      "created_at": "2026-03-22T00:57:25Z"
+    },
+    "packet:bb7fce5e-f7db-4928-a283-fb6cf4451e54": {
+      "id": "packet:bb7fce5e-f7db-4928-a283-fb6cf4451e54",
+      "type": "packet",
+      "packet_id": "bb7fce5e-f7db-4928-a283-fb6cf4451e54",
+      "packet_type": "task",
+      "title": "Fix exec-plans active-path drift",
+      "status": null,
+      "trace_id": "edd08bcb-700c-456a-a9c6-a96747983d38",
+      "from_agent": "tower",
+      "to_agent": "scribe",
+      "path": ".control-tower/packets/outbox/scribe-fix-exec-plans-active-path.json",
+      "created_at": "2026-03-22T00:56:24Z"
+    },
+    "artifact:.control-tower/packets/outbox/scribe-fix-exec-plans-active-path.json": {
+      "id": "artifact:.control-tower/packets/outbox/scribe-fix-exec-plans-active-path.json",
+      "type": "artifact",
+      "ref": ".control-tower/packets/outbox/scribe-fix-exec-plans-active-path.json",
+      "title": ".control-tower/packets/outbox/scribe-fix-exec-plans-active-path.json",
+      "created_at": "2026-03-22T00:56:24Z"
+    },
+    "event:black-box:7": {
+      "id": "event:black-box:7",
+      "type": "event",
+      "event_type": "codex_session_imported",
+      "timestamp": "2026-03-22T00:56:27.219Z",
+      "payload": {
+        "event_type": "codex_session_imported",
+        "session_id": "019d130b-1752-7233-80d4-0494735048f5",
+        "timestamp": "2026-03-22T00:56:27.219Z",
+        "source": "exec",
+        "originator": "codex_exec",
+        "transcript_path": ".control-tower/memory/l2/transcripts/019d130b-1752-7233-80d4-0494735048f5.md"
+      }
+    },
+    "event:black-box:8": {
+      "id": "event:black-box:8",
+      "type": "event",
+      "event_type": "codex_session_imported",
+      "timestamp": "2026-03-22T00:57:28.141Z",
+      "payload": {
+        "event_type": "codex_session_imported",
+        "session_id": "019d130c-054c-76b1-be19-574030436e61",
+        "timestamp": "2026-03-22T00:57:28.141Z",
+        "source": "exec",
+        "originator": "codex_exec",
+        "transcript_path": ".control-tower/memory/l2/transcripts/019d130c-054c-76b1-be19-574030436e61.md"
+      }
+    },
+    "packet:9b320567-7acd-4e50-9d91-3b311a921a08": {
+      "id": "packet:9b320567-7acd-4e50-9d91-3b311a921a08",
+      "type": "packet",
+      "packet_id": "9b320567-7acd-4e50-9d91-3b311a921a08",
+      "packet_type": "result",
+      "title": "Inspected commit `5e810a2` on `origin/feat/actor-aware-git-identities` and confirmed it contains only the docs-path restoration `docs/exec-plans/active/.gitkeep`. Applied that exact empty placeholder locally and staged only that file. No commit was created. Existing unrelated untracked items remain untouched.",
+      "status": "success",
+      "trace_id": "c1584ba0-a79b-4baa-9d5c-776fa3a9a64b",
+      "from_agent": "git-master",
+      "to_agent": "tower",
+      "path": ".control-tower/packets/inbox/git-master-land-exec-plans-active-path-result.json",
+      "created_at": "2026-03-21T18:00:00-07:00"
+    },
+    "artifact:.control-tower/packets/inbox/git-master-land-exec-plans-active-path-result.json": {
+      "id": "artifact:.control-tower/packets/inbox/git-master-land-exec-plans-active-path-result.json",
+      "type": "artifact",
+      "ref": ".control-tower/packets/inbox/git-master-land-exec-plans-active-path-result.json",
+      "title": ".control-tower/packets/inbox/git-master-land-exec-plans-active-path-result.json",
+      "created_at": "2026-03-21T18:00:00-07:00"
+    },
+    "dec_inferred_9b320567-7acd-4e50-9d91-3b311a921a08_0_commit-5e810a2-is-safe-to-isolate-because-it-adds-only-docs-exec-plans-active-gitkeep": {
+      "id": "dec_inferred_9b320567-7acd-4e50-9d91-3b311a921a08_0_commit-5e810a2-is-safe-to-isolate-because-it-adds-only-docs-exec-plans-active-gitkeep",
+      "type": "decision",
+      "topic": "commit-5e810a2-is-safe-to-isolate-because-it-adds-only-docs-exec-plans-active-gitkeep",
+      "title": "Commit `5e810a2` is safe to isolate because it adds only `docs/exec-plans/active/.gitkeep`.",
+      "status": "proposed",
+      "importance": "normal",
+      "summary": "Inferred from ResultPacket memory_worthy entry: Commit `5e810a2` is safe to isolate because it adds only `docs/exec-plans/active/.gitkeep`.",
+      "rationale": [
+        "Captured from a ResultPacket memory_worthy entry pending curation."
+      ],
+      "source_refs": [
+        ".control-tower/packets/inbox/git-master-land-exec-plans-active-path-result.json"
+      ],
+      "inferred": true,
+      "created_at": "2026-03-22T00:58:31Z",
+      "created_by": "git-master"
+    },
+    "packet:e9d6b6d4-1099-44dc-9c39-b78bf7f4b8db": {
+      "id": "packet:e9d6b6d4-1099-44dc-9c39-b78bf7f4b8db",
+      "type": "packet",
+      "packet_id": "e9d6b6d4-1099-44dc-9c39-b78bf7f4b8db",
+      "packet_type": "result",
+      "title": "Updated Tower memory/state to distinguish the active open PR stacks from the anomalous `main -> main` PR, and recorded that the prior `docs/PLANS.md` drift has already been resolved on `main` by restoring `docs/exec-plans/active/`.",
+      "status": "success",
+      "trace_id": "f67baf5b-473f-4b37-94d0-1b9140554ad4",
+      "from_agent": "scribe",
+      "to_agent": "tower",
+      "path": ".control-tower/packets/inbox/scribe-curate-branch-stack-result.json",
+      "created_at": "2026-03-22T01:00:52Z"
+    },
+    "artifact:.control-tower/packets/inbox/scribe-curate-branch-stack-result.json": {
+      "id": "artifact:.control-tower/packets/inbox/scribe-curate-branch-stack-result.json",
+      "type": "artifact",
+      "ref": ".control-tower/packets/inbox/scribe-curate-branch-stack-result.json",
+      "title": ".control-tower/packets/inbox/scribe-curate-branch-stack-result.json",
+      "created_at": "2026-03-22T01:00:52Z"
+    },
+    "dec_inferred_e9d6b6d4-1099-44dc-9c39-b78bf7f4b8db_0_active-branch-context-is-best-modeled-as-three-open-pr-lines-auth-feat-actor-aware-git-identities-feat-hashed-api-key-auth-retrieval-mcp-retrieval-layer-mcp-adapter-and-standalone-feat-pr-eval-harness": {
+      "id": "dec_inferred_e9d6b6d4-1099-44dc-9c39-b78bf7f4b8db_0_active-branch-context-is-best-modeled-as-three-open-pr-lines-auth-feat-actor-aware-git-identities-feat-hashed-api-key-auth-retrieval-mcp-retrieval-layer-mcp-adapter-and-standalone-feat-pr-eval-harness",
+      "type": "decision",
+      "topic": "active-branch-context-is-best-modeled-as-three-open-pr-lines-auth-feat-actor-aware-git-identities-feat-hashed-api-key-auth-retrieval-mcp-retrieval-layer-mcp-adapter-and-standalone-feat-pr-eval-harness",
+      "title": "Active branch context is best modeled as three open PR lines: auth (`feat/actor-aware-git-identities` -> `feat/hashed-api-key-auth`), retrieval/MCP (`retrieval-layer` -> `mcp-adapter`), and standalone `feat/pr-eval-harness`.",
+      "status": "proposed",
+      "importance": "normal",
+      "summary": "Inferred from ResultPacket memory_worthy entry: Active branch context is best modeled as three open PR lines: auth (`feat/actor-aware-git-identities` -> `feat/hashed-api-key-auth`), retrieval/MCP (`retrieval-layer` -> `mcp-adapter`), and standalone `feat/pr-eval-harness`.",
+      "rationale": [
+        "Captured from a ResultPacket memory_worthy entry pending curation."
+      ],
+      "source_refs": [
+        ".control-tower/packets/inbox/scribe-curate-branch-stack-result.json"
+      ],
+      "inferred": true,
+      "created_at": "2026-03-22T01:01:11Z",
+      "created_by": "scribe"
+    },
+    "dec_inferred_e9d6b6d4-1099-44dc-9c39-b78bf7f4b8db_1_pr-12-is-an-open-main-main-anomaly-and-should-be-treated-as-review-state-noise-until-clarified": {
+      "id": "dec_inferred_e9d6b6d4-1099-44dc-9c39-b78bf7f4b8db_1_pr-12-is-an-open-main-main-anomaly-and-should-be-treated-as-review-state-noise-until-clarified",
+      "type": "decision",
+      "topic": "pr-12-is-an-open-main-main-anomaly-and-should-be-treated-as-review-state-noise-until-clarified",
+      "title": "PR `#12` is an open `main -> main` anomaly and should be treated as review-state noise until clarified.",
+      "status": "proposed",
+      "importance": "normal",
+      "summary": "Inferred from ResultPacket memory_worthy entry: PR `#12` is an open `main -> main` anomaly and should be treated as review-state noise until clarified.",
+      "rationale": [
+        "Captured from a ResultPacket memory_worthy entry pending curation."
+      ],
+      "source_refs": [
+        ".control-tower/packets/inbox/scribe-curate-branch-stack-result.json"
+      ],
+      "inferred": true,
+      "created_at": "2026-03-22T01:01:11Z",
+      "created_by": "scribe"
+    },
+    "dec_inferred_e9d6b6d4-1099-44dc-9c39-b78bf7f4b8db_2_the-earlier-docs-plans-md-drift-was-resolved-by-restoring-docs-exec-plans-active-on-main-so-this-is-no-longer-an-active-docs-mismatch": {
+      "id": "dec_inferred_e9d6b6d4-1099-44dc-9c39-b78bf7f4b8db_2_the-earlier-docs-plans-md-drift-was-resolved-by-restoring-docs-exec-plans-active-on-main-so-this-is-no-longer-an-active-docs-mismatch",
+      "type": "decision",
+      "topic": "the-earlier-docs-plans-md-drift-was-resolved-by-restoring-docs-exec-plans-active-on-main-so-this-is-no-longer-an-active-docs-mismatch",
+      "title": "The earlier `docs/PLANS.md` drift was resolved by restoring `docs/exec-plans/active/` on `main`, so this is no longer an active docs mismatch.",
+      "status": "proposed",
+      "importance": "normal",
+      "summary": "Inferred from ResultPacket memory_worthy entry: The earlier `docs/PLANS.md` drift was resolved by restoring `docs/exec-plans/active/` on `main`, so this is no longer an active docs mismatch.",
+      "rationale": [
+        "Captured from a ResultPacket memory_worthy entry pending curation."
+      ],
+      "source_refs": [
+        ".control-tower/packets/inbox/scribe-curate-branch-stack-result.json"
+      ],
+      "inferred": true,
+      "created_at": "2026-03-22T01:01:11Z",
+      "created_by": "scribe"
+    },
+    "packet:d00a82d2-29b0-4e2c-ae70-dd8c4a9b4c01": {
+      "id": "packet:d00a82d2-29b0-4e2c-ae70-dd8c4a9b4c01",
+      "type": "packet",
+      "packet_id": "d00a82d2-29b0-4e2c-ae70-dd8c4a9b4c01",
+      "packet_type": "task",
+      "title": "Update repo docs after Git-Master work",
+      "status": null,
+      "trace_id": "c1584ba0-a79b-4baa-9d5c-776fa3a9a64b",
+      "from_agent": "tower",
+      "to_agent": "scribe",
+      "path": ".control-tower/packets/outbox/scribe-docs-followup-git-master-20260322T005831Z.json",
+      "created_at": "2026-03-22T00:58:31Z"
+    },
+    "artifact:.control-tower/packets/outbox/scribe-docs-followup-git-master-20260322T005831Z.json": {
+      "id": "artifact:.control-tower/packets/outbox/scribe-docs-followup-git-master-20260322T005831Z.json",
+      "type": "artifact",
+      "ref": ".control-tower/packets/outbox/scribe-docs-followup-git-master-20260322T005831Z.json",
+      "title": ".control-tower/packets/outbox/scribe-docs-followup-git-master-20260322T005831Z.json",
+      "created_at": "2026-03-22T00:58:31Z"
+    },
+    "question:should-pr-12-be-closed-or-recreated-from-a-non-main-head-branch-so-the-admin-ui-work-can-be-reviewed-as-a-normal-branch-line": {
+      "id": "question:should-pr-12-be-closed-or-recreated-from-a-non-main-head-branch-so-the-admin-ui-work-can-be-reviewed-as-a-normal-branch-line",
+      "type": "question",
+      "title": "Should PR `#12` be closed or recreated from a non-`main` head branch so the admin UI work can be reviewed as a normal branch line?",
+      "status": "open",
+      "source_ref": ".control-tower/docs/state/open-questions.md"
+    }
+  }
+}
