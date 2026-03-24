@@ -35,7 +35,11 @@ Provide a file-first API over a Git-backed vault with explicit approval boundari
 
 - API-origin changes are batched to daily `kb-api/*` branches and PRs.
 - Human-origin changes go to base branch directly.
+- `source=human` Git commits and pushes use the configured USER identity.
+- `source=api` Git commits, pushes, and PR API calls use the configured AGENT identity.
 - Mainline approval remains controlled by maintainers.
+
+> **TODO:** The `source` parameter is caller-declared. A malicious or misconfigured client can claim `source=human` to bypass PR review. Actor identity should be determined by authentication (e.g., per-actor API keys) rather than a query parameter.
 
 ## Guardrails
 
@@ -49,4 +53,3 @@ Provide a file-first API over a Git-backed vault with explicit approval boundari
 - `../../kb-server/BRANCHING_AND_CURRENT_VIEW.md`
 - `../SECURITY.md`
 - `../RELIABILITY.md`
-
