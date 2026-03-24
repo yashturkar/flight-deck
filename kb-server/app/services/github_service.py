@@ -20,9 +20,11 @@ class GitHubError(Exception):
 
 
 def _token_for_actor(actor: GitActor = AGENT_ACTOR) -> str:
-    if actor == AGENT_ACTOR and settings.github_agent_token:
-        return settings.github_agent_token
-    return settings.github_token
+    if actor == AGENT_ACTOR:
+        return settings.github_agent_token or settings.github_token
+    if actor == GitActor.USER:
+        return settings.github_token
+    raise GitHubError(f"unsupported GitHub actor: {actor}")
 
 
 def _headers(actor: GitActor = AGENT_ACTOR) -> dict[str, str]:

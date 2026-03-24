@@ -110,6 +110,10 @@ class TestPush:
         with pytest.raises(GitError, match="push failed"):
             push(retries=1)
 
+    def test_push_rejects_non_user_actor(self):
+        with pytest.raises(GitError, match="push only supports user actor"):
+            push(actor=AGENT_ACTOR)
+
 
 class TestRunAuthBehavior:
     def test_sets_non_interactive_git_env(self):

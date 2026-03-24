@@ -1,6 +1,9 @@
 from unittest.mock import MagicMock, patch
 
+import pytest
+
 from app.services import github_service
+from app.services.git_service import GitActor
 
 
 class TestGitHubTokenSelection:
@@ -43,3 +46,19 @@ class TestGitHubTokenSelection:
             github_service.create_pr("kb-api/2026-03-11", "Title")
 
         assert client.post.call_args.kwargs["headers"]["Authorization"] == "Bearer fallback-token"
+
+    def test_headers_rejects_unsupported_actor(self):
+        with patch("app.services.github_service.settings") as settings:
+            settings.github_agent_token = "agent-token"
+            settings.github_token = "fallback-token"
+
+            with pytest.raises(github_service.GitHubError, match="unsupported GitHub actor"):
+                github_service._headers(actor="other")  # type: ignore[arg-type]
+
+    def test_user_actor_uses_legacy_token(self):
+        with patch("app.services.github_service.settings") as settings:
+            settings.github_agent_token = "agent-token"
+            settings.github_token = "fallback-token"
+
+            headers = github_service._headers(actor=GitActor.USER)
+            assert headers["Authorization"] == "Bearer fallback-token"

@@ -7,16 +7,21 @@ import os
 import stat
 import subprocess
 import tempfile
+from enum import Enum
 from pathlib import Path
-from typing import Literal
 
 from app.core.config import settings
 
 log = logging.getLogger(__name__)
 
-GitActor = Literal["user", "agent"]
-USER_ACTOR: GitActor = "user"
-AGENT_ACTOR: GitActor = "agent"
+
+class GitActor(str, Enum):
+    USER = "user"
+    AGENT = "agent"
+
+
+USER_ACTOR = GitActor.USER
+AGENT_ACTOR = GitActor.AGENT
 
 
 class GitError(Exception):
@@ -76,13 +81,15 @@ def _actor_env(actor: GitActor | None) -> dict[str, str]:
         committer_email = settings.git_user_committer_email or author_email
         ssh_command = settings.git_user_ssh_command
         https_token = ""
-    else:
+    elif actor == AGENT_ACTOR:
         author_name = settings.git_agent_author_name
         author_email = settings.git_agent_author_email
         committer_name = settings.git_agent_committer_name or author_name
         committer_email = settings.git_agent_committer_email or author_email
         ssh_command = settings.git_agent_ssh_command
         https_token = settings.git_agent_https_token
+    else:
+        raise GitError(f"unsupported git actor: {actor}")
 
     if author_name:
         env["GIT_AUTHOR_NAME"] = author_name
@@ -204,15 +211,13 @@ def commit_files(
     return sha
 
 
-def push(
-    remote: str | None = None,
-    branch: str | None = None,
-    retries: int = 2,
-    actor: GitActor | None = None,
-) -> None:
+def push(retries: int = 2, actor: GitActor = USER_ACTOR) -> None:
     """Push to remote with simple retry on transient failures."""
-    remote = remote or settings.git_remote
-    branch = branch or settings.git_branch
+    if actor != USER_ACTOR:
+        raise GitError("push only supports user actor; use push_branch for agent pushes")
+
+    remote = settings.git_remote
+    branch = settings.git_branch
 
     last_err: Exception | None = None
     for attempt in range(1, retries + 1):
