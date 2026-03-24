@@ -110,7 +110,6 @@ class TestPush:
         with pytest.raises(GitError, match="push failed"):
             push(retries=1)
 
-
 class TestRunAuthBehavior:
     def test_sets_non_interactive_git_env(self):
         with patch("app.services.git_service.subprocess.run") as run_mock:

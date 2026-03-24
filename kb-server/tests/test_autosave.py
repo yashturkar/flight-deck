@@ -90,4 +90,4 @@ class TestActorRouting:
 
             gs.commit_files.assert_called_once()
             assert gs.commit_files.call_args.kwargs["actor"] == gs.USER_ACTOR
-            gs.push.assert_called_once_with(actor=gs.USER_ACTOR)
+            gs.push.assert_called_once_with()

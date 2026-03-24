@@ -111,7 +111,7 @@ def write_note(
             [path], f"human: update {path}", actor=git_service.USER_ACTOR
         )
         if settings.git_push_enabled:
-            git_service.push(actor=git_service.USER_ACTOR)
+            git_service.push()
     else:
         batcher.enqueue(path)
 
@@ -145,6 +145,6 @@ def delete_note(
             [path], f"human: delete {path}", actor=git_service.USER_ACTOR
         )
         if settings.git_push_enabled:
-            git_service.push(actor=git_service.USER_ACTOR)
+            git_service.push()
     else:
         batcher.enqueue(path)
