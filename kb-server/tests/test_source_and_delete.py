@@ -182,7 +182,7 @@ class TestNotesRouteActorMapping:
                 "human: update notes/test.md",
                 actor=gs.USER_ACTOR,
             )
-            gs.push.assert_called_once_with(actor=gs.USER_ACTOR)
+            gs.push.assert_called_once_with()
 
     def test_api_write_enqueues_without_direct_commit(self):
         session = MagicMock()
@@ -220,4 +220,4 @@ class TestNotesRouteActorMapping:
                 "human: delete notes/test.md",
                 actor=gs.USER_ACTOR,
             )
-            gs.push.assert_called_once_with(actor=gs.USER_ACTOR)
+            gs.push.assert_called_once_with()

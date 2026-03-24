@@ -16,6 +16,12 @@ log = logging.getLogger(__name__)
 
 
 class GitActor(str, Enum):
+    """Actor identity for git operations.
+
+    Use ``USER`` for human-origin writes on the configured base branch and
+    ``AGENT`` for API/batch workflows that operate on kb-api/* branches.
+    """
+
     USER = "user"
     AGENT = "agent"
 
@@ -211,18 +217,21 @@ def commit_files(
     return sha
 
 
-def push(retries: int = 2, actor: GitActor = USER_ACTOR) -> None:
-    """Push to remote with simple retry on transient failures."""
-    if actor != USER_ACTOR:
-        raise GitError("push only supports user actor; use push_branch for agent pushes")
+def push(retries: int = 2) -> None:
+    """Push the configured remote/base branch for human-origin writes.
 
+    This helper is intentionally user-only; agent writes use ``push_branch()``
+    on kb-api/* branches.
+
+    See also: ``push_branch()``.
+    """
     remote = settings.git_remote
     branch = settings.git_branch
 
     last_err: Exception | None = None
     for attempt in range(1, retries + 1):
         try:
-            _run("push", remote, branch, actor=actor)
+            _run("push", remote, branch, actor=USER_ACTOR)
             log.info("pushed %s/%s", remote, branch)
             return
         except GitError as exc:

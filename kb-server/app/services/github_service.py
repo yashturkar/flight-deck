@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+import threading
 from typing import Any
 
 import httpx
@@ -13,6 +14,8 @@ from app.services.git_service import AGENT_ACTOR, GitActor
 log = logging.getLogger(__name__)
 
 GITHUB_API = "https://api.github.com"
+_agent_token_fallback_logged = False
+_agent_token_fallback_lock = threading.Lock()
 
 
 class GitHubError(Exception):
@@ -20,8 +23,19 @@ class GitHubError(Exception):
 
 
 def _token_for_actor(actor: GitActor = AGENT_ACTOR) -> str:
+    global _agent_token_fallback_logged
     if actor == AGENT_ACTOR:
-        return settings.github_agent_token or settings.github_token
+        if settings.github_agent_token:
+            return settings.github_agent_token
+        if settings.github_token:
+            with _agent_token_fallback_lock:
+                if not _agent_token_fallback_logged:
+                    log.warning(
+                        "GITHUB_AGENT_TOKEN not configured; falling back to GITHUB_TOKEN for agent GitHub API calls"
+                    )
+                    _agent_token_fallback_logged = True
+            return settings.github_token
+        return ""
     if actor == GitActor.USER:
         return settings.github_token
     raise GitHubError(f"unsupported GitHub actor: {actor}")

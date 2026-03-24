@@ -154,7 +154,7 @@ class AutosaveWatcher:
             session.commit()
 
             if settings.git_push_enabled:
-                git_service.push(actor=git_service.USER_ACTOR)
+                git_service.push()
                 session.add(
                     VaultEvent(
                         event_type="autosave_push",
