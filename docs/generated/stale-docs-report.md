@@ -1,7 +1,7 @@
 ---
 owner: platform
 status: generated
-last_verified: 2026-03-07
+last_verified: 2026-11-16
 source_of_truth:
   - ../../scripts/docs_garden.py
 related_code:
@@ -14,7 +14,7 @@ review_cycle_days: 7
 
 # Stale Documentation Report
 
-Generated: `2026-03-07`
+Generated: `2026-11-16`
 
 ## Ownership Summary
 
@@ -23,7 +23,7 @@ Generated: `2026-03-07`
 | `architecture` | 4 |
 | `backend` | 1 |
 | `client` | 2 |
-| `platform` | 12 |
+| `platform` | 13 |
 | `product` | 2 |
 | `security` | 1 |
 | `sre` | 4 |
@@ -32,7 +32,30 @@ Generated: `2026-03-07`
 
 | File | Owner | Days Over SLA |
 | --- | --- | --- |
-| _none_ | - | - |
+| `AGENTS.md` | `platform` | 240 |
+| `ARCHITECTURE.md` | `architecture` | 233 |
+| `docs/CLIENTS.md` | `client` | 233 |
+| `docs/DESIGN.md` | `architecture` | 224 |
+| `docs/PLANS.md` | `platform` | 240 |
+| `docs/PRODUCT_SENSE.md` | `product` | 224 |
+| `docs/QUALITY_SCORE.md` | `platform` | 240 |
+| `docs/RELIABILITY.md` | `sre` | 233 |
+| `docs/SECURITY.md` | `security` | 233 |
+| `docs/design-docs/core-beliefs.md` | `architecture` | 224 |
+| `docs/design-docs/index.md` | `architecture` | 233 |
+| `docs/design-docs/source-map.md` | `platform` | 240 |
+| `docs/exec-plans/active/README.md` | `platform` | 210 |
+| `docs/exec-plans/completed/README.md` | `platform` | 224 |
+| `docs/exec-plans/completed/context-system-rollout.md` | `platform` | 224 |
+| `docs/exec-plans/tech-debt-tracker.md` | `platform` | 240 |
+| `docs/index.md` | `platform` | 240 |
+| `docs/product-specs/index.md` | `product` | 233 |
+| `docs/product-specs/kb-server.md` | `backend` | 240 |
+| `docs/product-specs/vault-sync.md` | `client` | 240 |
+| `docs/runbooks/autonomous-agent-e2e.md` | `platform` | 240 |
+| `docs/runbooks/backup-restore.md` | `sre` | 224 |
+| `docs/runbooks/deployment.md` | `sre` | 233 |
+| `docs/runbooks/incident-response.md` | `sre` | 240 |
 
 ## Missing or Invalid Metadata
 
